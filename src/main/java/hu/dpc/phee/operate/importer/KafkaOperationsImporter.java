@@ -1,4 +1,4 @@
-package hu.dpc.rt.kafkastreamer.importer.rdbms;
+package hu.dpc.phee.operate.importer;
 
 import org.apache.kafka.common.TopicPartition;
 import org.json.JSONObject;
@@ -21,7 +21,7 @@ public class KafkaOperationsImporter implements ConsumerSeekAware {
     @KafkaListener(topics = "${importer.kafka.topic}")
     public void listen(String rawData) {
         JSONObject data = new JSONObject(rawData);
-//        logger.debug("from kafka: {}", data.toString(2));
+        logger.info("from kafka: {}", data.toString(2));
 
         String intent = data.getString("intent");
         String recordType = data.getString("recordType");

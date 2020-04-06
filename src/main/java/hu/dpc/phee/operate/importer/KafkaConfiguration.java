@@ -1,4 +1,4 @@
-package hu.dpc.rt.kafkastreamer.importer.rdbms;
+package hu.dpc.phee.operate.importer;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;

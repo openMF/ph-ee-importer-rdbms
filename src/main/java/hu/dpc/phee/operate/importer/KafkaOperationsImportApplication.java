@@ -1,4 +1,4 @@
-package hu.dpc.rt.kafkastreamer.importer.rdbms;
+package hu.dpc.phee.operate.importer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

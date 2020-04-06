@@ -1,0 +1,1198 @@
+
+
+18:27:44.515  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885406016,
+  "recordType": "EVENT",
+  "valueType": "VARIABLE",
+  "position": 12885406464,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "workflowKey": 2251799813687425,
+    "scopeKey": 6755399441058311,
+    "name": "traceparent",
+    "workflowInstanceKey": 6755399441058311,
+    "value": "\"00-59856ccb778443d4aea02f735b91e838-59856ccb778443d4-01\""
+  },
+  "intent": "CREATED",
+  "key": 6755399441058312,
+  "timestamp": 1586104064258
+}
+18:27:44.516  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885406016,
+  "recordType": "EVENT",
+  "valueType": "VARIABLE",
+  "position": 12885406704,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "workflowKey": 2251799813687425,
+    "scopeKey": 6755399441058311,
+    "name": "tenantId",
+    "workflowInstanceKey": 6755399441058311,
+    "value": "\"tn01\""
+  },
+  "intent": "CREATED",
+  "key": 6755399441058313,
+  "timestamp": 1586104064258
+}
+18:27:44.516  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885406016,
+  "recordType": "EVENT",
+  "valueType": "VARIABLE",
+  "position": 12885406888,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "workflowKey": 2251799813687425,
+    "scopeKey": 6755399441058311,
+    "name": "fspiop-source",
+    "workflowInstanceKey": 6755399441058311,
+    "value": "\"in02tn03\""
+  },
+  "intent": "CREATED",
+  "key": 6755399441058314,
+  "timestamp": 1586104064258
+}
+18:27:44.517  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885406016,
+  "recordType": "EVENT",
+  "valueType": "VARIABLE",
+  "position": 12885407080,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "workflowKey": 2251799813687425,
+    "scopeKey": 6755399441058311,
+    "name": "partyIdType",
+    "workflowInstanceKey": 6755399441058311,
+    "value": "\"MSISDN\""
+  },
+  "intent": "CREATED",
+  "key": 6755399441058315,
+  "timestamp": 1586104064258
+}
+18:27:44.517  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885406016,
+  "recordType": "EVENT",
+  "valueType": "VARIABLE",
+  "position": 12885407264,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "workflowKey": 2251799813687425,
+    "scopeKey": 6755399441058311,
+    "name": "partyId",
+    "workflowInstanceKey": 6755399441058311,
+    "value": "\"27710101999\""
+  },
+  "intent": "CREATED",
+  "key": 6755399441058316,
+  "timestamp": 1586104064258
+}
+18:27:44.680  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885406016,
+  "recordType": "EVENT",
+  "valueType": "VARIABLE",
+  "position": 12885407448,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "workflowKey": 2251799813687425,
+    "scopeKey": 6755399441058311,
+    "name": "transactionId",
+    "workflowInstanceKey": 6755399441058311,
+    "value": "\"cc2cad51-81f4-4854-88ba-b017c7071cb9\""
+  },
+  "intent": "CREATED",
+  "key": 6755399441058317,
+  "timestamp": 1586104064258
+}
+18:27:44.680  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885406016,
+  "recordType": "EVENT",
+  "valueType": "VARIABLE",
+  "position": 12885407664,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "workflowKey": 2251799813687425,
+    "scopeKey": 6755399441058311,
+    "name": "originDate",
+    "workflowInstanceKey": 6755399441058311,
+    "value": "1586104064080"
+  },
+  "intent": "CREATED",
+  "key": 6755399441058318,
+  "timestamp": 1586104064258
+}
+18:27:44.681  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885406016,
+  "recordType": "EVENT",
+  "valueType": "VARIABLE",
+  "position": 12885407848,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "workflowKey": 2251799813687425,
+    "scopeKey": 6755399441058311,
+    "name": "Date",
+    "workflowInstanceKey": 6755399441058311,
+    "value": "\"Sun, 05 Apr 2020 16:27:41 GMT\""
+  },
+  "intent": "CREATED",
+  "key": 6755399441058319,
+  "timestamp": 1586104064258
+}
+18:27:44.681  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885406016,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885408048,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "PayeePartyLookup-DFSPID",
+    "flowScopeKey": -1,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "PROCESS"
+  },
+  "intent": "ELEMENT_ACTIVATING",
+  "key": 6755399441058311,
+  "timestamp": 1586104064258
+}
+18:27:44.681  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885408048,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885408888,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "PayeePartyLookup-DFSPID",
+    "flowScopeKey": -1,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "PROCESS"
+  },
+  "intent": "ELEMENT_ACTIVATED",
+  "key": 6755399441058311,
+  "timestamp": 1586104064346
+}
+18:27:44.682  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885408888,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885409216,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "StartEvent_1",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "START_EVENT"
+  },
+  "intent": "ELEMENT_ACTIVATING",
+  "key": 6755399441058321,
+  "timestamp": 1586104064430
+}
+18:27:44.841  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885409216,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885409544,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "StartEvent_1",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "START_EVENT"
+  },
+  "intent": "ELEMENT_ACTIVATED",
+  "key": 6755399441058321,
+  "timestamp": 1586104064516
+}
+18:27:44.842  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885409544,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885409872,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "StartEvent_1",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "START_EVENT"
+  },
+  "intent": "ELEMENT_COMPLETING",
+  "key": 6755399441058321,
+  "timestamp": 1586104064595
+}
+18:27:44.842  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885409872,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885410200,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "StartEvent_1",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "START_EVENT"
+  },
+  "intent": "ELEMENT_COMPLETED",
+  "key": 6755399441058321,
+  "timestamp": 1586104064658
+}
+18:27:45.048  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885410200,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885410528,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "SequenceFlow_1jawp7n",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "SEQUENCE_FLOW"
+  },
+  "intent": "SEQUENCE_FLOW_TAKEN",
+  "key": 6755399441058322,
+  "timestamp": 1586104064714
+}
+18:27:45.048  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885410528,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885410864,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_1lfzg19",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "SERVICE_TASK"
+  },
+  "intent": "ELEMENT_ACTIVATING",
+  "key": 6755399441058323,
+  "timestamp": 1586104064774
+}
+18:27:45.049  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885410864,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885411192,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_1lfzg19",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "SERVICE_TASK"
+  },
+  "intent": "ELEMENT_ACTIVATED",
+  "key": 6755399441058323,
+  "timestamp": 1586104064833
+}
+18:27:45.223  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885411520,
+  "recordType": "EVENT",
+  "valueType": "JOB",
+  "position": 12885411896,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_1lfzg19",
+    "variables": {},
+    "errorMessage": "",
+    "errorCode": "",
+    "type": "payee-party-lookup-DFSPID",
+    "retries": 3,
+    "elementInstanceKey": 6755399441058323,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "deadline": -1,
+    "worker": "",
+    "customHeaders": {},
+    "workflowDefinitionVersion": 1
+  },
+  "intent": "CREATED",
+  "key": 6755399441058324,
+  "timestamp": 1586104064972
+}
+18:27:45.223 DEBUG [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885411520,
+  "recordType": "EVENT",
+  "valueType": "JOB",
+  "position": 12885411896,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_1lfzg19",
+    "variables": {},
+    "errorMessage": "",
+    "errorCode": "",
+    "type": "payee-party-lookup-DFSPID",
+    "retries": 3,
+    "elementInstanceKey": 6755399441058323,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "deadline": -1,
+    "worker": "",
+    "customHeaders": {},
+    "workflowDefinitionVersion": 1
+  },
+  "intent": "CREATED",
+  "key": 6755399441058324,
+  "timestamp": 1586104064972
+}
+18:27:45.223  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : CREATED EVENT payee-party-lookup-DFSPID
+18:27:45.383  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885412272,
+  "recordType": "EVENT",
+  "valueType": "JOB",
+  "position": 12885412488,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_1lfzg19",
+    "variables": {
+      "traceparent": "00-59856ccb778443d4aea02f735b91e838-59856ccb778443d4-01",
+      "tenantId": "tn01",
+      "fspiop-source": "in02tn03",
+      "partyIdType": "MSISDN",
+      "partyId": "27710101999",
+      "Date": "Sun, 05 Apr 2020 16:27:41 GMT",
+      "originDate": 1586104064080,
+      "transactionId": "cc2cad51-81f4-4854-88ba-b017c7071cb9"
+    },
+    "errorMessage": "",
+    "errorCode": "",
+    "type": "payee-party-lookup-DFSPID",
+    "retries": 3,
+    "elementInstanceKey": 6755399441058323,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "deadline": 1586104365088,
+    "worker": "payee-party-lookup-DFSPID",
+    "customHeaders": {},
+    "workflowDefinitionVersion": 1
+  },
+  "intent": "ACTIVATED",
+  "key": 6755399441058324,
+  "timestamp": 1586104065135
+}
+18:27:45.384 DEBUG [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885412272,
+  "recordType": "EVENT",
+  "valueType": "JOB",
+  "position": 12885412488,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_1lfzg19",
+    "variables": {
+      "traceparent": "00-59856ccb778443d4aea02f735b91e838-59856ccb778443d4-01",
+      "tenantId": "tn01",
+      "fspiop-source": "in02tn03",
+      "partyIdType": "MSISDN",
+      "partyId": "27710101999",
+      "Date": "Sun, 05 Apr 2020 16:27:41 GMT",
+      "originDate": 1586104064080,
+      "transactionId": "cc2cad51-81f4-4854-88ba-b017c7071cb9"
+    },
+    "errorMessage": "",
+    "errorCode": "",
+    "type": "payee-party-lookup-DFSPID",
+    "retries": 3,
+    "elementInstanceKey": 6755399441058323,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "deadline": 1586104365088,
+    "worker": "payee-party-lookup-DFSPID",
+    "customHeaders": {},
+    "workflowDefinitionVersion": 1
+  },
+  "intent": "ACTIVATED",
+  "key": 6755399441058324,
+  "timestamp": 1586104065135
+}
+18:27:45.384  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : ACTIVATED EVENT payee-party-lookup-DFSPID
+18:27:47.454  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885414408,
+  "recordType": "EVENT",
+  "valueType": "JOB",
+  "position": 12885414912,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_1lfzg19",
+    "variables": {"payeePartyResponse": "{\"partyIdInfo\":{\"partyIdType\":\"MSISDN\",\"partyIdentifier\":\"27710101999\",\"fspId\":\"in01tn01\"},\"personalInfo\":{\"complexName\":{\"firstName\":\"Interoperation\",\"lastName\":\"Customer\"},\"dateOfBirth\":\"2000-01-01\"}}"},
+    "errorMessage": "",
+    "errorCode": "",
+    "type": "payee-party-lookup-DFSPID",
+    "retries": 3,
+    "elementInstanceKey": 6755399441058323,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "deadline": 1586104365088,
+    "worker": "payee-party-lookup-DFSPID",
+    "customHeaders": {},
+    "workflowDefinitionVersion": 1
+  },
+  "intent": "COMPLETED",
+  "key": 6755399441058324,
+  "timestamp": 1586104067321
+}
+18:27:47.454 DEBUG [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885414408,
+  "recordType": "EVENT",
+  "valueType": "JOB",
+  "position": 12885414912,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_1lfzg19",
+    "variables": {"payeePartyResponse": "{\"partyIdInfo\":{\"partyIdType\":\"MSISDN\",\"partyIdentifier\":\"27710101999\",\"fspId\":\"in01tn01\"},\"personalInfo\":{\"complexName\":{\"firstName\":\"Interoperation\",\"lastName\":\"Customer\"},\"dateOfBirth\":\"2000-01-01\"}}"},
+    "errorMessage": "",
+    "errorCode": "",
+    "type": "payee-party-lookup-DFSPID",
+    "retries": 3,
+    "elementInstanceKey": 6755399441058323,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "deadline": 1586104365088,
+    "worker": "payee-party-lookup-DFSPID",
+    "customHeaders": {},
+    "workflowDefinitionVersion": 1
+  },
+  "intent": "COMPLETED",
+  "key": 6755399441058324,
+  "timestamp": 1586104067321
+}
+18:27:47.454  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : COMPLETED EVENT payee-party-lookup-DFSPID
+18:27:47.619  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885414912,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885415544,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_1lfzg19",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "SERVICE_TASK"
+  },
+  "intent": "ELEMENT_COMPLETING",
+  "key": 6755399441058323,
+  "timestamp": 1586104067376
+}
+18:27:47.619  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885415544,
+  "recordType": "EVENT",
+  "valueType": "VARIABLE",
+  "position": 12885415872,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "workflowKey": 2251799813687425,
+    "scopeKey": 6755399441058311,
+    "name": "payeePartyResponse",
+    "workflowInstanceKey": 6755399441058311,
+    "value": "\"{\\\"partyIdInfo\\\":{\\\"partyIdType\\\":\\\"MSISDN\\\",\\\"partyIdentifier\\\":\\\"27710101999\\\",\\\"fspId\\\":\\\"in01tn01\\\"},\\\"personalInfo\\\":{\\\"complexName\\\":{\\\"firstName\\\":\\\"Interoperation\\\",\\\"lastName\\\":\\\"Customer\\\"},\\\"dateOfBirth\\\":\\\"2000-01-01\\\"}}\""
+  },
+  "intent": "CREATED",
+  "key": 6755399441058327,
+  "timestamp": 1586104067427
+}
+18:27:47.619  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885415544,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885416264,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_1lfzg19",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "SERVICE_TASK"
+  },
+  "intent": "ELEMENT_COMPLETED",
+  "key": 6755399441058323,
+  "timestamp": 1586104067427
+}
+18:27:47.784  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885416264,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885416592,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "SequenceFlow_05i1bde",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "SEQUENCE_FLOW"
+  },
+  "intent": "SEQUENCE_FLOW_TAKEN",
+  "key": 6755399441058328,
+  "timestamp": 1586104067488
+}
+18:27:47.784  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885416592,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885416928,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "ExclusiveGateway_0oihs3d",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "EXCLUSIVE_GATEWAY"
+  },
+  "intent": "ELEMENT_ACTIVATING",
+  "key": 6755399441058329,
+  "timestamp": 1586104067536
+}
+18:27:47.955  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885416928,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885417272,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "ExclusiveGateway_0oihs3d",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "EXCLUSIVE_GATEWAY"
+  },
+  "intent": "ELEMENT_ACTIVATED",
+  "key": 6755399441058329,
+  "timestamp": 1586104067604
+}
+18:27:47.955  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885417272,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885417616,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "ExclusiveGateway_0oihs3d",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "EXCLUSIVE_GATEWAY"
+  },
+  "intent": "ELEMENT_COMPLETING",
+  "key": 6755399441058329,
+  "timestamp": 1586104067668
+}
+18:27:47.955  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885417616,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885417960,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "ExclusiveGateway_0oihs3d",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "EXCLUSIVE_GATEWAY"
+  },
+  "intent": "ELEMENT_COMPLETED",
+  "key": 6755399441058329,
+  "timestamp": 1586104067717
+}
+18:27:48.115  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885417960,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885418304,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "SequenceFlow_1m437yt",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "SEQUENCE_FLOW"
+  },
+  "intent": "SEQUENCE_FLOW_TAKEN",
+  "key": 6755399441058330,
+  "timestamp": 1586104067770
+}
+18:27:48.115  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885418304,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885418640,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_0xyli0d",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "SERVICE_TASK"
+  },
+  "intent": "ELEMENT_ACTIVATING",
+  "key": 6755399441058331,
+  "timestamp": 1586104067835
+}
+18:27:48.116  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885418640,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885418968,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_0xyli0d",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "SERVICE_TASK"
+  },
+  "intent": "ELEMENT_ACTIVATED",
+  "key": 6755399441058331,
+  "timestamp": 1586104067889
+}
+18:27:48.278  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885419296,
+  "recordType": "EVENT",
+  "valueType": "JOB",
+  "position": 12885419680,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_0xyli0d",
+    "variables": {},
+    "errorMessage": "",
+    "errorCode": "",
+    "type": "payee-party-lookup-error-DFSPID",
+    "retries": 3,
+    "elementInstanceKey": 6755399441058331,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "deadline": -1,
+    "worker": "",
+    "customHeaders": {},
+    "workflowDefinitionVersion": 1
+  },
+  "intent": "CREATED",
+  "key": 6755399441058332,
+  "timestamp": 1586104067988
+}
+18:27:48.278 DEBUG [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885419296,
+  "recordType": "EVENT",
+  "valueType": "JOB",
+  "position": 12885419680,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_0xyli0d",
+    "variables": {},
+    "errorMessage": "",
+    "errorCode": "",
+    "type": "payee-party-lookup-error-DFSPID",
+    "retries": 3,
+    "elementInstanceKey": 6755399441058331,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "deadline": -1,
+    "worker": "",
+    "customHeaders": {},
+    "workflowDefinitionVersion": 1
+  },
+  "intent": "CREATED",
+  "key": 6755399441058332,
+  "timestamp": 1586104067988
+}
+18:27:48.278  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : CREATED EVENT payee-party-lookup-error-DFSPID
+18:27:48.438  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885420064,
+  "recordType": "EVENT",
+  "valueType": "JOB",
+  "position": 12885420296,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_0xyli0d",
+    "variables": {
+      "payeePartyResponse": "{\"partyIdInfo\":{\"partyIdType\":\"MSISDN\",\"partyIdentifier\":\"27710101999\",\"fspId\":\"in01tn01\"},\"personalInfo\":{\"complexName\":{\"firstName\":\"Interoperation\",\"lastName\":\"Customer\"},\"dateOfBirth\":\"2000-01-01\"}}",
+      "traceparent": "00-59856ccb778443d4aea02f735b91e838-59856ccb778443d4-01",
+      "tenantId": "tn01",
+      "fspiop-source": "in02tn03",
+      "partyIdType": "MSISDN",
+      "partyId": "27710101999",
+      "Date": "Sun, 05 Apr 2020 16:27:41 GMT",
+      "originDate": 1586104064080,
+      "transactionId": "cc2cad51-81f4-4854-88ba-b017c7071cb9"
+    },
+    "errorMessage": "",
+    "errorCode": "",
+    "type": "payee-party-lookup-error-DFSPID",
+    "retries": 3,
+    "elementInstanceKey": 6755399441058331,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "deadline": 1586104368100,
+    "worker": "payee-party-lookup-error-DFSPID",
+    "customHeaders": {},
+    "workflowDefinitionVersion": 1
+  },
+  "intent": "ACTIVATED",
+  "key": 6755399441058332,
+  "timestamp": 1586104068134
+}
+18:27:48.439 DEBUG [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885420064,
+  "recordType": "EVENT",
+  "valueType": "JOB",
+  "position": 12885420296,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_0xyli0d",
+    "variables": {
+      "payeePartyResponse": "{\"partyIdInfo\":{\"partyIdType\":\"MSISDN\",\"partyIdentifier\":\"27710101999\",\"fspId\":\"in01tn01\"},\"personalInfo\":{\"complexName\":{\"firstName\":\"Interoperation\",\"lastName\":\"Customer\"},\"dateOfBirth\":\"2000-01-01\"}}",
+      "traceparent": "00-59856ccb778443d4aea02f735b91e838-59856ccb778443d4-01",
+      "tenantId": "tn01",
+      "fspiop-source": "in02tn03",
+      "partyIdType": "MSISDN",
+      "partyId": "27710101999",
+      "Date": "Sun, 05 Apr 2020 16:27:41 GMT",
+      "originDate": 1586104064080,
+      "transactionId": "cc2cad51-81f4-4854-88ba-b017c7071cb9"
+    },
+    "errorMessage": "",
+    "errorCode": "",
+    "type": "payee-party-lookup-error-DFSPID",
+    "retries": 3,
+    "elementInstanceKey": 6755399441058331,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "deadline": 1586104368100,
+    "worker": "payee-party-lookup-error-DFSPID",
+    "customHeaders": {},
+    "workflowDefinitionVersion": 1
+  },
+  "intent": "ACTIVATED",
+  "key": 6755399441058332,
+  "timestamp": 1586104068134
+}
+18:27:48.439  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : ACTIVATED EVENT payee-party-lookup-error-DFSPID
+18:27:49.030  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885422728,
+  "recordType": "EVENT",
+  "valueType": "JOB",
+  "position": 12885423008,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_0xyli0d",
+    "variables": {},
+    "errorMessage": "",
+    "errorCode": "",
+    "type": "payee-party-lookup-error-DFSPID",
+    "retries": 3,
+    "elementInstanceKey": 6755399441058331,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "deadline": 1586104368100,
+    "worker": "payee-party-lookup-error-DFSPID",
+    "customHeaders": {},
+    "workflowDefinitionVersion": 1
+  },
+  "intent": "COMPLETED",
+  "key": 6755399441058332,
+  "timestamp": 1586104068874
+}
+18:27:49.030 DEBUG [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885422728,
+  "recordType": "EVENT",
+  "valueType": "JOB",
+  "position": 12885423008,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_0xyli0d",
+    "variables": {},
+    "errorMessage": "",
+    "errorCode": "",
+    "type": "payee-party-lookup-error-DFSPID",
+    "retries": 3,
+    "elementInstanceKey": 6755399441058331,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "deadline": 1586104368100,
+    "worker": "payee-party-lookup-error-DFSPID",
+    "customHeaders": {},
+    "workflowDefinitionVersion": 1
+  },
+  "intent": "COMPLETED",
+  "key": 6755399441058332,
+  "timestamp": 1586104068874
+}
+18:27:49.030  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : COMPLETED EVENT payee-party-lookup-error-DFSPID
+18:27:49.195  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885423008,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885423432,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_0xyli0d",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "SERVICE_TASK"
+  },
+  "intent": "ELEMENT_COMPLETING",
+  "key": 6755399441058331,
+  "timestamp": 1586104068932
+}
+18:27:49.196  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885423432,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885423760,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "Task_0xyli0d",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "SERVICE_TASK"
+  },
+  "intent": "ELEMENT_COMPLETED",
+  "key": 6755399441058331,
+  "timestamp": 1586104068992
+}
+18:27:49.352  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885423760,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885424088,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "SequenceFlow_08f5fxr",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "SEQUENCE_FLOW"
+  },
+  "intent": "SEQUENCE_FLOW_TAKEN",
+  "key": 6755399441058335,
+  "timestamp": 1586104069043
+}
+18:27:49.353  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885424088,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885424424,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "EndEvent_02an9bi",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "END_EVENT"
+  },
+  "intent": "ELEMENT_ACTIVATING",
+  "key": 6755399441058336,
+  "timestamp": 1586104069116
+}
+18:27:49.353  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885424424,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885424752,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "EndEvent_02an9bi",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "END_EVENT"
+  },
+  "intent": "ELEMENT_ACTIVATED",
+  "key": 6755399441058336,
+  "timestamp": 1586104069167
+}
+18:27:49.523  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885424752,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885425080,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "EndEvent_02an9bi",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "END_EVENT"
+  },
+  "intent": "ELEMENT_COMPLETING",
+  "key": 6755399441058336,
+  "timestamp": 1586104069216
+}
+18:27:49.523  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885425080,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885425408,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "EndEvent_02an9bi",
+    "flowScopeKey": 6755399441058311,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "END_EVENT"
+  },
+  "intent": "ELEMENT_COMPLETED",
+  "key": 6755399441058336,
+  "timestamp": 1586104069265
+}
+18:27:49.524  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885425408,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885425736,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "PayeePartyLookup-DFSPID",
+    "flowScopeKey": -1,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "PROCESS"
+  },
+  "intent": "ELEMENT_COMPLETING",
+  "key": 6755399441058311,
+  "timestamp": 1586104069333
+}
+18:27:49.692  INFO [kaListenerEndpointContainer#0-0-C-1] .i.r.KafkaOperationsImporter : from kafka: {
+  "partitionId": 3,
+  "sourceRecordPosition": 12885425736,
+  "recordType": "EVENT",
+  "valueType": "WORKFLOW_INSTANCE",
+  "position": 12885426064,
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "value": {
+    "elementId": "PayeePartyLookup-DFSPID",
+    "flowScopeKey": -1,
+    "parentWorkflowInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "workflowKey": 2251799813687425,
+    "workflowInstanceKey": 6755399441058311,
+    "bpmnProcessId": "PayeePartyLookup-DFSPID",
+    "version": 1,
+    "bpmnElementType": "PROCESS"
+  },
+  "intent": "ELEMENT_COMPLETED",
+  "key": 6755399441058311,
+  "timestamp": 1586104069392
+}
+
