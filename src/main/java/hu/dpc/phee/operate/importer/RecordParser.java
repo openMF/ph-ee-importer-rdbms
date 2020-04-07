@@ -19,6 +19,8 @@ import java.util.List;
 public class RecordParser {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private static List<String> BUSINESS_ID_FIELDS = Arrays.asList("transactionId", "partyId");
+
     @Autowired
     private TaskRepository taskRepository;
 
@@ -55,16 +57,15 @@ public class RecordParser {
 
         Variable variable = new Variable();
         variable.setWorkflowInstanceKey(workflowInstanceKey);
-        variable.setWorkflowKey(json.read("$.value.workflowKey"));
         variable.setTimestamp(timestamp);
+        variable.setWorkflowKey(json.read("$.value.workflowKey"));
         String name = json.read("$.value.name");
         variable.setName(name);
         String value = json.read("$.value.value");
         variable.setValue(value);
         variableRepository.save(variable);
 
-        List<String> businessIds = Arrays.asList("transactionId", "partyId");
-        if (businessIds.contains(name)) {
+        if (BUSINESS_ID_FIELDS.contains(name)) {
             Transaction transaction = new Transaction();
             transaction.setTimestamp(timestamp);
             transaction.setWorkflowInstanceKey(workflowInstanceKey);
