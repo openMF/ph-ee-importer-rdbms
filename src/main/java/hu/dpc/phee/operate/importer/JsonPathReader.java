@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 
 @Component
-public class JsonParser {
+public class JsonPathReader {
     private ParseContext jsonParser;
 
     @PostConstruct

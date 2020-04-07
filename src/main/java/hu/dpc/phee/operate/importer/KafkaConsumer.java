@@ -20,7 +20,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
     private String kafkaTopic;
 
     @Autowired
-    private JsonParser jsonParser;
+    private JsonPathReader jsonPathReader;
 
     @Autowired
     private RecordParser recordParser;
@@ -28,7 +28,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
 
     @KafkaListener(topics = "${importer.kafka.topic}")
     public void listen(String rawData) {
-        DocumentContext json = jsonParser.parse(rawData);
+        DocumentContext json = jsonPathReader.parse(rawData);
         logger.debug("from kafka: {}", json.jsonString());
 
         String valueType = json.read("$.valueType");

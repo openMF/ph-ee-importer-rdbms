@@ -27,7 +27,7 @@ public class RecordParser {
 
     @Autowired
     private TransactionRepository transactionRepository;
-    
+
 
     public void parseTask(DocumentContext json) {
         String type = json.read("$.value.type");
