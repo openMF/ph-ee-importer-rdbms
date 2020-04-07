@@ -1,9 +1,11 @@
 package hu.dpc.phee.operate.importer;
 
+import com.jayway.jsonpath.DocumentContext;
+import hu.dpc.phee.operate.importer.entity.AuditRecord;
 import org.apache.kafka.common.TopicPartition;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.ConsumerSeekAware;
@@ -12,31 +14,39 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class KafkaOperationsImporter implements ConsumerSeekAware {
+public class KafkaConsumer implements ConsumerSeekAware {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${importer.kafka.topic}")
     private String kafkaTopic;
 
+    @Value("${importer.database.max-batch-size}")
+    private int maxBatchSize;
+
+    @Autowired
+    private JsonParser jsonParser;
+
+    @Autowired
+    private AuditRecordRepository auditRecordRepository;
+
     @KafkaListener(topics = "${importer.kafka.topic}")
     public void listen(String rawData) {
-        JSONObject data = new JSONObject(rawData);
-        logger.info("from kafka: {}", data.toString(2));
+        DocumentContext json = jsonParser.parse(rawData);
+        logger.info("from kafka: {}", json.jsonString());
 
-        String intent = data.getString("intent");
-        String recordType = data.getString("recordType");
-        String type = null;
-        if (data.has("value")) {
-            JSONObject value = data.getJSONObject("value");
-            if (value.has("type")) {
-                type = value.getString("type");
-            }
-        }
+        String intent = json.read("$.intent");
+        String recordType = json.read("$.recordType");
+        String type = json.read("$.value.type");
 
         if (type != null) {
-            logger.debug("{}", data.toString(2));
             logger.info("{} {} {}", intent, recordType, type);
         }
+
+        AuditRecord auditRecord = new AuditRecord();
+        auditRecord.setWorkflowInstanceKey(json.read("$.value.workflowInstanceKey"));
+        auditRecord.setWorkflowKey(json.read("$.value.workflowKey"));
+        auditRecord.setTimestamp(json.read("$.timestamp"));
+        auditRecordRepository.save(auditRecord);
     }
 
     @Override

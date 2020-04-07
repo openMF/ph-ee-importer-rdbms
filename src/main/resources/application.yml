@@ -4,6 +4,8 @@ kafka:
 importer:
   kafka:
     topic: "zeebe-export"
+  database:
+    max-batch-size: 100
 
 spring:
   jpa:
@@ -13,6 +15,6 @@ spring:
         logging:
           logger: "hu.dpc.phee.operate.importer.EclipselinkLogger"
   datasource:
-    url: "jdbc:mysql://operator-mysql:3306/operator"
+    url: "jdbc:mysql://operator-mysql:3306/operator?rewriteBatchedStatements=true"
     username: "mifos"
     password: "password"
