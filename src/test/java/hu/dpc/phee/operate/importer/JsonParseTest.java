@@ -5,7 +5,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.ParseContext;
-import hu.dpc.phee.operate.importer.entity.AuditRecord;
+import hu.dpc.phee.operate.importer.persistence.Task;
 import org.junit.Test;
 
 public class JsonParseTest {
@@ -47,9 +47,9 @@ public class JsonParseTest {
         ParseContext jsonParser = JsonPath.using(config);
 
         DocumentContext doc = jsonParser.parse(json);
-        AuditRecord auditRecord = new AuditRecord();
-        auditRecord.setWorkflowKey(doc.read("$.value.workflowKey"));
-        auditRecord.setWorkflowInstanceKey(doc.read("$.value.workflowInstanceKey"));
-        System.out.println(auditRecord);
+        Task task = new Task();
+        task.setWorkflowKey(doc.read("$.value.workflowKey"));
+        task.setWorkflowInstanceKey(doc.read("$.value.workflowInstanceKey"));
+        System.out.println(task);
     }
 }

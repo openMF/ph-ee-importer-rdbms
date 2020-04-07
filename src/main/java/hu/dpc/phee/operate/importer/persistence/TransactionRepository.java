@@ -1,6 +1,5 @@
-package hu.dpc.phee.operate.importer;
+package hu.dpc.phee.operate.importer.persistence;
 
-import hu.dpc.phee.operate.importer.entity.AuditRecord;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,6 +7,6 @@ import javax.transaction.Transactional;
 
 @Repository
 @Transactional
-public interface AuditRecordRepository extends CrudRepository<AuditRecord, Long> {
+public interface TransactionRepository extends CrudRepository<Transaction, Long> {
 
 }

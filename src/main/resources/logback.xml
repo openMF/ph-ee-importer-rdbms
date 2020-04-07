@@ -18,6 +18,7 @@
     <logger name="org.eclipse" level="DEBUG"/>
     <logger name="org.apache.camel.component.undertow" level="TRACE"/>
     <logger name="com.jayway" level="INFO"/>
+    <logger name="com.zaxxer" level="INFO"/>
 
     <root level="DEBUG">
         <appender-ref ref="CONSOLE"/>

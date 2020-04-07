@@ -1,4 +1,4 @@
-package hu.dpc.phee.operate.importer;
+package hu.dpc.phee.operate.importer.config;
 
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.slf4j.Logger;
