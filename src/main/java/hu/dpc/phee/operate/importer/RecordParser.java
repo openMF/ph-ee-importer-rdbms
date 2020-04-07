@@ -27,6 +27,7 @@ public class RecordParser {
 
     @Autowired
     private TransactionRepository transactionRepository;
+    
 
     public void parseTask(DocumentContext json) {
         String type = json.read("$.value.type");
@@ -60,6 +61,7 @@ public class RecordParser {
         variable.setName(name);
         String value = json.read("$.value.value");
         variable.setValue(value);
+        variableRepository.save(variable);
 
         List<String> businessIds = Arrays.asList("transactionId", "partyId");
         if (businessIds.contains(name)) {
@@ -70,7 +72,6 @@ public class RecordParser {
             transaction.setBusinessKeyType(name);
             transactionRepository.save(transaction);
         }
-        variableRepository.save(variable);
     }
 
 }

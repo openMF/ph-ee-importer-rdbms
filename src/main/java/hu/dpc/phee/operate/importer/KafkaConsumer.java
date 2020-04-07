@@ -19,14 +19,12 @@ public class KafkaConsumer implements ConsumerSeekAware {
     @Value("${importer.kafka.topic}")
     private String kafkaTopic;
 
-    @Value("${importer.database.max-batch-size}")
-    private int maxBatchSize;
-
     @Autowired
     private JsonParser jsonParser;
 
     @Autowired
     private RecordParser recordParser;
+
 
     @KafkaListener(topics = "${importer.kafka.topic}")
     public void listen(String rawData) {

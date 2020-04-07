@@ -4,8 +4,6 @@ kafka:
 importer:
   kafka:
     topic: "zeebe-export"
-  database:
-    max-batch-size: 100
 
 spring:
   jpa:
