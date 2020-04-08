@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 public class RestApiController {
@@ -31,35 +31,23 @@ public class RestApiController {
     private VariableRepository variableRepository;
 
     @GetMapping("/variables")
-    public Map<String, List<Variable>> variables(
+    public List<List<Variable>> variables(
             @RequestParam(value = "businessKey") String businessKey,
             @RequestParam(value = "businessKeyType") String businessKeyType
     ) {
-        Map<String, List<Variable>> results = new HashMap<>();
-
-        int count = 0;
-        for (Transaction transaction : loadTransactions(businessKey, businessKeyType)) {
-            List<Variable> variables = variableRepository.findByWorkflowInstanceKey(transaction.getWorkflowInstanceKey());
-            results.put(transaction.getBusinessKey() + "-" + ++count, variables);
-        }
-
-        return results;
+        return loadTransactions(businessKey, businessKeyType).stream()
+                .map(transaction -> variableRepository.findByWorkflowInstanceKey(transaction.getWorkflowInstanceKey()))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/tasks")
-    public Map<String, List<Task>> tasks(
+    public List<List<Task>> tasks(
             @RequestParam(value = "businessKey") String businessKey,
             @RequestParam(value = "businessKeyType") String businessKeyType
     ) {
-        Map<String, List<Task>> results = new HashMap<>();
-
-        int count = 0;
-        for (Transaction transaction : loadTransactions(businessKey, businessKeyType)) {
-            List<Task> tasks = taskRepository.findByWorkflowInstanceKey(transaction.getWorkflowInstanceKey());
-            results.put(transaction.getBusinessKey() + "-" + ++count, tasks);
-        }
-
-        return results;
+        return loadTransactions(businessKey, businessKeyType).stream()
+                .map(transaction -> taskRepository.findByWorkflowInstanceKey(transaction.getWorkflowInstanceKey()))
+                .collect(Collectors.toList());
     }
 
     private List<Transaction> loadTransactions(@RequestParam("businessKey") String businessKey, @RequestParam("businessKeyType") String businessKeyType) {
