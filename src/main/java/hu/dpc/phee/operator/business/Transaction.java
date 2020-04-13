@@ -4,11 +4,13 @@ package hu.dpc.phee.operator.business;
 import org.eclipse.persistence.annotations.Index;
 
 import javax.persistence.Cacheable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -23,24 +25,48 @@ public class Transaction {
     /**
      * zeebe workflowInstanceKey
      */
+    @Column(name = "WORKFLOW_INSTANCE_KEY")
     @Index(name = "idx_paymentProcessId")
     private Long workflowInstanceKey;
 
     private String transactionId;
+
+    @Column(name = "STARTED_AT")
     private Date startedAt;
+    @Column(name = "COMPLETED_AT")
+    private Date completedAt;
+
     private String status; // TODO enum
 
+    @Column(name = "PAYEE_DFSP_ID")
     private String payeeDfspId;
+    @Column(name = "PAYEE_PARTY_ID")
     private String payeePartyId;
-    private String payeePartyType;
-    private String payeeFee;
+    @Column(name = "PAYEE_PARTY_ID_TYPE")
+    private String payeePartyIdType;
+    @Column(name = "PAYEE_FEE")
+    private BigDecimal payeeFee;
+    @Column(name = "PAYEE_FEE_CURRENCY")
+    private String payeeFeeCurrency;
+    @Column(name = "PAYEE_QUOTE_CODE")
     private String payeeQuoteCode;
 
+    @Column(name = "PAYER_DFSP_ID")
     private String payerDfspId;
+    @Column(name = "PAYER_PARTY_ID")
     private String payerPartyId;
-    private String payerPartyType;
-    private String payerFee;
+    @Column(name = "PAYER_PARTY_ID_TYPE")
+    private String payerPartyIdType;
+    @Column(name = "PAYER_FEE")
+    private BigDecimal payerFee;
+    @Column(name = "PAYER_FEE_CURRENCY")
+    private String payerFeeCurrency;
+    @Column(name = "PAYER_QUOTE_CODE")
     private String payerQuoteCode;
+
+    private BigDecimal amount;
+    private String currency;
+
 
     Transaction() {
         // jpa constructor
@@ -48,6 +74,15 @@ public class Transaction {
 
     public Transaction(Long workflowInstanceKey) {
         this.workflowInstanceKey = workflowInstanceKey;
+    }
+
+
+    public Date getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(Date completedAt) {
+        this.completedAt = completedAt;
     }
 
     public Date getStartedAt() {
@@ -58,11 +93,11 @@ public class Transaction {
         this.startedAt = startedAt;
     }
 
-    public String getPayeeFee() {
+    public BigDecimal getPayeeFee() {
         return payeeFee;
     }
 
-    public void setPayeeFee(String payeeFee) {
+    public void setPayeeFee(BigDecimal payeeFee) {
         this.payeeFee = payeeFee;
     }
 
@@ -74,11 +109,11 @@ public class Transaction {
         this.payeeQuoteCode = payeeQuoteCode;
     }
 
-    public String getPayerFee() {
+    public BigDecimal getPayerFee() {
         return payerFee;
     }
 
-    public void setPayerFee(String payerFee) {
+    public void setPayerFee(BigDecimal payerFee) {
         this.payerFee = payerFee;
     }
 
@@ -89,10 +124,6 @@ public class Transaction {
     public void setPayerQuoteCode(String payerQuoteCode) {
         this.payerQuoteCode = payerQuoteCode;
     }
-
-    private String amount;
-    private String currency;
-
 
     public Long getId() {
         return id;
@@ -134,12 +165,12 @@ public class Transaction {
         this.payeePartyId = payeePartyId;
     }
 
-    public String getPayeePartyType() {
-        return payeePartyType;
+    public String getPayeePartyIdType() {
+        return payeePartyIdType;
     }
 
-    public void setPayeePartyType(String payeePartyType) {
-        this.payeePartyType = payeePartyType;
+    public void setPayeePartyIdType(String payeePartyType) {
+        this.payeePartyIdType = payeePartyType;
     }
 
     public String getPayerPartyId() {
@@ -150,16 +181,36 @@ public class Transaction {
         this.payerPartyId = payerPartyId;
     }
 
-    public String getPayerPartyType() {
-        return payerPartyType;
+    public String getPayerPartyIdType() {
+        return payerPartyIdType;
     }
 
-    public void setPayerPartyType(String payerPartyType) {
-        this.payerPartyType = payerPartyType;
+    public void setPayerPartyIdType(String payerPartyType) {
+        this.payerPartyIdType = payerPartyType;
     }
 
-    public String getAmount() {
+    public String getPayeeFeeCurrency() {
+        return payeeFeeCurrency;
+    }
+
+    public void setPayeeFeeCurrency(String payeeFeeCurrency) {
+        this.payeeFeeCurrency = payeeFeeCurrency;
+    }
+
+    public String getPayerFeeCurrency() {
+        return payerFeeCurrency;
+    }
+
+    public void setPayerFeeCurrency(String payerFeeCurrency) {
+        this.payerFeeCurrency = payerFeeCurrency;
+    }
+
+    public BigDecimal getAmount() {
         return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
     public String getPayeeDfspId() {
@@ -176,10 +227,6 @@ public class Transaction {
 
     public void setPayerDfspId(String payerDfspId) {
         this.payerDfspId = payerDfspId;
-    }
-
-    public void setAmount(String amount) {
-        this.amount = amount;
     }
 
     public String getCurrency() {

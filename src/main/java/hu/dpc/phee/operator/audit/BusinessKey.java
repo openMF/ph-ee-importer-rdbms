@@ -4,6 +4,7 @@ package hu.dpc.phee.operator.audit;
 import org.eclipse.persistence.annotations.Index;
 
 import javax.persistence.Cacheable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,15 +19,20 @@ public class BusinessKey {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(name = "BUSINESS_KEY")
     @Index(name = "idx_businessKey")
     private String businessKey;
 
+    @Column(name = "BUSINESS_KEY_TYPE")
     @Index(name = "idx_businessKeyType")
     private String businessKeyType;
 
+    @Column(name = "WORKFLOW_INSTANCE_KEY")
     @Index(name = "idx_workflowInstanceKey")
     private Long workflowInstanceKey;
+
     private Long timestamp;
+
 
     public Long getId() {
         return id;
