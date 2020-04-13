@@ -1,6 +1,7 @@
 package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.DocumentContext;
+import hu.dpc.phee.operator.business.TransactionParser;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,9 @@ public class KafkaConsumer implements ConsumerSeekAware {
     @Autowired
     private RecordParser recordParser;
 
+    @Autowired
+    private TransactionParser transactionParser;
+
 
     @KafkaListener(topics = "${importer.kafka.topic}")
     public void listen(String rawData) {
@@ -35,6 +39,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
         switch (valueType) {
             case "VARIABLE":
                 recordParser.parseVariable(json);
+                transactionParser.parseVariable(json);
                 break;
 
             case "JOB":
@@ -42,7 +47,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 break;
 
             case "WORKFLOW_INSTANCE":
-                recordParser.parseWorkflowElement(json);
+                transactionParser.parseWorkflowElement(json);
                 break;
         }
     }
