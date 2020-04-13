@@ -2,7 +2,6 @@ package hu.dpc.phee.operator.business;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.importer.JsonPathReader;
-import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +9,8 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -117,6 +114,13 @@ public class TransactionParser {
                 logger.debug("saved finished transaction {}", transaction.getWorkflowInstanceKey());
             }
         }
+    }
+
+    public void transactionStatus(DocumentContext json, TransactionStatus status) {
+        Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
+        Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
+        transaction.setStatus(status);
+        logger.debug("transaction {} set to {}", json, status);
     }
 
     private synchronized Transaction getOrCreateTransaction(Long workflowInstanceKey) {

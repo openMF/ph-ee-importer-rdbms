@@ -2,6 +2,7 @@ package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.business.TransactionParser;
+import hu.dpc.phee.operator.business.TransactionStatus;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,22 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 transactionParser.parseWorkflowElement(json);
                 break;
         }
+
+        if ("JOB".equals(valueType) &&
+                "send-success-to-channel".equals(json.read("$.value.type")) &&
+                "COMPLETED".equals(json.read("$.intent"))
+        ) {
+            transactionParser.transactionStatus(json, TransactionStatus.COMPLETED);
+        }
+
+        if ("JOB".equals(valueType) &&
+                "send-error-to-channel".equals(json.read("$.value.type")) &&
+                "COMPLETED".equals(json.read("$.intent"))
+        ) {
+            transactionParser.transactionStatus(json, TransactionStatus.FAILED);
+        }
+
+
     }
 
     @Override

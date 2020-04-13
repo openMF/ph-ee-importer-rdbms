@@ -6,6 +6,8 @@ import org.eclipse.persistence.annotations.Index;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -37,7 +39,8 @@ public class Transaction {
     @Column(name = "COMPLETED_AT")
     private Date completedAt;
 
-    private String status; // TODO enum
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status;
 
     @Column(name = "PAYEE_DFSP_ID")
     private String payeeDfspId;
@@ -150,11 +153,11 @@ public class Transaction {
         this.workflowInstanceKey = paymentProcessId;
     }
 
-    public String getStatus() {
+    public TransactionStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(TransactionStatus status) {
         this.status = status;
     }
 
