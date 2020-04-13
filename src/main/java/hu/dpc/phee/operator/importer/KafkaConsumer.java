@@ -32,11 +32,18 @@ public class KafkaConsumer implements ConsumerSeekAware {
         logger.debug("from kafka: {}", json.jsonString());
 
         String valueType = json.read("$.valueType");
-        if ("VARIABLE".equals(valueType)) {
-            recordParser.parseVariable(json);
+        switch (valueType) {
+            case "VARIABLE":
+                recordParser.parseVariable(json);
+                break;
 
-        } else {
-            recordParser.parseTask(json);
+            case "JOB":
+                recordParser.parseTask(json);
+                break;
+
+            case "WORKFLOW_INSTANCE":
+                recordParser.parseWorkflowElement(json);
+                break;
         }
     }
 

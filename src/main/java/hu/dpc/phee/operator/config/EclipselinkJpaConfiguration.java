@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@EntityScan(basePackages = "hu.dpc.phee.operate.importer")
-@EnableJpaRepositories(basePackages = "hu.dpc.phee.operate.importer")
+@EntityScan(basePackages = "hu.dpc.phee.operator")
+@EnableJpaRepositories(basePackages = "hu.dpc.phee.operator")
 @EnableTransactionManagement(proxyTargetClass = true)
 public class EclipselinkJpaConfiguration extends JpaBaseConfiguration {
     private Logger logger = LoggerFactory.getLogger(this.getClass());

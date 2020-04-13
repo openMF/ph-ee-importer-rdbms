@@ -11,7 +11,7 @@ spring:
     properties:
       eclipselink:
         logging:
-          logger: "hu.dpc.phee.operate.importer.config.EclipselinkLogger"
+          logger: "hu.dpc.phee.operator.config.EclipselinkLogger"
   datasource:
     url: "jdbc:mysql://operator-mysql:3306/operator?rewriteBatchedStatements=true"
     username: "mifos"
