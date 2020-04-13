@@ -1,4 +1,4 @@
-package hu.dpc.phee.operate.importer.config;
+package hu.dpc.phee.operator.config;
 
 import org.eclipse.persistence.logging.AbstractSessionLog;
 import org.eclipse.persistence.logging.SessionLog;

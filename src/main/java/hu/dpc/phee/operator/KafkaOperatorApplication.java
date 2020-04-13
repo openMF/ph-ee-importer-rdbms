@@ -1,4 +1,4 @@
-package hu.dpc.phee.operate.importer;
+package hu.dpc.phee.operator;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
 @SpringBootApplication
-public class KafkaOperationsImportApplication {
+public class KafkaOperatorApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(KafkaOperationsImportApplication.class, args);
+		SpringApplication.run(KafkaOperatorApplication.class, args);
 	}
 
 }

@@ -1,4 +1,4 @@
-package hu.dpc.phee.operate.importer;
+package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;

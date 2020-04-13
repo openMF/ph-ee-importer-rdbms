@@ -1,4 +1,4 @@
-package hu.dpc.phee.operate.importer.config;
+package hu.dpc.phee.operator.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;

@@ -1,12 +1,12 @@
-package hu.dpc.phee.operate.importer;
+package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.DocumentContext;
-import hu.dpc.phee.operate.importer.audit.BusinessKey;
-import hu.dpc.phee.operate.importer.audit.Task;
-import hu.dpc.phee.operate.importer.audit.TaskRepository;
-import hu.dpc.phee.operate.importer.audit.BusinessKeyRepository;
-import hu.dpc.phee.operate.importer.audit.Variable;
-import hu.dpc.phee.operate.importer.audit.VariableRepository;
+import hu.dpc.phee.operator.audit.BusinessKey;
+import hu.dpc.phee.operator.audit.Task;
+import hu.dpc.phee.operator.audit.TaskRepository;
+import hu.dpc.phee.operator.audit.BusinessKeyRepository;
+import hu.dpc.phee.operator.audit.Variable;
+import hu.dpc.phee.operator.audit.VariableRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

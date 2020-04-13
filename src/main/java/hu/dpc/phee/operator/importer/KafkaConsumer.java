@@ -1,4 +1,4 @@
-package hu.dpc.phee.operate.importer;
+package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.DocumentContext;
 import org.apache.kafka.common.TopicPartition;
