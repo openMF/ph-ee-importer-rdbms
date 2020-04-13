@@ -8,8 +8,8 @@ import java.util.List;
 
 @Repository
 @Transactional
-public interface TransactionRepository extends CrudRepository<Transaction, Long> {
+public interface BusinessKeyRepository extends CrudRepository<BusinessKey, Long> {
 
-    List<Transaction> findByBusinessKeyAndBusinessKeyType(String businessKey, String businessKeyType);
+    List<BusinessKey> findByBusinessKeyAndBusinessKeyType(String businessKey, String businessKeyType);
 
 }

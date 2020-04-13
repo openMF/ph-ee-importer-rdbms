@@ -2,8 +2,8 @@ package hu.dpc.phee.operate.importer.api;
 
 import hu.dpc.phee.operate.importer.persistence.Task;
 import hu.dpc.phee.operate.importer.persistence.TaskRepository;
-import hu.dpc.phee.operate.importer.persistence.Transaction;
-import hu.dpc.phee.operate.importer.persistence.TransactionRepository;
+import hu.dpc.phee.operate.importer.persistence.BusinessKey;
+import hu.dpc.phee.operate.importer.persistence.BusinessKeyRepository;
 import hu.dpc.phee.operate.importer.persistence.Variable;
 import hu.dpc.phee.operate.importer.persistence.VariableRepository;
 import org.slf4j.Logger;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ public class RestApiController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private TransactionRepository transactionRepository;
+    private BusinessKeyRepository businessKeyRepository;
 
     @Autowired
     private TaskRepository taskRepository;
@@ -50,10 +49,10 @@ public class RestApiController {
                 .collect(Collectors.toList());
     }
 
-    private List<Transaction> loadTransactions(@RequestParam("businessKey") String businessKey, @RequestParam("businessKeyType") String businessKeyType) {
-        List<Transaction> transactions = transactionRepository.findByBusinessKeyAndBusinessKeyType(businessKey, businessKeyType);
-        logger.debug("loaded {} transaction(s) for business key {} of type {}", transactions.size(), businessKey, businessKeyType);
-        return transactions;
+    private List<BusinessKey> loadTransactions(@RequestParam("businessKey") String businessKey, @RequestParam("businessKeyType") String businessKeyType) {
+        List<BusinessKey> businessKeys = businessKeyRepository.findByBusinessKeyAndBusinessKeyType(businessKey, businessKeyType);
+        logger.debug("loaded {} transaction(s) for business key {} of type {}", businessKeys.size(), businessKey, businessKeyType);
+        return businessKeys;
     }
 
 }

@@ -11,9 +11,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "businesskeys")
 @Cacheable(false)
-public class Transaction {
+public class BusinessKey {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

@@ -1,10 +1,10 @@
 package hu.dpc.phee.operate.importer;
 
 import com.jayway.jsonpath.DocumentContext;
+import hu.dpc.phee.operate.importer.persistence.BusinessKey;
 import hu.dpc.phee.operate.importer.persistence.Task;
 import hu.dpc.phee.operate.importer.persistence.TaskRepository;
-import hu.dpc.phee.operate.importer.persistence.Transaction;
-import hu.dpc.phee.operate.importer.persistence.TransactionRepository;
+import hu.dpc.phee.operate.importer.persistence.BusinessKeyRepository;
 import hu.dpc.phee.operate.importer.persistence.Variable;
 import hu.dpc.phee.operate.importer.persistence.VariableRepository;
 import org.slf4j.Logger;
@@ -28,7 +28,7 @@ public class RecordParser {
     private VariableRepository variableRepository;
 
     @Autowired
-    private TransactionRepository transactionRepository;
+    private BusinessKeyRepository businessKeyRepository;
 
 
     public void parseTask(DocumentContext json) {
@@ -66,12 +66,12 @@ public class RecordParser {
         variableRepository.save(variable);
 
         if (BUSINESS_ID_FIELDS.contains(name)) {
-            Transaction transaction = new Transaction();
-            transaction.setTimestamp(timestamp);
-            transaction.setWorkflowInstanceKey(workflowInstanceKey);
-            transaction.setBusinessKey(value);
-            transaction.setBusinessKeyType(name);
-            transactionRepository.save(transaction);
+            BusinessKey businessKey = new BusinessKey();
+            businessKey.setTimestamp(timestamp);
+            businessKey.setWorkflowInstanceKey(workflowInstanceKey);
+            businessKey.setBusinessKey(value);
+            businessKey.setBusinessKeyType(name);
+            businessKeyRepository.save(businessKey);
         }
     }
 
