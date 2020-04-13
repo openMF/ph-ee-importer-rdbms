@@ -1,35 +1,38 @@
-package hu.dpc.phee.operate.importer.persistence;
+package hu.dpc.phee.operate.importer.audit;
 
-
-import org.eclipse.persistence.annotations.Index;
 
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "variables")
+@Table(name = "tasks")
 @Cacheable(false)
-public class Variable {
+public class Task {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private Long workflowKey;
-
-    @Index(name = "idx_workflowInstanceKey")
     private Long workflowInstanceKey;
-
     private Long timestamp;
 
-    private String name;
+    private String intent;
+    private String recordType;
+    private String type;
 
-    @Lob
-    private String value;
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
 
     public Long getId() {
         return id;
@@ -38,6 +41,7 @@ public class Variable {
     public void setId(Long id) {
         this.id = id;
     }
+
 
     public Long getWorkflowKey() {
         return workflowKey;
@@ -55,27 +59,27 @@ public class Variable {
         this.workflowInstanceKey = workflowInstanceKey;
     }
 
-    public Long getTimestamp() {
-        return timestamp;
+    public String getIntent() {
+        return intent;
     }
 
-    public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
+    public void setIntent(String intent) {
+        this.intent = intent;
     }
 
-    public String getName() {
-        return name;
+    public String getRecordType() {
+        return recordType;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setRecordType(String recordType) {
+        this.recordType = recordType;
     }
 
-    public String getValue() {
-        return value;
+    public String getType() {
+        return type;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setType(String type) {
+        this.type = type;
     }
 }

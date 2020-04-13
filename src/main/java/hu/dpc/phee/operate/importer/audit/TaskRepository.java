@@ -1,4 +1,4 @@
-package hu.dpc.phee.operate.importer.persistence;
+package hu.dpc.phee.operate.importer.audit;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

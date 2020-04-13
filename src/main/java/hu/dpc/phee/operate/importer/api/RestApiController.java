@@ -1,11 +1,11 @@
 package hu.dpc.phee.operate.importer.api;
 
-import hu.dpc.phee.operate.importer.persistence.Task;
-import hu.dpc.phee.operate.importer.persistence.TaskRepository;
-import hu.dpc.phee.operate.importer.persistence.BusinessKey;
-import hu.dpc.phee.operate.importer.persistence.BusinessKeyRepository;
-import hu.dpc.phee.operate.importer.persistence.Variable;
-import hu.dpc.phee.operate.importer.persistence.VariableRepository;
+import hu.dpc.phee.operate.importer.audit.Task;
+import hu.dpc.phee.operate.importer.audit.TaskRepository;
+import hu.dpc.phee.operate.importer.audit.BusinessKey;
+import hu.dpc.phee.operate.importer.audit.BusinessKeyRepository;
+import hu.dpc.phee.operate.importer.audit.Variable;
+import hu.dpc.phee.operate.importer.audit.VariableRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package hu.dpc.phee.operate.importer.persistence;
+package hu.dpc.phee.operate.importer.audit;
 
 
 import org.eclipse.persistence.annotations.Index;

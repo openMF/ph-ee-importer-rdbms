@@ -5,7 +5,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.ParseContext;
-import hu.dpc.phee.operate.importer.persistence.Task;
+import hu.dpc.phee.operate.importer.audit.Task;
 import org.junit.Test;
 
 public class JsonParseTest {
