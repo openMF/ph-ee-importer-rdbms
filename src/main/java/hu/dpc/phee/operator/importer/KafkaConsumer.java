@@ -42,28 +42,30 @@ public class KafkaConsumer implements ConsumerSeekAware {
 
             case "JOB":
                 recordParser.parseTask(json);
+
+                checkTransactionStatus(json);
                 break;
 
             case "WORKFLOW_INSTANCE":
                 transactionParser.parseWorkflowElement(json);
                 break;
         }
+    }
 
-        if ("JOB".equals(valueType) &&
-                "send-success-to-channel".equals(json.read("$.value.type")) &&
-                "COMPLETED".equals(json.read("$.intent"))
-        ) {
-            transactionParser.transactionStatus(json, TransactionStatus.COMPLETED);
+    /**
+     * check if send to channel JOBs are COMPLETED
+     */
+    private void checkTransactionStatus(DocumentContext json) {
+        String type = json.read("$.value.type");
+        String intent = json.read("$.intent");
+        if ("COMPLETED".equals(intent)) {
+            if ("send-success-to-channel".equals(type)) {
+                transactionParser.transactionStatus(json, TransactionStatus.COMPLETED);
+            }
+            if ("send-error-to-channel".equals(type)) {
+                transactionParser.transactionStatus(json, TransactionStatus.FAILED);
+            }
         }
-
-        if ("JOB".equals(valueType) &&
-                "send-error-to-channel".equals(json.read("$.value.type")) &&
-                "COMPLETED".equals(json.read("$.intent"))
-        ) {
-            transactionParser.transactionStatus(json, TransactionStatus.FAILED);
-        }
-
-
     }
 
     @Override
