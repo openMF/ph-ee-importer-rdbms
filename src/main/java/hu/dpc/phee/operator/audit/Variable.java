@@ -27,12 +27,16 @@ public class Variable {
     @Index(name = "idx_workflowInstanceKey")
     private Long workflowInstanceKey;
 
+    @Column(name = "TIMESTAMP")
     private Long timestamp;
 
+    @Column(name = "NAME")
     private String name;
 
     @Lob
+    @Column(name = "VALUE")
     private String value;
+
 
     public Long getId() {
         return id;

@@ -29,6 +29,7 @@ public class Transaction {
     @Index(name = "idx_paymentProcessId")
     private Long workflowInstanceKey;
 
+    @Column(name = "TRANSACTION_ID")
     private String transactionId;
 
     @Column(name = "STARTED_AT")

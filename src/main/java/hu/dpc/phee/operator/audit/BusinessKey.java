@@ -31,6 +31,7 @@ public class BusinessKey {
     @Index(name = "idx_workflowInstanceKey")
     private Long workflowInstanceKey;
 
+    @Column(name = "TIMESTAMP")
     private Long timestamp;
 
 

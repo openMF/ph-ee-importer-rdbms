@@ -6,9 +6,14 @@ import hu.dpc.phee.operator.audit.BusinessKey;
 import hu.dpc.phee.operator.audit.BusinessKeyRepository;
 import hu.dpc.phee.operator.audit.Variable;
 import hu.dpc.phee.operator.audit.VariableRepository;
+import hu.dpc.phee.operator.business.Transaction;
+import hu.dpc.phee.operator.business.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +33,18 @@ public class RestApiController {
 
     @Autowired
     private VariableRepository variableRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+
+    @GetMapping("/transactions")
+    public List<Transaction> transactions(
+            @RequestParam(value = "page") Integer page,
+            @RequestParam(value = "size") Integer size
+    ) {
+        return transactionRepository.findAllByCompletedAtNotNull(PageRequest.of(page, size, Sort.by("startedAt").ascending()));
+    }
 
     @GetMapping("/variables")
     public List<List<Variable>> variables(
