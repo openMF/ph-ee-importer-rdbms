@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -99,7 +100,9 @@ public class TransactionParser {
 
         if ("START_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
             Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
+            Long timestamp = json.read("$.timestamp");
             Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
+            transaction.setStartedAt(new Date(timestamp));
             inflightTransactions.put(workflowInstanceKey, transaction);
             logger.debug("started in-flight transaction {}", transaction.getWorkflowInstanceKey());
         }
