@@ -10,6 +10,6 @@ import java.util.List;
 @Transactional
 public interface TaskRepository extends CrudRepository<Task, Long> {
 
-    List<Task> findByWorkflowInstanceKey(Long workflowInstanceKey);
+    List<Task> findByWorkflowInstanceKeyOrderByTimestamp(Long workflowInstanceKey);
 
 }

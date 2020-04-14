@@ -7,6 +7,7 @@ import hu.dpc.phee.operator.audit.TaskRepository;
 import hu.dpc.phee.operator.audit.Variable;
 import hu.dpc.phee.operator.audit.VariableRepository;
 import hu.dpc.phee.operator.business.Transaction;
+import hu.dpc.phee.operator.business.TransactionDetail;
 import hu.dpc.phee.operator.business.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,6 +39,14 @@ public class RestApiController {
     private TransactionRepository transactionRepository;
 
 
+    @GetMapping("/transaction/{workflowInstanceKey}")
+    public TransactionDetail transaction(@PathVariable Long workflowInstanceKey) {
+        Transaction transaction = transactionRepository.findFirstByWorkflowInstanceKey(workflowInstanceKey);
+        List<Task> tasks = taskRepository.findByWorkflowInstanceKeyOrderByTimestamp(workflowInstanceKey);
+        List<Variable> variables = variableRepository.findByWorkflowInstanceKeyOrderByTimestamp(workflowInstanceKey);
+        return new TransactionDetail(transaction, tasks, variables);
+    }
+
     @GetMapping("/transactions")
     public List<Transaction> transactions(
             @RequestParam(value = "page") Integer page,
@@ -51,7 +61,7 @@ public class RestApiController {
             @RequestParam(value = "businessKeyType") String businessKeyType
     ) {
         return loadTransactions(businessKey, businessKeyType).stream()
-                .map(transaction -> variableRepository.findByWorkflowInstanceKey(transaction.getWorkflowInstanceKey()))
+                .map(transaction -> variableRepository.findByWorkflowInstanceKeyOrderByTimestamp(transaction.getWorkflowInstanceKey()))
                 .collect(Collectors.toList());
     }
 
@@ -61,7 +71,7 @@ public class RestApiController {
             @RequestParam(value = "businessKeyType") String businessKeyType
     ) {
         return loadTransactions(businessKey, businessKeyType).stream()
-                .map(transaction -> taskRepository.findByWorkflowInstanceKey(transaction.getWorkflowInstanceKey()))
+                .map(transaction -> taskRepository.findByWorkflowInstanceKeyOrderByTimestamp(transaction.getWorkflowInstanceKey()))
                 .collect(Collectors.toList());
     }
 
