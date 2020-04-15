@@ -38,10 +38,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>hu.dpc.phee</groupId>
-            <artifactId>importer-es</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.zeebe</groupId>
             <artifactId>zeebe-elasticsearch-exporter</artifactId>
             <version>${zeebe.version}</version>
