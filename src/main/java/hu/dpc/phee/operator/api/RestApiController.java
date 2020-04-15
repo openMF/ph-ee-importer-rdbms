@@ -38,6 +38,10 @@ public class RestApiController {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @GetMapping("/")
+    public void health() {
+        // 200 ok
+    }
 
     @GetMapping("/transaction/{workflowInstanceKey}")
     public TransactionDetail transaction(@PathVariable Long workflowInstanceKey) {

@@ -123,7 +123,7 @@ public class TransactionParser {
         Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
         Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
         transaction.setStatus(status);
-        logger.debug("transaction {} set to {}", json, status);
+        logger.debug("transaction {} set to {}", workflowInstanceKey, status);
     }
 
     private synchronized Transaction getOrCreateTransaction(Long workflowInstanceKey) {
