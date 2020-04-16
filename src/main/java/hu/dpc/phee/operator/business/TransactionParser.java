@@ -1,6 +1,7 @@
 package hu.dpc.phee.operator.business;
 
 import com.jayway.jsonpath.DocumentContext;
+import hu.dpc.phee.operator.OperatorUtils;
 import hu.dpc.phee.operator.importer.JsonPathReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class TransactionParser {
     private static void parseTransferResponsePrepare(Transaction transaction, String jsonString) {
         DocumentContext json = JsonPathReader.parseEscaped(jsonString);
         String completedAt = json.read("$.completedTimestamp", String.class);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        SimpleDateFormat dateFormat = OperatorUtils.dateFormat();
         try {
             transaction.setCompletedAt(dateFormat.parse(completedAt));
         } catch (ParseException e) {
