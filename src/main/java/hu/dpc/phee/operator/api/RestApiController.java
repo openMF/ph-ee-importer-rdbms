@@ -9,9 +9,12 @@ import hu.dpc.phee.operator.audit.VariableRepository;
 import hu.dpc.phee.operator.business.Transaction;
 import hu.dpc.phee.operator.business.TransactionDetail;
 import hu.dpc.phee.operator.business.TransactionRepository;
+import hu.dpc.phee.operator.business.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,11 +56,36 @@ public class RestApiController {
     }
 
     @GetMapping("/transactions")
-    public List<Transaction> transactions(
+    public Page<Transaction> transactions(
             @RequestParam(value = "page") Integer page,
-            @RequestParam(value = "size") Integer size
+            @RequestParam(value = "size") Integer size,
+            @RequestParam(value = "payerPartyId", required = false) String payerPartyId,
+            @RequestParam(value = "payeePartyId", required = false) String payeePartyId,
+            @RequestParam(value = "payeeDfspId", required = false) String payeeDfspId,
+            @RequestParam(value = "transactionId", required = false) String transactionId,
+            @RequestParam(value = "transactionStatus", required = false) String transactionStatus,
+            @RequestParam(value = "amount", required = false) BigDecimal amount,
+            @RequestParam(value = "currency", required = false) String currency
     ) {
-        return transactionRepository.findAllByCompletedAtNotNull(PageRequest.of(page, size, Sort.by("startedAt").ascending()));
+        Transaction sample = new Transaction();
+        sample.setPayerPartyId(payerPartyId);
+        sample.setPayeePartyId(payeePartyId);
+        sample.setPayeeDfspId(payeeDfspId);
+        sample.setTransactionId(transactionId);
+        sample.setStatus(parseStatus(transactionStatus));
+        sample.setAmount(amount);
+        sample.setCurrency(currency);
+
+        return transactionRepository.findAll(Example.of(sample), PageRequest.of(page, size, Sort.by("startedAt").ascending()));
+    }
+
+    private TransactionStatus parseStatus(@RequestParam(value = "transactionStatus", required = false) String transactionStatus) {
+        try {
+            return transactionStatus == null ? null : TransactionStatus.valueOf(transactionStatus);
+        } catch (Exception e) {
+            logger.warn("failed to parse transaction status {}, ignoring it", transactionStatus);
+            return null;
+        }
     }
 
     @GetMapping("/variables")

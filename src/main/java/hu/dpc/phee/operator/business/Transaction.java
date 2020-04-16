@@ -72,7 +72,7 @@ public class Transaction {
     private String currency;
 
 
-    Transaction() {
+    public Transaction() {
         // jpa constructor
     }
 
