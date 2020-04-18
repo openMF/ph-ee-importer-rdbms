@@ -9,24 +9,14 @@ import hu.dpc.phee.operator.audit.VariableRepository;
 import hu.dpc.phee.operator.business.Transaction;
 import hu.dpc.phee.operator.business.TransactionDetail;
 import hu.dpc.phee.operator.business.TransactionRepository;
-import hu.dpc.phee.operator.business.TransactionSpecs;
-import hu.dpc.phee.operator.business.TransactionStatus;
-import hu.dpc.phee.operator.business.Transaction_;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
