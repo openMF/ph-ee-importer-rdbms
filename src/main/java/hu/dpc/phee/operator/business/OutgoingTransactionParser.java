@@ -105,17 +105,17 @@ public class OutgoingTransactionParser {
             Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
             transaction.setStartedAt(new Date(timestamp));
             inflightTransactions.put(workflowInstanceKey, transaction);
-            logger.debug("started in-flight transaction {}", transaction.getWorkflowInstanceKey());
+            logger.debug("started in-flight OUTGOING transaction {}", transaction.getWorkflowInstanceKey());
         }
 
         if ("END_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
             Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
             Transaction transaction = inflightTransactions.remove(workflowInstanceKey);
             if (transaction == null) {
-                logger.error("failed to find in-flight transaction {}", workflowInstanceKey);
+                logger.error("failed to find in-flight OUTGOING transaction {}", workflowInstanceKey);
             } else {
                 transactionRepository.save(transaction);
-                logger.debug("saved finished transaction {}", transaction.getWorkflowInstanceKey());
+                logger.debug("saved finished OUTGOING transaction {}", transaction.getWorkflowInstanceKey());
             }
         }
     }

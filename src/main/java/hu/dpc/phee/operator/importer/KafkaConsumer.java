@@ -21,7 +21,7 @@ import java.util.Set;
 @Component
 public class KafkaConsumer implements ConsumerSeekAware {
     private static final String OUTGOING_BPMN_NAME = "PaymentTest3";
-    private static final List<String> INCOMING_BPMN_NAMES = Arrays.asList("PayeePartyLookup-DFSPID", "PayeeQuoteTransfer-DFSPID");
+    private static final List<String> INCOMING_BPMN_NAMES = Arrays.asList(IncomingTransactionParser.BPMN_PAYEE_QUOTE_TRANSFER);
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
