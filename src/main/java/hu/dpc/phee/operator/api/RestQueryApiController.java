@@ -37,6 +37,7 @@ public class RestQueryApiController {
             @RequestParam(value = "payerPartyId", required = false) String payerPartyId,
             @RequestParam(value = "payeePartyId", required = false) String payeePartyId,
             @RequestParam(value = "payeeDfspId", required = false) String payeeDfspId,
+            @RequestParam(value = "payerDfspId", required = false) String payerDfspId,
             @RequestParam(value = "transactionId", required = false) String transactionId,
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "amount", required = false) BigDecimal amount,
@@ -54,6 +55,9 @@ public class RestQueryApiController {
         }
         if (payeeDfspId != null) {
             specs.add(TransactionSpecs.match(Transaction_.payeeDfspId, payeeDfspId));
+        }
+        if (payerDfspId != null) {
+            specs.add(TransactionSpecs.match(Transaction_.payerDfspId, payerDfspId));
         }
         if (transactionId != null) {
             specs.add(TransactionSpecs.match(Transaction_.transactionId, transactionId));
