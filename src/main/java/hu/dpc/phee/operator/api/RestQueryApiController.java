@@ -42,7 +42,8 @@ public class RestQueryApiController {
             @RequestParam(value = "amount", required = false) BigDecimal amount,
             @RequestParam(value = "currency", required = false) String currency,
             @RequestParam(value = "startFrom", required = false) String startFrom,
-            @RequestParam(value = "startTo", required = false) String startTo
+            @RequestParam(value = "startTo", required = false) String startTo,
+            @RequestParam(value = "sortedBy", required = false) String sortedBy
     ) {
         List<Specification<Transaction>> specs = new ArrayList<>();
         if (payerPartyId != null) {
@@ -78,7 +79,12 @@ public class RestQueryApiController {
             logger.warn("failed to parse dates {} / {}", startFrom, startTo);
         }
 
-        PageRequest pager = PageRequest.of(page, size, Sort.by("startedAt").ascending());
+        PageRequest pager;
+        if (sortedBy == null || "startedAt".equals(sortedBy)) {
+            pager = PageRequest.of(page, size, Sort.by("startedAt").descending());
+        } else {
+            pager = PageRequest.of(page, size, Sort.by(sortedBy).ascending());
+        }
 
         if (specs.size() > 0) {
             Specification<Transaction> compiledSpecs = specs.get(0);
