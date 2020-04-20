@@ -40,8 +40,8 @@ public class EclipselinkJpaConfiguration extends JpaBaseConfiguration {
     protected Map<String, Object> getVendorProperties() {
         HashMap<String, Object> map = new HashMap<>();
         map.put(PersistenceUnitProperties.WEAVING, detectWeavingMode());
-        map.put(PersistenceUnitProperties.DDL_GENERATION, "drop-and-create-tables");
-//        map.put(PersistenceUnitProperties.DDL_GENERATION, "create-or-extend-tables");
+//        map.put(PersistenceUnitProperties.DDL_GENERATION, "drop-and-create-tables");
+        map.put(PersistenceUnitProperties.DDL_GENERATION, "create-or-extend-tables");
         map.put(PersistenceUnitProperties.LOGGING_LEVEL, "INFO");
         map.put("eclipselink.jdbc.batch-writing", "JDBC");
         map.put("eclipselink.jdbc.batch-writing.size", "1000");
