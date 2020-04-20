@@ -76,7 +76,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
             incomingTransactionParser.parseVariable(json);
 
         } else {
-            logger.debug("skipping not outgoing VARIABLE for workflowKey {}", workflowKey);
+            logger.debug("skipping unknown VARIABLE for workflowKey {}", workflowKey);
         }
     }
 
@@ -90,7 +90,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
             incomingTransactionParser.checkTransactionStatus(json);
 
         } else {
-            logger.debug("skipping not outgoing JOB for workflowKey {}", workflowKey);
+            logger.debug("skipping unknown JOB for workflowKey {}", workflowKey);
         }
     }
 
@@ -107,7 +107,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
             incomingTransactionParser.parseWorkflowElement(json);
 
         } else {
-            logger.debug("skipping not outgoing WORKFLOW_INSTANCE {}", bpmnProcessId);
+            logger.debug("skipping unknown WORKFLOW_INSTANCE {}", bpmnProcessId);
         }
     }
 
