@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
 @SpringBootApplication
-public class KafkaOperatorApplication {
+public class KafkaOperationsApplication {
 
 	static {
 		// NOTE zeebe timestamps are also GMT, parsed dates in DB should also use GMT to match this
@@ -14,7 +14,7 @@ public class KafkaOperatorApplication {
 	}
 
 	public static void main(String[] args) {
-		SpringApplication.run(KafkaOperatorApplication.class, args);
+		SpringApplication.run(KafkaOperationsApplication.class, args);
 	}
 
 }

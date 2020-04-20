@@ -4,6 +4,7 @@ kafka:
 importer:
   kafka:
     topic: "zeebe-export"
+    reset: false
 
 spring:
   jpa:

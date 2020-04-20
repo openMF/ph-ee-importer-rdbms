@@ -21,6 +21,10 @@ public class KafkaConsumer implements ConsumerSeekAware {
     @Value("${importer.kafka.topic}")
     private String kafkaTopic;
 
+    @Value("${importer.kafka.reset}")
+    private boolean reset;
+
+
     @Autowired
     private RecordParser recordParser;
 
@@ -42,7 +46,6 @@ public class KafkaConsumer implements ConsumerSeekAware {
 
             case "JOB":
                 recordParser.parseTask(json);
-
                 checkTransactionStatus(json);
                 break;
 
@@ -70,11 +73,15 @@ public class KafkaConsumer implements ConsumerSeekAware {
 
     @Override
     public void onPartitionsAssigned(Map<TopicPartition, Long> assignments, ConsumerSeekCallback callback) {
-        assignments.keySet().stream()
-                .filter(partition -> partition.topic().equals(kafkaTopic))
-                .forEach(partition -> {
-                    callback.seekToBeginning(partition.topic(), partition.partition());
-                    logger.info("seeked {} to beginning", partition);
-                });
+        if (reset) {
+            assignments.keySet().stream()
+                    .filter(partition -> partition.topic().equals(kafkaTopic))
+                    .forEach(partition -> {
+                        callback.seekToBeginning(partition.topic(), partition.partition());
+                        logger.info("seeked {} to beginning", partition);
+                    });
+        } else {
+            logger.info("no reset, consuming kafka topics from latest");
+        }
     }
 }
