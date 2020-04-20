@@ -98,12 +98,10 @@ public class KafkaConsumer implements ConsumerSeekAware {
         String bpmnProcessId = json.read("$.value.bpmnProcessId");
         if (OUTGOING_BPMN_NAME.equals(bpmnProcessId)) {
             outgoingTransactions.add(workflowKey);
-            logger.debug("registered {} as OUTGOING workflowKey", workflowKey);
             outgoingTransactionParser.parseWorkflowElement(json);
 
         } else if (INCOMING_BPMN_NAMES.contains(bpmnProcessId)) {
             incomingTransactions.add(workflowKey);
-            logger.debug("registered {} as INCOMING workflowKey", workflowKey);
             incomingTransactionParser.parseWorkflowElement(json);
 
         } else {
