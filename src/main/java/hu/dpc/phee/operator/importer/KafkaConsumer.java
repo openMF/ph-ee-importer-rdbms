@@ -1,8 +1,8 @@
 package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.DocumentContext;
-import hu.dpc.phee.operator.business.TransactionParser;
-import hu.dpc.phee.operator.business.TransactionStatus;
+import hu.dpc.phee.operator.business.IncomingTransactionParser;
+import hu.dpc.phee.operator.business.OutgoingTransactionParser;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +12,17 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class KafkaConsumer implements ConsumerSeekAware {
+    private static final String OUTGOING_BPMN_NAME = "PaymentTest3";
+    private static final List<String> INCOMING_BPMN_NAMES = Arrays.asList("PayeePartyLookup-DFSPID", "PayeeQuoteTransfer-DFSPID");
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${importer.kafka.topic}")
@@ -24,12 +31,17 @@ public class KafkaConsumer implements ConsumerSeekAware {
     @Value("${importer.kafka.reset}")
     private boolean reset;
 
-
     @Autowired
     private RecordParser recordParser;
 
     @Autowired
-    private TransactionParser transactionParser;
+    private OutgoingTransactionParser outgoingTransactionParser;
+
+    @Autowired
+    private IncomingTransactionParser incomingTransactionParser;
+
+    private Set<Long> outgoingTransactions = new HashSet<>();
+    private Set<Long> incomingTransactions = new HashSet<>();
 
 
     @KafkaListener(topics = "${importer.kafka.topic}")
@@ -37,37 +49,65 @@ public class KafkaConsumer implements ConsumerSeekAware {
         DocumentContext json = JsonPathReader.parse(rawData);
         logger.debug("from kafka: {}", json.jsonString());
 
+        Long workflowKey = json.read("$.value.workflowKey");
         String valueType = json.read("$.valueType");
         switch (valueType) {
             case "VARIABLE":
-                recordParser.parseVariable(json);
-                transactionParser.parseVariable(json);
+                processVariable(json, workflowKey);
                 break;
 
             case "JOB":
-                recordParser.parseTask(json);
-                checkTransactionStatus(json);
+                processJob(json, workflowKey);
                 break;
 
             case "WORKFLOW_INSTANCE":
-                transactionParser.parseWorkflowElement(json);
+                processWorkflowInstance(json, workflowKey);
                 break;
         }
     }
 
-    /**
-     * check if send to channel JOBs are COMPLETED
-     */
-    private void checkTransactionStatus(DocumentContext json) {
-        String type = json.read("$.value.type");
-        String intent = json.read("$.intent");
-        if ("COMPLETED".equals(intent)) {
-            if ("send-success-to-channel".equals(type)) {
-                transactionParser.transactionStatus(json, TransactionStatus.COMPLETED);
-            }
-            if ("send-error-to-channel".equals(type)) {
-                transactionParser.transactionStatus(json, TransactionStatus.FAILED);
-            }
+    private void processVariable(DocumentContext json, Long workflowKey) {
+        recordParser.parseVariable(json);
+
+        if (outgoingTransactions.contains(workflowKey)) {
+            outgoingTransactionParser.parseVariable(json);
+
+        } else if (incomingTransactions.contains(workflowKey)) {
+            incomingTransactionParser.parseVariable(json);
+
+        } else {
+            logger.debug("skipping not outgoing VARIABLE for workflowKey {}", workflowKey);
+        }
+    }
+
+    private void processJob(DocumentContext json, Long workflowKey) {
+        recordParser.parseTask(json);
+
+        if (outgoingTransactions.contains(workflowKey)) {
+            outgoingTransactionParser.checkTransactionStatus(json);
+
+        } else if (incomingTransactions.contains(workflowKey)) {
+            incomingTransactionParser.checkTransactionStatus(json);
+
+        } else {
+            logger.debug("skipping not outgoing JOB for workflowKey {}", workflowKey);
+        }
+    }
+
+    private void processWorkflowInstance(DocumentContext json, Long workflowKey) {
+        String bpmnProcessId = json.read("$.value.bpmnProcessId");
+        if (OUTGOING_BPMN_NAME.equals(bpmnProcessId)) {
+            outgoingTransactions.add(workflowKey);
+            logger.debug("registered {} as OUTGOING workflowKey", workflowKey);
+            outgoingTransactionParser.parseWorkflowElement(json);
+
+        } else if (INCOMING_BPMN_NAMES.contains(bpmnProcessId)) {
+            incomingTransactions.add(workflowKey);
+            logger.debug("registered {} as INCOMING workflowKey", workflowKey);
+            incomingTransactionParser.parseWorkflowElement(json);
+
+        } else {
+            logger.debug("skipping not outgoing WORKFLOW_INSTANCE {}", bpmnProcessId);
         }
     }
 

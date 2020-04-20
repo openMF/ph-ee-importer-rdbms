@@ -20,8 +20,8 @@ import java.util.function.Consumer;
 import static hu.dpc.phee.operator.OperatorUtils.strip;
 
 @Component
-public class TransactionParser {
-    private static Logger logger = LoggerFactory.getLogger(TransactionParser.class);
+public class OutgoingTransactionParser {
+    private static Logger logger = LoggerFactory.getLogger(OutgoingTransactionParser.class);
 
     private static Map<String, Consumer<Pair<Transaction, String>>> VARIABLE_PARSERS = new HashMap<>();
 
@@ -119,6 +119,23 @@ public class TransactionParser {
             }
         }
     }
+
+    /**
+     * check if send to channel JOBs are COMPLETED
+     */
+    public void checkTransactionStatus(DocumentContext json) {
+        String type = json.read("$.value.type");
+        String intent = json.read("$.intent");
+        if ("COMPLETED".equals(intent)) {
+            if ("send-success-to-channel".equals(type)) {
+                transactionStatus(json, TransactionStatus.COMPLETED);
+            }
+            if ("send-error-to-channel".equals(type)) {
+                transactionStatus(json, TransactionStatus.FAILED);
+            }
+        }
+    }
+
 
     public void transactionStatus(DocumentContext json, TransactionStatus status) {
         Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
