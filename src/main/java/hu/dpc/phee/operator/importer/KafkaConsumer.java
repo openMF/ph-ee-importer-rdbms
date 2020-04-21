@@ -86,9 +86,6 @@ public class KafkaConsumer implements ConsumerSeekAware {
         if (outgoingTransactions.contains(workflowKey)) {
             outgoingTransactionParser.checkTransactionStatus(json);
 
-        } else if (incomingTransactions.contains(workflowKey)) {
-            incomingTransactionParser.checkTransactionStatus(json);
-
         } else {
             logger.debug("skipping unknown JOB for workflowKey {}", workflowKey);
         }

@@ -34,7 +34,6 @@ public class IncomingTransactionParser {
     }
 
 
-
     @Autowired
     private TransactionRepository transactionRepository;
 
@@ -79,54 +78,50 @@ public class IncomingTransactionParser {
     }
 
     public void parseVariable(DocumentContext json) {
-        logger.debug("## parse INCOMING variable");
         String name = json.read("$.value.name");
 
         if (VARIABLE_PARSERS.keySet().contains(name)) {
+            logger.debug("## parse INCOMING variable {}", name);
             Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
             String value = json.read("$.value.value");
 
             Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
             VARIABLE_PARSERS.get(name).accept(Pair.of(transaction, value));
+            transactionRepository.save(transaction);
         }
     }
 
     public void parseWorkflowElement(DocumentContext json) {
-        logger.debug("## parse INCOMING workflow element");
-
         String bpmnElementType = json.read("$.value.bpmnElementType");
         String bpmnProcessId = json.read("$.value.bpmnProcessId");
         String intent = json.read("$.intent");
         Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
 
         if (BPMN_PAYEE_QUOTE_TRANSFER.equals(bpmnProcessId) && "START_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
+            logger.debug("## parse INCOMING workflow element {} {}", bpmnElementType, intent);
+
             Long timestamp = json.read("$.timestamp");
             Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
             transaction.setStartedAt(new Date(timestamp));
             inflightTransactions.put(workflowInstanceKey, transaction);
+            transactionRepository.save(transaction);
             logger.debug("started in-flight INCOMING transaction {}", transaction.getWorkflowInstanceKey());
         }
 
         if (BPMN_PAYEE_QUOTE_TRANSFER.equals(bpmnProcessId) && "END_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
-            Transaction transaction = inflightTransactions.remove(workflowInstanceKey);
+            logger.debug("## parse INCOMING workflow element {} {}", bpmnElementType, intent);
+
+            Transaction transaction = inflightTransactions.get(workflowInstanceKey);
             if (transaction == null) {
                 logger.error("failed to find in-flight INCOMING transaction {}", workflowInstanceKey);
             } else {
                 transaction.setStatus(TransactionStatus.COMPLETED);
                 transactionRepository.save(transaction);
                 logger.debug("saved finished INCOMING transaction {}", transaction.getWorkflowInstanceKey());
+                inflightTransactions.remove(workflowInstanceKey);
             }
         }
     }
-
-    public void checkTransactionStatus(DocumentContext json) {
-        String bpmnProcessId = json.read("$.value.bpmnProcessId");
-        if (BPMN_PAYEE_QUOTE_TRANSFER.equals(bpmnProcessId)) {
-
-        }
-        logger.debug("## check INCOMING transaction status");
-    }
-
 
     private synchronized Transaction getOrCreateTransaction(Long workflowInstanceKey) {
         Transaction transaction = inflightTransactions.get(workflowInstanceKey);

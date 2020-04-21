@@ -2,5 +2,6 @@ package hu.dpc.phee.operator.business;
 
 public enum TransactionStatus {
     COMPLETED,
-    FAILED
+    FAILED,
+    IN_PROGRESS
 }

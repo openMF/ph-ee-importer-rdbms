@@ -92,6 +92,7 @@ public class OutgoingTransactionParser {
 
             Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
             VARIABLE_PARSERS.get(name).accept(Pair.of(transaction, value));
+            transactionRepository.save(transaction);
         }
     }
 
@@ -105,6 +106,7 @@ public class OutgoingTransactionParser {
             Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
             transaction.setStartedAt(new Date(timestamp));
             inflightTransactions.put(workflowInstanceKey, transaction);
+            transactionRepository.save(transaction);
             logger.debug("started in-flight OUTGOING transaction {}", transaction.getWorkflowInstanceKey());
         }
 

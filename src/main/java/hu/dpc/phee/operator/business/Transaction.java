@@ -78,8 +78,8 @@ public class Transaction {
 
     public Transaction(Long workflowInstanceKey) {
         this.workflowInstanceKey = workflowInstanceKey;
+        this.status = TransactionStatus.IN_PROGRESS;
     }
-
 
     public Date getCompletedAt() {
         return completedAt;
