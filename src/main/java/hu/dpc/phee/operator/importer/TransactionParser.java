@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 public class TransactionParser {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private static final String OUTGOING_BPMN_NAME = "PaymentTest3";
+    private static final String OUTGOING_BPMN_NAME = "PayerFundTransfer-DFSPID";
     private static final String INCOMING_BPMN_NAME = "PayeeQuoteTransfer-DFSPID";
     private static final List<String> TRANSFER_BPMN_NAMES = Arrays.asList(INCOMING_BPMN_NAME, OUTGOING_BPMN_NAME);
 
