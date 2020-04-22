@@ -1,0 +1,69 @@
+package hu.dpc.phee.operator.importer;
+
+import hu.dpc.phee.operator.business.Transaction;
+import hu.dpc.phee.operator.business.TransactionDirection;
+import hu.dpc.phee.operator.business.TransactionRepository;
+import hu.dpc.phee.operator.business.TransactionStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+@Component
+public class TransactionManager {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    /**
+     * in-memory in-flight transactions
+     */
+    private Map<Long, Transaction> inflightTransactions = new HashMap<>();
+
+
+    public TransactionDirection isInflightTransaction(Long workflowInstanceKey) {
+        Transaction transaction = inflightTransactions.get(workflowInstanceKey);
+        return transaction == null ? TransactionDirection.IGNORED : transaction.getDirection();
+    }
+
+    public void processStarted(Long workflowInstanceKey, Long timestamp, TransactionDirection direction) {
+        Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
+        transaction.setDirection(direction);
+        transaction.setStartedAt(new Date(timestamp));
+        transactionRepository.save(transaction);
+        logger.debug("started in-flight {} transaction {}", direction, transaction.getWorkflowInstanceKey());
+    }
+
+    public void processEnded(Long workflowInstanceKey, Long timestamp, TransactionDirection direction) {
+        Transaction transaction = inflightTransactions.remove(workflowInstanceKey);
+        if (transaction == null) {
+            logger.error("failed to find in-flight {} transaction {}", direction, workflowInstanceKey);
+        } else {
+            transaction.setCompletedAt(new Date(timestamp));
+            transactionRepository.save(transaction);
+            logger.debug("saved finished {} transaction {}", direction, transaction.getWorkflowInstanceKey());
+        }
+    }
+
+    public void transactionResult(Long workflowInstanceKey, TransactionStatus status, String endElementId) {
+        Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
+        transaction.setStatus(status);
+        transaction.setStatusDetail(endElementId);  // TODO turn into human readable
+        transactionRepository.save(transaction);
+        logger.debug("{} transaction {} result {} ({})", transaction.getDirection(), workflowInstanceKey, status, endElementId);
+    }
+
+    synchronized Transaction getOrCreateTransaction(Long workflowInstanceKey) {
+        Transaction transaction = inflightTransactions.get(workflowInstanceKey);
+        if (transaction == null) {
+            transaction = new Transaction(workflowInstanceKey);
+            inflightTransactions.put(workflowInstanceKey, transaction);
+        }
+        return transaction;
+    }
+}

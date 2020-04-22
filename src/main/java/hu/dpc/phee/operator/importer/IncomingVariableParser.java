@@ -1,8 +1,9 @@
-package hu.dpc.phee.operator.business;
+package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.OperatorUtils;
-import hu.dpc.phee.operator.importer.JsonPathReader;
+import hu.dpc.phee.operator.business.Transaction;
+import hu.dpc.phee.operator.business.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -20,10 +20,8 @@ import java.util.function.Consumer;
 import static hu.dpc.phee.operator.OperatorUtils.strip;
 
 @Component
-public class IncomingTransactionParser {
-    private static Logger logger = LoggerFactory.getLogger(IncomingTransactionParser.class);
-
-    public static final String BPMN_PAYEE_QUOTE_TRANSFER = "PayeeQuoteTransfer-DFSPID";
+public class IncomingVariableParser {
+    private static Logger logger = LoggerFactory.getLogger(IncomingVariableParser.class);
 
     private static Map<String, Consumer<Pair<Transaction, String>>> VARIABLE_PARSERS = new HashMap<>();
 
@@ -33,6 +31,9 @@ public class IncomingTransactionParser {
         VARIABLE_PARSERS.put("localQuoteResponse", pair -> parseLocalQuoteResponse(pair.getFirst(), strip(pair.getSecond())));
     }
 
+
+    @Autowired
+    private TransactionManager transactionManager;
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -81,54 +82,13 @@ public class IncomingTransactionParser {
         String name = json.read("$.value.name");
 
         if (VARIABLE_PARSERS.keySet().contains(name)) {
-            logger.debug("## parse INCOMING variable {}", name);
+            logger.debug("parsing INCOMING variable {}", name);
             Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
             String value = json.read("$.value.value");
 
-            Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
+            Transaction transaction = transactionManager.getOrCreateTransaction(workflowInstanceKey);
             VARIABLE_PARSERS.get(name).accept(Pair.of(transaction, value));
             transactionRepository.save(transaction);
         }
-    }
-
-    public void parseWorkflowElement(DocumentContext json) {
-        String bpmnElementType = json.read("$.value.bpmnElementType");
-        String bpmnProcessId = json.read("$.value.bpmnProcessId");
-        String intent = json.read("$.intent");
-        Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
-
-        if (BPMN_PAYEE_QUOTE_TRANSFER.equals(bpmnProcessId) && "START_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
-            logger.debug("## parse INCOMING workflow element {} {}", bpmnElementType, intent);
-
-            Long timestamp = json.read("$.timestamp");
-            Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
-            transaction.setStartedAt(new Date(timestamp));
-            inflightTransactions.put(workflowInstanceKey, transaction);
-            transactionRepository.save(transaction);
-            logger.debug("started in-flight INCOMING transaction {}", transaction.getWorkflowInstanceKey());
-        }
-
-        if (BPMN_PAYEE_QUOTE_TRANSFER.equals(bpmnProcessId) && "END_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
-            logger.debug("## parse INCOMING workflow element {} {}", bpmnElementType, intent);
-
-            Transaction transaction = inflightTransactions.get(workflowInstanceKey);
-            if (transaction == null) {
-                logger.error("failed to find in-flight INCOMING transaction {}", workflowInstanceKey);
-            } else {
-                transaction.setStatus(TransactionStatus.COMPLETED);
-                transactionRepository.save(transaction);
-                logger.debug("saved finished INCOMING transaction {}", transaction.getWorkflowInstanceKey());
-                inflightTransactions.remove(workflowInstanceKey);
-            }
-        }
-    }
-
-    private synchronized Transaction getOrCreateTransaction(Long workflowInstanceKey) {
-        Transaction transaction = inflightTransactions.get(workflowInstanceKey);
-        if (transaction == null) {
-            transaction = new Transaction(workflowInstanceKey);
-            inflightTransactions.put(workflowInstanceKey, transaction);
-        }
-        return transaction;
     }
 }

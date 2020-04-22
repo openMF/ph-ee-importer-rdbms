@@ -1,8 +1,10 @@
-package hu.dpc.phee.operator.business;
+package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.OperatorUtils;
-import hu.dpc.phee.operator.importer.JsonPathReader;
+import hu.dpc.phee.operator.business.Transaction;
+import hu.dpc.phee.operator.business.TransactionRepository;
+import hu.dpc.phee.operator.business.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -20,8 +21,8 @@ import java.util.function.Consumer;
 import static hu.dpc.phee.operator.OperatorUtils.strip;
 
 @Component
-public class OutgoingTransactionParser {
-    private static Logger logger = LoggerFactory.getLogger(OutgoingTransactionParser.class);
+public class OutgoingVariableParser {
+    private static Logger logger = LoggerFactory.getLogger(OutgoingVariableParser.class);
 
     private static Map<String, Consumer<Pair<Transaction, String>>> VARIABLE_PARSERS = new HashMap<>();
 
@@ -34,6 +35,9 @@ public class OutgoingTransactionParser {
         VARIABLE_PARSERS.put("transferResponse-PREPARE", pair -> parseTransferResponsePrepare(pair.getFirst(), pair.getSecond()));
     }
 
+
+    @Autowired
+    private TransactionManager transactionManager;
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -87,71 +91,13 @@ public class OutgoingTransactionParser {
         String name = json.read("$.value.name");
 
         if (VARIABLE_PARSERS.keySet().contains(name)) {
+            logger.debug("parsing OUTGOING variable {}", name);
             Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
             String value = json.read("$.value.value");
 
-            Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
+            Transaction transaction = transactionManager.getOrCreateTransaction(workflowInstanceKey);
             VARIABLE_PARSERS.get(name).accept(Pair.of(transaction, value));
             transactionRepository.save(transaction);
         }
-    }
-
-    public void parseWorkflowElement(DocumentContext json) {
-        String bpmnElementType = json.read("$.value.bpmnElementType");
-        String intent = json.read("$.intent");
-
-        if ("START_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
-            Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
-            Long timestamp = json.read("$.timestamp");
-            Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
-            transaction.setStartedAt(new Date(timestamp));
-            inflightTransactions.put(workflowInstanceKey, transaction);
-            transactionRepository.save(transaction);
-            logger.debug("started in-flight OUTGOING transaction {}", transaction.getWorkflowInstanceKey());
-        }
-
-        if ("END_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
-            Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
-            Transaction transaction = inflightTransactions.remove(workflowInstanceKey);
-            if (transaction == null) {
-                logger.error("failed to find in-flight OUTGOING transaction {}", workflowInstanceKey);
-            } else {
-                transactionRepository.save(transaction);
-                logger.debug("saved finished OUTGOING transaction {}", transaction.getWorkflowInstanceKey());
-            }
-        }
-    }
-
-    /**
-     * check if send to channel JOBs are COMPLETED
-     */
-    public void checkTransactionStatus(DocumentContext json) {
-        String type = json.read("$.value.type");
-        String intent = json.read("$.intent");
-        if ("COMPLETED".equals(intent)) {
-            if ("send-success-to-channel".equals(type)) {
-                transactionStatus(json, TransactionStatus.COMPLETED);
-            }
-            if ("send-error-to-channel".equals(type)) {
-                transactionStatus(json, TransactionStatus.FAILED);
-            }
-        }
-    }
-
-
-    public void transactionStatus(DocumentContext json, TransactionStatus status) {
-        Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
-        Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
-        transaction.setStatus(status);
-        logger.debug("transaction {} set to {}", workflowInstanceKey, status);
-    }
-
-    private synchronized Transaction getOrCreateTransaction(Long workflowInstanceKey) {
-        Transaction transaction = inflightTransactions.get(workflowInstanceKey);
-        if (transaction == null) {
-            transaction = new Transaction(workflowInstanceKey);
-            inflightTransactions.put(workflowInstanceKey, transaction);
-        }
-        return transaction;
     }
 }

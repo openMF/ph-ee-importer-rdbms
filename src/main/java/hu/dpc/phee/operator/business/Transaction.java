@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -42,6 +43,9 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
+    @Column(name = "STATUS_DETAIL")
+    private String statusDetail;
+
     @Column(name = "PAYEE_DFSP_ID")
     private String payeeDfspId;
     @Column(name = "PAYEE_PARTY_ID")
@@ -71,6 +75,9 @@ public class Transaction {
     private BigDecimal amount;
     private String currency;
 
+    @Transient
+    private TransactionDirection direction;
+
 
     public Transaction() {
         // jpa constructor
@@ -80,6 +87,7 @@ public class Transaction {
         this.workflowInstanceKey = workflowInstanceKey;
         this.status = TransactionStatus.IN_PROGRESS;
     }
+
 
     public Date getCompletedAt() {
         return completedAt;
@@ -239,5 +247,21 @@ public class Transaction {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public TransactionDirection getDirection() {
+        return direction;
+    }
+
+    public String getStatusDetail() {
+        return statusDetail;
+    }
+
+    public void setStatusDetail(String statusDetail) {
+        this.statusDetail = statusDetail;
+    }
+
+    public void setDirection(TransactionDirection direction) {
+        this.direction = direction;
     }
 }
