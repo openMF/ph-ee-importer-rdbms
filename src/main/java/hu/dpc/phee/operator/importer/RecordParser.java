@@ -37,6 +37,7 @@ public class RecordParser {
         task.setIntent(intent);
         task.setRecordType(recordType);
         task.setType(type);
+        task.setElementId(json.read("$.value.elementId"));
         taskRepository.save(task);
     }
 

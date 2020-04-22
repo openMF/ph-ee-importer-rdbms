@@ -30,6 +30,8 @@ public class Task {
     private String recordType;
     @Column(name = "TYPE")
     private String type;
+    @Column(name = "ELEMENT_ID")
+    private String elementId;
 
 
     public Long getTimestamp() {
@@ -83,6 +85,14 @@ public class Task {
 
     public String getType() {
         return type;
+    }
+
+    public String getElementId() {
+        return elementId;
+    }
+
+    public void setElementId(String elementId) {
+        this.elementId = elementId;
     }
 
     public void setType(String type) {
