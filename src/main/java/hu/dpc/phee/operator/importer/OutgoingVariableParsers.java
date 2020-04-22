@@ -3,12 +3,9 @@ package hu.dpc.phee.operator.importer;
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.OperatorUtils;
 import hu.dpc.phee.operator.business.Transaction;
-import hu.dpc.phee.operator.business.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -19,11 +16,10 @@ import java.util.function.Consumer;
 
 import static hu.dpc.phee.operator.OperatorUtils.strip;
 
-@Component
-public class OutgoingVariableParser {
-    private static Logger logger = LoggerFactory.getLogger(OutgoingVariableParser.class);
+public class OutgoingVariableParsers {
+    private static Logger logger = LoggerFactory.getLogger(OutgoingVariableParsers.class);
 
-    private static Map<String, Consumer<Pair<Transaction, String>>> VARIABLE_PARSERS = new HashMap<>();
+    public static Map<String, Consumer<Pair<Transaction, String>>> VARIABLE_PARSERS = new HashMap<>();
 
     static {
         VARIABLE_PARSERS.put("transactionId", pair -> pair.getFirst().setTransactionId(strip(pair.getSecond())));
@@ -33,19 +29,6 @@ public class OutgoingVariableParser {
         VARIABLE_PARSERS.put("localQuoteResponse", pair -> parseLocalQuoteResponse(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("transferResponse-PREPARE", pair -> parseTransferResponsePrepare(pair.getFirst(), pair.getSecond()));
     }
-
-
-    @Autowired
-    private InflightTransactionManager inflightTransactionManager;
-
-    @Autowired
-    private TransactionRepository transactionRepository;
-
-    /**
-     * in-memory in-flight transactions
-     */
-    private Map<Long, Transaction> inflightTransactions = new HashMap<>();
-
 
     private static void parseTransferResponsePrepare(Transaction transaction, String jsonString) {
         DocumentContext json = JsonPathReader.parseEscaped(jsonString);
@@ -85,18 +68,4 @@ public class OutgoingVariableParser {
         transaction.setCurrency(json.read("$.amount.currency"));
     }
 
-
-    public void parseVariable(DocumentContext json) {
-        String name = json.read("$.value.name");
-
-        if (VARIABLE_PARSERS.keySet().contains(name)) {
-            logger.debug("parsing OUTGOING variable {}", name);
-            Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
-            String value = json.read("$.value.value");
-
-            Transaction transaction = inflightTransactionManager.getOrCreateTransaction(workflowInstanceKey);
-            VARIABLE_PARSERS.get(name).accept(Pair.of(transaction, value));
-            transactionRepository.save(transaction);
-        }
-    }
 }

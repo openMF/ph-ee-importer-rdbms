@@ -1,7 +1,6 @@
 package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.DocumentContext;
-import hu.dpc.phee.operator.audit.BusinessKeyRepository;
 import hu.dpc.phee.operator.audit.Task;
 import hu.dpc.phee.operator.audit.TaskRepository;
 import hu.dpc.phee.operator.audit.Variable;
@@ -15,17 +14,11 @@ import org.springframework.stereotype.Component;
 public class RecordParser {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-
     @Autowired
     private TaskRepository taskRepository;
 
     @Autowired
     private VariableRepository variableRepository;
-
-    @Autowired
-    private BusinessKeyRepository businessKeyRepository;
-
-
 
     public void parseTask(DocumentContext json) {
         String type = json.read("$.value.type");

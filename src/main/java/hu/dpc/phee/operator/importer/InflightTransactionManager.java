@@ -26,11 +26,6 @@ public class InflightTransactionManager {
     private Map<Long, Transaction> inflightTransactions = new HashMap<>();
 
 
-    public TransactionDirection isInflightTransaction(Long workflowInstanceKey) {
-        Transaction transaction = inflightTransactions.get(workflowInstanceKey);
-        return transaction == null ? TransactionDirection.IGNORED : transaction.getDirection();
-    }
-
     public void processStarted(Long workflowInstanceKey, Long timestamp, TransactionDirection direction) {
         Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
         transaction.setDirection(direction);
