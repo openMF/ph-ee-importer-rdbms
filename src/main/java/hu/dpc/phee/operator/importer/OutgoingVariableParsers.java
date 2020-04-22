@@ -24,6 +24,7 @@ public class OutgoingVariableParsers {
     static {
         VARIABLE_PARSERS.put("transactionId", pair -> pair.getFirst().setTransactionId(strip(pair.getSecond())));
         VARIABLE_PARSERS.put("payeeFspId", pair -> pair.getFirst().setPayeeDfspId(strip(pair.getSecond())));
+        VARIABLE_PARSERS.put("payerFspId", pair -> pair.getFirst().setPayerDfspId(strip(pair.getSecond())));
         VARIABLE_PARSERS.put("transactionRequest", pair -> parseTransactionRequest(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("payeeQuoteResponse", pair -> parsePayeeQuoteResponse(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("localQuoteResponse", pair -> parseLocalQuoteResponse(pair.getFirst(), pair.getSecond()));
@@ -57,7 +58,6 @@ public class OutgoingVariableParsers {
     private static void parseTransactionRequest(Transaction transaction, String jsonString) {
         DocumentContext json = JsonPathReader.parseEscaped(jsonString);
 
-        transaction.setPayerDfspId(json.read("$.payer.partyIdInfo.fspId"));
         transaction.setPayerPartyId(json.read("$.payer.partyIdInfo.partyIdentifier"));
         transaction.setPayerPartyIdType(json.read("$.payer.partyIdInfo.partyIdType"));
 
