@@ -33,7 +33,7 @@ public class IncomingVariableParser {
 
 
     @Autowired
-    private TransactionManager transactionManager;
+    private InflightTransactionManager inflightTransactionManager;
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -86,7 +86,7 @@ public class IncomingVariableParser {
             Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
             String value = json.read("$.value.value");
 
-            Transaction transaction = transactionManager.getOrCreateTransaction(workflowInstanceKey);
+            Transaction transaction = inflightTransactionManager.getOrCreateTransaction(workflowInstanceKey);
             VARIABLE_PARSERS.get(name).accept(Pair.of(transaction, value));
             transactionRepository.save(transaction);
         }

@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class TransactionManager {
+public class InflightTransactionManager {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired

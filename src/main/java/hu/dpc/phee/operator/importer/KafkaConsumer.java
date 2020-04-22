@@ -40,7 +40,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
     private IncomingVariableParser incomingVariableParser;
 
     @Autowired
-    private TransactionManager transactionManager;
+    private InflightTransactionManager inflightTransactionManager;
 
 
     @KafkaListener(topics = "${importer.kafka.topic}")
@@ -68,7 +68,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
         recordParser.parseVariable(json);
         Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
 
-        TransactionDirection direction = transactionManager.isInflightTransaction(workflowInstanceKey);
+        TransactionDirection direction = inflightTransactionManager.isInflightTransaction(workflowInstanceKey);
         if (direction == TransactionDirection.OUTGOING) {
             outgoingVariableParser.parseVariable(json);
 
@@ -93,13 +93,13 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 String endElementId = json.read("$.value.elementId");
 
                 if (endElementId.startsWith("EndEvent_Success")) {
-                    transactionManager.transactionResult(workflowInstanceKey, TransactionStatus.COMPLETED, endElementId);
+                    inflightTransactionManager.transactionResult(workflowInstanceKey, TransactionStatus.COMPLETED, endElementId);
 
                 } else if (endElementId.startsWith("EndEvent_Fail")) {
-                    transactionManager.transactionResult(workflowInstanceKey, TransactionStatus.FAILED, endElementId);
+                    inflightTransactionManager.transactionResult(workflowInstanceKey, TransactionStatus.FAILED, endElementId);
 
                 } else {
-                    transactionManager.transactionResult(workflowInstanceKey, TransactionStatus.UNKNOWN, endElementId);
+                    inflightTransactionManager.transactionResult(workflowInstanceKey, TransactionStatus.UNKNOWN, endElementId);
                 }
             }
 
@@ -109,9 +109,9 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 Long timestamp = json.read("$.timestamp");
 
                 if ("ELEMENT_ACTIVATING".equals(intent)) {
-                    transactionManager.processStarted(workflowInstanceKey, timestamp, direction);
+                    inflightTransactionManager.processStarted(workflowInstanceKey, timestamp, direction);
                 } else if ("ELEMENT_COMPLETED".equals(intent)) {
-                    transactionManager.processEnded(workflowInstanceKey, timestamp, direction);
+                    inflightTransactionManager.processEnded(workflowInstanceKey, timestamp, direction);
                 }
             }
         }

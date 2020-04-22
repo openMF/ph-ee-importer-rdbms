@@ -4,7 +4,6 @@ import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.OperatorUtils;
 import hu.dpc.phee.operator.business.Transaction;
 import hu.dpc.phee.operator.business.TransactionRepository;
-import hu.dpc.phee.operator.business.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,7 @@ public class OutgoingVariableParser {
 
 
     @Autowired
-    private TransactionManager transactionManager;
+    private InflightTransactionManager inflightTransactionManager;
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -95,7 +94,7 @@ public class OutgoingVariableParser {
             Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
             String value = json.read("$.value.value");
 
-            Transaction transaction = transactionManager.getOrCreateTransaction(workflowInstanceKey);
+            Transaction transaction = inflightTransactionManager.getOrCreateTransaction(workflowInstanceKey);
             VARIABLE_PARSERS.get(name).accept(Pair.of(transaction, value));
             transactionRepository.save(transaction);
         }
