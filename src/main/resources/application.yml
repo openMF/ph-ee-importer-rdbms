@@ -1,5 +1,5 @@
 kafka:
-  brokers: "kafka:9092"
+  brokers: "localhost:9092"
 
 importer:
   kafka:
@@ -15,9 +15,28 @@ spring:
           logger: "hu.dpc.phee.operator.config.EclipselinkLogger"
     open-in-view: false
   datasource:
-    url: "jdbc:mysql://operator-mysql:3306/operator?rewriteBatchedStatements=true"
-    username: "mifos"
-    password: "password"
+    url: "jdbc:mysql://localhost:3306/operator?rewriteBatchedStatements=true"
+    username: "root"
+    password: "mysql"
 
 server:
   port: 8000
+
+security:
+  oauth2:
+    resource:
+      jwt:
+        key-uri: http://localhost:8080/oauth/token_key
+
+rest:
+  authorization:
+    enabled: false
+    settings:
+      - endpoint: "/variables"
+        authority: "hasAuthority('ALL_FUNCTIONS')"
+      - endpoint: "/tasks"
+        authority: "hasAuthority('ALL_FUNCTIONS')"
+      - endpoint: "/transaction/*"
+        authority: "hasAuthority('ALL_FUNCTIONS')"
+      - endpoint: "/transactions"
+        authority: "hasAuthority('ALL_FUNCTIONS')"
