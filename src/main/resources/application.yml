@@ -15,9 +15,9 @@ spring:
           logger: "hu.dpc.phee.operator.config.EclipselinkLogger"
     open-in-view: false
   datasource:
-    url: "jdbc:mysql://localhost:3306/operator?rewriteBatchedStatements=true"
-    username: "root"
-    password: "mysql"
+    url: "jdbc:mysql://operator-mysql:3306/operator?rewriteBatchedStatements=true"
+    username: "mifos"
+    password: "password"
 
 server:
   port: 8000
