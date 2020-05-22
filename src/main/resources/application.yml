@@ -15,7 +15,7 @@ spring:
           logger: "hu.dpc.phee.operator.config.EclipselinkLogger"
     open-in-view: false
   datasource:
-    url: "jdbc:mysql://operator-mysql:3306/operator?rewriteBatchedStatements=true"
+    url: "jdbc:mysql://operations-mysql:3306/operations?rewriteBatchedStatements=true"
     username: "mifos"
     password: "password"
 
