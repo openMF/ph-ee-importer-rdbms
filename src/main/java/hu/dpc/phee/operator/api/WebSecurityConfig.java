@@ -14,10 +14,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private boolean isSecurityEnabled;
 
     public void configure(WebSecurity webSecurity) {
-        if (isSecurityEnabled) {
-            webSecurity.ignoring().antMatchers("/");
-        } else {
-            webSecurity.ignoring().antMatchers("/**");
-        }
+        webSecurity.ignoring().antMatchers(isSecurityEnabled ? "/" : "/**");
     }
 }
