@@ -23,7 +23,7 @@ import java.util.List;
 
 import static hu.dpc.phee.operator.OperatorUtils.dateFormat;
 
-@CrossOrigin
+@CrossOrigin(origins = "*")
 @RestController
 public class RestQueryApiController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
