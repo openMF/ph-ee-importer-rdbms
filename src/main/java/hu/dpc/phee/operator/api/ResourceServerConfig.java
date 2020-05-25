@@ -37,7 +37,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
             builder.anyRequest().fullyAuthenticated().and()
                     .csrf().disable()
                     .anonymous().disable()
-                    .cors().disable();
+                    .cors();
         } else {
             http.authorizeRequests().anyRequest().permitAll();
         }
