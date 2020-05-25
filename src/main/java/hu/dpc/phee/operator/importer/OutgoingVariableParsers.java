@@ -25,7 +25,7 @@ public class OutgoingVariableParsers {
         VARIABLE_PARSERS.put("transactionId", pair -> pair.getFirst().setTransactionId(strip(pair.getSecond())));
         VARIABLE_PARSERS.put("payeeFspId", pair -> pair.getFirst().setPayeeDfspId(strip(pair.getSecond())));
         VARIABLE_PARSERS.put("payerFspId", pair -> pair.getFirst().setPayerDfspId(strip(pair.getSecond())));
-        VARIABLE_PARSERS.put("transactionRequest", pair -> parseTransactionRequest(pair.getFirst(), pair.getSecond()));
+        VARIABLE_PARSERS.put("channelRequest", pair -> parseTransactionRequest(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("payeeQuoteResponse", pair -> parsePayeeQuoteResponse(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("localQuoteResponse", pair -> parseLocalQuoteResponse(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("transferResponse-PREPARE", pair -> parseTransferResponsePrepare(pair.getFirst(), pair.getSecond()));
