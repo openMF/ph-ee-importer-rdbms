@@ -22,7 +22,7 @@
         <kafka-streams.version>2.4.0</kafka-streams.version>
         <mysql.version>8.0.19</mysql.version>
         <spring-boot.version>2.2.4.RELEASE</spring-boot.version>
-        <zeebe.version>0.23.0-alpha2</zeebe.version>
+        <zeebe.version>0.23.2</zeebe.version>
     </properties>
 
     <dependencyManagement>
