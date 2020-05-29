@@ -27,7 +27,7 @@ public class OutgoingVariableParsers {
         VARIABLE_PARSERS.put("transactionId", pair -> pair.getFirst().setTransactionId(strip(pair.getSecond())));
         VARIABLE_PARSERS.put("partyLookupFspId", pair -> pair.getFirst().setPayeeDfspId(strip(pair.getSecond())));
         VARIABLE_PARSERS.put("payerFspId", pair -> pair.getFirst().setPayerDfspId(strip(pair.getSecond())));
-        VARIABLE_PARSERS.put("channelRequest", pair -> parseTransactionRequest(pair.getFirst(), pair.getSecond()));
+        VARIABLE_PARSERS.put("channelRequest", pair -> parseChannelRequest(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("payeeQuoteResponse", pair -> parsePayeeQuoteResponse(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("localQuoteResponse", pair -> parseLocalQuoteResponse(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("transferResponse-PREPARE", pair -> parseTransferResponsePrepare(pair.getFirst(), pair.getSecond()));
@@ -63,7 +63,7 @@ public class OutgoingVariableParsers {
         transaction.setPayeeFeeCurrency(json.read("$.payeeFspFee.currency"));
     }
 
-    private static void parseTransactionRequest(Transaction transaction, String jsonString) {
+    private static void parseChannelRequest(Transaction transaction, String jsonString) {
         DocumentContext json = JsonPathReader.parseEscaped(jsonString);
 
         transaction.setPayerPartyId(json.read("$.payer.partyIdInfo.partyIdentifier"));
