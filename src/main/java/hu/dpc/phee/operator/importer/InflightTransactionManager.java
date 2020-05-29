@@ -26,19 +26,19 @@ public class InflightTransactionManager {
     private Map<Long, Transaction> inflightTransactions = new HashMap<>();
 
 
-    public void processStarted(Long workflowInstanceKey, Long timestamp) {
+    public void processStarted(Long workflowInstanceKey, Long timestamp, TransactionDirection direction) {
         Transaction transaction = getOrCreateTransaction(workflowInstanceKey);
+        transaction.setDirection(direction);
         transaction.setStartedAt(new Date(timestamp));
         transactionRepository.save(transaction);
         logger.debug("started in-flight {} transaction {}", transaction.getDirection(), transaction.getWorkflowInstanceKey());
     }
 
-    public void processEnded(Long workflowInstanceKey, Long timestamp) {
+    public void processEnded(Long workflowInstanceKey, Long timestamp, TransactionDirection direction) {
         Transaction transaction = inflightTransactions.remove(workflowInstanceKey);
         if (transaction == null) {
             logger.error("failed to find in-flight transaction {}", workflowInstanceKey);
         } else {
-            TransactionDirection direction = transaction.getDirection();
             transaction.setCompletedAt(new Date(timestamp));
             transactionRepository.save(transaction);
             logger.debug("saved finished {} transaction {}", direction, transaction.getWorkflowInstanceKey());

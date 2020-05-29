@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static hu.dpc.phee.operator.business.TransactionDirection.fromBpmn;
+
 @Component
 public class TransactionParser {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -70,11 +72,12 @@ public class TransactionParser {
 
             if ("PROCESS".equals(bpmnElementType)) {
                 Long timestamp = json.read("$.timestamp");
+                TransactionDirection direction = fromBpmn(bpmnProcessId);
 
                 if ("ELEMENT_ACTIVATING".equals(intent)) {
-                    inflightTransactionManager.processStarted(workflowInstanceKey, timestamp);
+                    inflightTransactionManager.processStarted(workflowInstanceKey, timestamp, direction);
                 } else if ("ELEMENT_COMPLETED".equals(intent)) {
-                    inflightTransactionManager.processEnded(workflowInstanceKey, timestamp);
+                    inflightTransactionManager.processEnded(workflowInstanceKey, timestamp, direction);
                 }
             }
         }

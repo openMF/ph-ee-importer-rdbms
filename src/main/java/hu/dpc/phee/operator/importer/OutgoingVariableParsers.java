@@ -32,7 +32,6 @@ public class OutgoingVariableParsers {
         VARIABLE_PARSERS.put("localQuoteResponse", pair -> parseLocalQuoteResponse(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("transferResponse-PREPARE", pair -> parseTransferResponsePrepare(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("transferCreateFailed", pair -> parseTransferCreateFailed(pair.getFirst(), pair.getSecond()));
-
     }
 
     private static void parseTransferCreateFailed(Transaction transaction, String value) {
@@ -74,8 +73,5 @@ public class OutgoingVariableParsers {
 
         transaction.setAmount(json.read("$.amount.amount", BigDecimal.class));
         transaction.setCurrency(json.read("$.amount.currency"));
-
-        String initiator = json.read("$.transactionType.initiator");
-        transaction.setDirection(TransactionDirection.fromInitiator(initiator));
     }
 }

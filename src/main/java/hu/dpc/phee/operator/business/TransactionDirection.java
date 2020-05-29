@@ -3,17 +3,24 @@ package hu.dpc.phee.operator.business;
 import java.util.Arrays;
 
 public enum TransactionDirection {
-    INCOMING("PAYEE"),
-    OUTGOING("PAYER"),
-    IGNORED(null);
+    INCOMING("payee"),
+    OUTGOING("payer"),
+    IGNORED("ignored");
 
-    private String initiator;
+    private String prefix;
 
-    TransactionDirection(String initiator) {
-        this.initiator = initiator;
+    TransactionDirection(String prefix) {
+        this.prefix = prefix;
     }
 
-    public static TransactionDirection fromInitiator(String initiator) {
-        return Arrays.stream(values()).filter(it -> it.initiator.equals(initiator)).findFirst().orElse(IGNORED);
+    public static TransactionDirection fromBpmn(String processId) {
+        if(processId != null) {
+            return Arrays.stream(TransactionDirection.values())
+                    .filter(d -> processId.toLowerCase().startsWith(d.prefix))
+                    .findFirst()
+                    .orElse(IGNORED);
+        } else {
+            return IGNORED;
+        }
     }
 }
