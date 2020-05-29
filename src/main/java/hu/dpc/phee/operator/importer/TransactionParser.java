@@ -68,42 +68,15 @@ public class TransactionParser {
         if (TRANSFER_BPMN_NAMES.contains(bpmnProcessId)) {
             Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
 
-            if ("END_EVENT".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
-                String endElementId = json.read("$.value.elementId");
-
-                if (endElementId.startsWith("EndEvent_Success")) {
-                    inflightTransactionManager.transactionResult(workflowInstanceKey, TransactionStatus.COMPLETED, endElementId);
-
-                } else if (endElementId.startsWith("EndEvent_Fail")) {
-                    inflightTransactionManager.transactionResult(workflowInstanceKey, TransactionStatus.FAILED, endElementId);
-
-                } else {
-                    inflightTransactionManager.transactionResult(workflowInstanceKey, TransactionStatus.UNKNOWN, endElementId);
-                }
-            }
-
-            TransactionDirection direction = getTransactionDirection(bpmnProcessId);
-
             if ("PROCESS".equals(bpmnElementType)) {
                 Long timestamp = json.read("$.timestamp");
 
                 if ("ELEMENT_ACTIVATING".equals(intent)) {
-                    inflightTransactionManager.processStarted(workflowInstanceKey, timestamp, direction);
+                    inflightTransactionManager.processStarted(workflowInstanceKey, timestamp);
                 } else if ("ELEMENT_COMPLETED".equals(intent)) {
-                    inflightTransactionManager.processEnded(workflowInstanceKey, timestamp, direction);
+                    inflightTransactionManager.processEnded(workflowInstanceKey, timestamp);
                 }
             }
         }
     }
-
-    private TransactionDirection getTransactionDirection(String bpmnProcessId) {
-        if (OUTGOING_BPMN_NAME.equals(bpmnProcessId)) {
-            return TransactionDirection.OUTGOING;
-        } else if (INCOMING_BPMN_NAME.equals(bpmnProcessId)) {
-            return TransactionDirection.INCOMING;
-        } else {
-            throw new AssertionError("Can't determine transaction direction from unhandled process type " + bpmnProcessId);
-        }
-    }
-
 }

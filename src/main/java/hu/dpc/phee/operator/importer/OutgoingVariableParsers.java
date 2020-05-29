@@ -3,6 +3,8 @@ package hu.dpc.phee.operator.importer;
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.OperatorUtils;
 import hu.dpc.phee.operator.business.Transaction;
+import hu.dpc.phee.operator.business.TransactionDirection;
+import hu.dpc.phee.operator.business.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
@@ -29,6 +31,12 @@ public class OutgoingVariableParsers {
         VARIABLE_PARSERS.put("payeeQuoteResponse", pair -> parsePayeeQuoteResponse(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("localQuoteResponse", pair -> parseLocalQuoteResponse(pair.getFirst(), pair.getSecond()));
         VARIABLE_PARSERS.put("transferResponse-PREPARE", pair -> parseTransferResponsePrepare(pair.getFirst(), pair.getSecond()));
+        VARIABLE_PARSERS.put("transferCreateFailed", pair -> parseTransferCreateFailed(pair.getFirst(), pair.getSecond()));
+
+    }
+
+    private static void parseTransferCreateFailed(Transaction transaction, String value) {
+        transaction.setStatus("false".equals(value) ? TransactionStatus.COMPLETED : TransactionStatus.FAILED);
     }
 
     private static void parseTransferResponsePrepare(Transaction transaction, String jsonString) {
@@ -66,6 +74,8 @@ public class OutgoingVariableParsers {
 
         transaction.setAmount(json.read("$.amount.amount", BigDecimal.class));
         transaction.setCurrency(json.read("$.amount.currency"));
-    }
 
+        String initiator = json.read("$.transactionType.initiator");
+        transaction.setDirection(TransactionDirection.fromInitiator(initiator));
+    }
 }
