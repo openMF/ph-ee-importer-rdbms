@@ -2,9 +2,7 @@ package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.business.Transaction;
-import hu.dpc.phee.operator.business.TransactionDirection;
 import hu.dpc.phee.operator.business.TransactionRepository;
-import hu.dpc.phee.operator.business.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,11 +50,8 @@ public class TransactionParser {
 
             Transaction transaction = inflightTransactionManager.getOrCreateTransaction(workflowInstanceKey);
             VARIABLE_PARSERS.get(name).accept(Pair.of(transaction, value));
-            if (transaction.getStartedAt() != null) {
-                transactionRepository.save(transaction);
-            } else {
-                logger.warn("NOT saving variable {} for not yet started transaction {}", name, transaction);
-            }
+            transactionRepository.save(transaction);
+
         }
     }
 
