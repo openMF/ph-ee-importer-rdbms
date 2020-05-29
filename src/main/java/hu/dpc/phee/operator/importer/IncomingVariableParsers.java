@@ -3,6 +3,7 @@ package hu.dpc.phee.operator.importer;
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.OperatorUtils;
 import hu.dpc.phee.operator.business.Transaction;
+import hu.dpc.phee.operator.business.TransactionDirection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
@@ -50,6 +51,8 @@ public class IncomingVariableParsers {
 
         transaction.setAmount(json.read("$.amount.amount", BigDecimal.class));
         transaction.setCurrency(json.read("$.amount.currency"));
+
+        transaction.setDirection(TransactionDirection.INCOMING);
     }
 
     private static void parseTransferResponse(Transaction transaction, String jsonString) {
