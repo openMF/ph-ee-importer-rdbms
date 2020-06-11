@@ -1,28 +1,28 @@
-package hu.dpc.phee.operator.business;
+package hu.dpc.phee.operator.entity.transfer;
 
-import hu.dpc.phee.operator.audit.Task;
-import hu.dpc.phee.operator.audit.Variable;
+import hu.dpc.phee.operator.entity.task.Task;
+import hu.dpc.phee.operator.entity.variable.Variable;
 
 import java.util.List;
 
 
-public class TransactionDetail {
-    private Transaction transaction;
+public class TransferDetail {
+    private Transfer transfer;
     private List<Task> tasks;
     private List<Variable> variables;
 
-    public TransactionDetail(Transaction transaction, List<Task> tasks, List<Variable> variables) {
-        this.transaction = transaction;
+    public TransferDetail(Transfer transfer, List<Task> tasks, List<Variable> variables) {
+        this.transfer = transfer;
         this.tasks = tasks;
         this.variables = variables;
     }
 
-    public Transaction getTransaction() {
-        return transaction;
+    public Transfer getTransfer() {
+        return transfer;
     }
 
-    public void setTransaction(Transaction transaction) {
-        this.transaction = transaction;
+    public void setTransfer(Transfer transfer) {
+        this.transfer = transfer;
     }
 
     public List<Task> getTasks() {

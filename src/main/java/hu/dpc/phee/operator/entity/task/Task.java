@@ -1,22 +1,16 @@
-package hu.dpc.phee.operator.audit;
+package hu.dpc.phee.operator.entity.task;
 
+
+import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
 
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "tasks")
-@Cacheable(false)
-public class Task {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class Task extends AbstractPersistableCustom<Long> {
 
     @Column(name = "WORKFLOW_KEY")
     private Long workflowKey;
@@ -33,7 +27,6 @@ public class Task {
     @Column(name = "ELEMENT_ID")
     private String elementId;
 
-
     public Long getTimestamp() {
         return timestamp;
     }
@@ -41,15 +34,6 @@ public class Task {
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
 
     public Long getWorkflowKey() {
         return workflowKey;

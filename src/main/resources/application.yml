@@ -14,29 +14,40 @@ spring:
         logging:
           logger: "hu.dpc.phee.operator.config.EclipselinkLogger"
     open-in-view: false
-  datasource:
-    url: "jdbc:mysql://operations-mysql:3306/operations?rewriteBatchedStatements=true"
+
+datasource:
+  common:
+    protocol: "jdbc"
+    subprotocol: "mysql"
+    driverclass_name: "com.mysql.cj.jdbc.Driver"
+  core:
+    port: 3306
+    host: "operations-mysql"
+    schema: "tenants"
     username: "mifos"
     password: "password"
 
 server:
   port: 8000
 
-security:
-  oauth2:
-    resource:
-      jwt:
-        key-uri: http://localhost:8080/oauth/token_key
-
-rest:
-  authorization:
-    enabled: false
-    settings:
-      - endpoint: "/variables"
-        authority: "hasAuthority('ALL_FUNCTIONS')"
-      - endpoint: "/tasks"
-        authority: "hasAuthority('ALL_FUNCTIONS')"
-      - endpoint: "/transaction/*"
-        authority: "hasAuthority('ALL_FUNCTIONS')"
-      - endpoint: "/transactions"
-        authority: "hasAuthority('ALL_FUNCTIONS')"
+bpmn:
+  transfer-type: "TRANSFER"
+  transaction-request-type: "TRANSACTION-REQUEST"
+  incoming-direction: "INCOMING"
+  outgoing-direction: "OUTGOING"
+  processes:
+    - id: "PayeeQuoteTransfer"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "PayerTransactionRequest"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transaction-request-type}"
+    - id: "PayerFundTransfer"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "PayeeTransactionRequest"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transaction-request-type}"
+    - id: "transfer-process"
+      direction: "UNKNOWN"
+      type: "CALL_ACTIVITY"

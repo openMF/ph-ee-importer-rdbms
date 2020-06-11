@@ -23,11 +23,11 @@ import java.util.UUID;
 @EnableKafka
 @Configuration
 public class KafkaConfiguration {
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${kafka.brokers}")
     private String kafkaBrokers;
-
 
     @Bean
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
@@ -68,5 +68,4 @@ public class KafkaConfiguration {
         logger.info("using Kafka client id {}", clientId);
         return clientId;
     }
-
 }

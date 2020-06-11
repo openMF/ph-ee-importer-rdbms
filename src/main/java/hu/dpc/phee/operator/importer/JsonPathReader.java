@@ -6,9 +6,6 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.ParseContext;
 import org.apache.commons.text.StringEscapeUtils;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 
 import static hu.dpc.phee.operator.OperatorUtils.strip;
 

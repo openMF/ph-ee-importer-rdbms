@@ -1,13 +1,13 @@
-package hu.dpc.phee.operator.business;
+package hu.dpc.phee.operator.entity.transfer;
 
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.metamodel.SingularAttribute;
 import java.util.Date;
 
-public class TransactionSpecs {
+public class TransferSpecs {
 
-    public static Specification<Transaction> between(SingularAttribute<Transaction, Date> attribute, Date from, Date to) {
+    public static Specification<Transfer> between(SingularAttribute<Transfer, Date> attribute, Date from, Date to) {
         return (root, query, builder) ->
                 builder.and(
                         builder.greaterThanOrEqualTo(root.get(attribute), from),
@@ -15,16 +15,16 @@ public class TransactionSpecs {
                 );
     }
 
-    public static Specification<Transaction> later(SingularAttribute<Transaction, Date> attribute, Date from) {
+    public static Specification<Transfer> later(SingularAttribute<Transfer, Date> attribute, Date from) {
         return (root, query, builder) -> builder.greaterThanOrEqualTo(root.get(attribute), from);
     }
 
-    public static Specification<Transaction> earlier(SingularAttribute<Transaction, Date> attribute, Date to) {
+    public static Specification<Transfer> earlier(SingularAttribute<Transfer, Date> attribute, Date to) {
         return (root, query, builder) -> builder.lessThanOrEqualTo(root.get(attribute), to);
     }
 
 
-    public static <T> Specification<Transaction> match(SingularAttribute<Transaction, T> attribute, T input) {
+    public static <T> Specification<Transfer> match(SingularAttribute<Transfer, T> attribute, T input) {
         return (root, query, builder) -> builder.equal(root.get(attribute), input);
     }
 }

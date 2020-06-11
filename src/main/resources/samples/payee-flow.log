@@ -1196,3 +1196,179 @@
   "timestamp": 1586104069392
 }
 
+{
+"partitionId":1,
+"value":
+{
+	"name":"payeeQuoteResponse",
+	"value":"\"
+	{\\\
+	"transferAmount\\\":{\\\
+	"amount\\\":\\\"235\\\",\\\
+	"currency\\\":\\\"TZS\\\"},\\\
+	"payeeReceiveAmount\\\":{\\\
+	"amount\\\":\\\"235\\\",\\\
+	"currency\\\":\\\"TZS\\\"},\\\
+	"payeeFspFee\\\":{\\\
+	"amount\\\":\\\"0\\\",\\\
+	"currency\\\":\\\"TZS\\\"},\\\
+	"payeeFspCommission\\\":{\\\
+	"amount\\\":\\\"0\\\",\\\
+	"currency\\\":\\\"TZS\\\"},\\\
+	"expiration\\\":\\\"2020-06-03T14:29:45.585Z\\\",\\\
+	"ilpPacket\\\":\\\"AQMyMzUgZy50ei5pbjAxdG4wMS5NU0lTRE4uMjc3MTAxMDE5OTmCAdBleUowY21GdWMyRmpkR2x2Ymtsa0lqb2lOak5rWmpVd1pXVXROREE0WVMwMFpUUmlMVGhpTWpRdFpUTXlNV0pqWXpFeE5UQTJJaXdpY1hWdmRHVkpaQ0k2SWpJeE1tVTRaRGN4TFRWbE56QXRORGswTVMxaU16QTNMV0pqTnpsa09XVXhNalkzTWlJc0luQmhlV1ZsSWpwN0luQmhjblI1U1dSSmJtWnZJanA3SW5CaGNuUjVTV1JVZVhCbElqb2lUVk5KVTBST0lpd2ljR0Z5ZEhsSlpHVnVkR2xtYVdWeUlqb2lNamMzTVRBeE1ERTVPVGtpTENKbWMzQkpaQ0k2SW1sdU1ERjBiakF4SW4xOUxDSndZWGxsY2lJNmV5SndZWEowZVVsa1NXNW1ieUk2ZXlKd1lYSjBlVWxrVkhsd1pTSTZJazFUU1ZORVRpSXNJbkJoY25SNVNXUmxiblJwWm1sbGNpSTZJakkzTnpFd016QTFPVGs1SWl3aVpuTndTV1FpT2lKcGJqQXpkRzR3TlNKOWZTd2lZVzF2ZFc1MElqcDdJbU4xY25KbGJtTjVJam9pVkZwVElpd2lZVzF2ZFc1MElqb2lNak0xSW4xOQ==\\\",\\\
+	"condition\\\":\\\"b_5CXBdAWOoXxPOZmIoQ3VY8SdaAhhR0lZ548D_cGjc\\\"
+	}\"",
+	"scopeKey":2251799814024106,
+	"workflowInstanceKey":2251799814024106,
+	"workflowKey":2251799814012692
+},
+"sourceRecordPosition":85900046816,
+"position":85900047432,
+"key":2251799814024153,
+"timestamp":1591190985768,
+"valueType":"VARIABLE",
+"recordType":"EVENT",
+"rejectionType":"NULL_VAL",
+"rejectionReason":"",
+"intent":"CREATED"
+}
+
+from kafka: {"partitionId":1,
+"value":{
+"name":"localQuoteResponse",
+    "value":"\"
+    {\\\
+    "quoteCode\\\":\\\"1ed4af53-deb3-4783-b307-12ae35c4a925\\\",\\\
+    "fspFee\\\":{\\\
+    "amount\\\":1.000000,\\\
+    "currency\\\":\\\"TZS\\\"},\\\
+    "transactionCode\\\":\\\"63df50ee-408a-4e4b-8b24-e321bcc11506\\\",\\\
+    "state\\\":\\\"ACCEPTED\\\"
+    }\"",
+"scopeKey":2251799814024179,
+"workflowInstanceKey":2251799814024179,
+"workflowKey":2251799813686943},
+"sourceRecordPosition":85900079736,
+"position":85900082984,
+"key":2251799814024185,
+"timestamp":1591190987069,
+"valueType":"VARIABLE",
+"recordType":"EVENT",
+"rejectionType":"NULL_VAL",
+"rejectionReason":"",
+"intent":"CREATED"
+}
+
+from kafka: {
+"partitionId":1,
+"value":{
+"name":"quoteSwitchRequest",
+"value":"\"{\\\
+"transactionId\\\":\\\"e40fb493-9819-40f2-86c0-f07d99bda291\\\",\\\
+"quoteId\\\":\\\"e3252b57-e65d-493c-8c21-b96c3014e34f\\\",\\\
+"payee\\\":{\\\
+"partyIdInfo\\\":{\\\
+"partyIdType\\\":\\\"MSISDN\\\",\\\
+"partyIdentifier\\\":\\\"27710305999\\\",\\\
+"fspId\\\":\\\"in03tn05\\\"}},\\\
+"payer\\\":{\\\
+"partyIdInfo\\\":{\\\
+"partyIdType\\\":\\\"MSISDN\\\",\\\
+"partyIdentifier\\\":\\\"27710101999\\\",\\\
+"fspId\\\":\\\"in01tn01\\\"}},\\\
+"amountType\\\":\\\"RECEIVE\\\",\\\
+"amount\\\":{\\\
+"amount\\\":\\\"250\\\",\\\
+"currency\\\":\\\"TZS\\\"},\\\
+"transactionType\\\":{\\\
+"scenario\\\":\\\"PAYMENT\\\",\\\
+"initiator\\\":\\\"PAYER\\\",\\\
+"initiatorType\\\":\\\
+"CONSUMER\\\"}}\"",
+"scopeKey":2251799813962818,
+"workflowInstanceKey":2251799813962818,
+"workflowKey":2251799813686921},
+"sourceRecordPosition":68721705200,
+"position":68721706152,
+"key":2251799813962819,
+"timestamp":1591105239390,
+"valueType":"VARIABLE",
+"recordType":"EVENT",
+"rejectionType":"NULL_VAL",
+"rejectionReason":"",
+"intent":"CREATED"}
+
+
+### original process start ###
+{"partitionId":1,
+"value":
+{
+"version":1,
+"flowScopeKey":-1,
+"bpmnElementType":"PROCESS",
+"parentWorkflowInstanceKey":-1,
+"parentElementInstanceKey":-1,
+"workflowInstanceKey":2251799813686963,
+"bpmnProcessId":"PayerFundTransfer-DFSPID",
+"workflowKey":2251799813686925,
+"elementId":"PayerFundTransfer-DFSPID"
+},
+"sourceRecordPosition":4296365776,
+"position":4296367480,
+"key":2251799813686963,
+"timestamp":1590762784476,
+"valueType":"WORKFLOW_INSTANCE",
+"recordType":"EVENT",
+"rejectionType":"NULL_VAL",
+"rejectionReason":"",
+"intent":"ELEMENT_ACTIVATING"
+}
+
+## variable inside call activity ###
+{
+"partitionId":1,
+"value":
+{
+"name":"partyLookupFailed",
+"value":"false",
+"scopeKey":2251799813687036,
+"workflowInstanceKey":2251799813687036,
+"workflowKey":2251799813686943
+},
+"sourceRecordPosition":4296435464,
+"position":4296436448,
+"key":2251799813687037,
+"timestamp":1590762798085,
+"valueType":"VARIABLE",
+"recordType":"EVENT",
+"rejectionType":"NULL_VAL",
+"rejectionReason":"",
+"intent":"CREATED"
+}
+
+### call activity start ###
+{
+"partitionId":1,
+"value":
+{
+"version":1,
+"flowScopeKey":-1,
+"bpmnElementType":"PROCESS",
+"parentWorkflowInstanceKey":2251799813686963,
+"parentElementInstanceKey":2251799813687035,
+"workflowInstanceKey":2251799813687036,
+"bpmnProcessId":"transfer-process-DFSPID",
+"workflowKey":2251799813686943,
+"elementId":"transfer-processDFSPID"
+},
+"sourceRecordPosition":4296435464,
+"position":4296436120,
+"key":2251799813687036,
+"timestamp":1590762798085,
+"valueType":"WORKFLOW_INSTANCE",
+"recordType":"EVENT",
+"rejectionType":"NULL_VAL",
+"rejectionReason":"",
+"intent":"ELEMENT_ACTIVATING"
+}

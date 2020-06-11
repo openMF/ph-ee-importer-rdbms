@@ -1,23 +1,16 @@
-package hu.dpc.phee.operator.audit;
+package hu.dpc.phee.operator.entity.businesskey;
 
 
+import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
 import org.eclipse.persistence.annotations.Index;
 
-import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "businesskeys")
-@Cacheable(false)
-public class BusinessKey {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class BusinessKey extends AbstractPersistableCustom<Long> {
 
     @Column(name = "BUSINESS_KEY")
     @Index(name = "idx_businessKey")
@@ -34,21 +27,12 @@ public class BusinessKey {
     @Column(name = "TIMESTAMP")
     private Long timestamp;
 
-
-    public Long getId() {
-        return id;
-    }
-
     public String getBusinessKeyType() {
         return businessKeyType;
     }
 
     public void setBusinessKeyType(String businessKeyType) {
         this.businessKeyType = businessKeyType;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Long getWorkflowInstanceKey() {

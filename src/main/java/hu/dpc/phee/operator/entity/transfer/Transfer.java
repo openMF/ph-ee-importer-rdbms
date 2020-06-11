@@ -1,35 +1,22 @@
-package hu.dpc.phee.operator.business;
+package hu.dpc.phee.operator.entity.transfer;
 
 
+import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
 import org.eclipse.persistence.annotations.Index;
 
-import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
-@Table(name = "transactions")
-@Cacheable(false)
-public class Transaction {
+@Table(name = "transfers")
+public class Transfer extends AbstractPersistableCustom<Long> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    /**
-     * zeebe workflowInstanceKey
-     */
     @Column(name = "WORKFLOW_INSTANCE_KEY")
-    @Index(name = "idx_paymentProcessId")
     private Long workflowInstanceKey;
 
     @Column(name = "TRANSACTION_ID")
@@ -41,7 +28,7 @@ public class Transaction {
     private Date completedAt;
 
     @Enumerated(EnumType.STRING)
-    private TransactionStatus status;
+    private TransferStatus status;
 
     @Column(name = "STATUS_DETAIL")
     private String statusDetail;
@@ -72,22 +59,22 @@ public class Transaction {
     @Column(name = "PAYER_QUOTE_CODE")
     private String payerQuoteCode;
 
+    @Column(name = "amount")
     private BigDecimal amount;
+
+    @Column(name = "currency")
     private String currency;
 
-    @Transient
-    private TransactionDirection direction;
+    @Column(name = "direction")
+    private String direction;
 
-
-    public Transaction() {
-        // jpa constructor
+    public Transfer() {
     }
 
-    public Transaction(Long workflowInstanceKey) {
+    public Transfer(Long workflowInstanceKey) {
         this.workflowInstanceKey = workflowInstanceKey;
-        this.status = TransactionStatus.IN_PROGRESS;
+        this.status = TransferStatus.IN_PROGRESS;
     }
-
 
     public Date getCompletedAt() {
         return completedAt;
@@ -137,14 +124,6 @@ public class Transaction {
         this.payerQuoteCode = payerQuoteCode;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getTransactionId() {
         return transactionId;
     }
@@ -161,11 +140,11 @@ public class Transaction {
         this.workflowInstanceKey = paymentProcessId;
     }
 
-    public TransactionStatus getStatus() {
+    public TransferStatus getStatus() {
         return status;
     }
 
-    public void setStatus(TransactionStatus status) {
+    public void setStatus(TransferStatus status) {
         this.status = status;
     }
 
@@ -249,10 +228,6 @@ public class Transaction {
         this.currency = currency;
     }
 
-    public TransactionDirection getDirection() {
-        return direction;
-    }
-
     public String getStatusDetail() {
         return statusDetail;
     }
@@ -261,7 +236,11 @@ public class Transaction {
         this.statusDetail = statusDetail;
     }
 
-    public void setDirection(TransactionDirection direction) {
+    public String getDirection() {
+        return direction;
+    }
+
+    public void setDirection(String direction) {
         this.direction = direction;
     }
 }

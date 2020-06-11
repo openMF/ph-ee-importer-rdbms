@@ -26,14 +26,11 @@ import java.util.Map;
 @EnableJpaRepositories(basePackages = "hu.dpc.phee.operator")
 @EnableTransactionManagement(proxyTargetClass = true)
 public class EclipselinkJpaConfiguration extends JpaBaseConfiguration {
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Value("${importer.kafka.reset}")
-    private boolean reset;
-
-
-    protected EclipselinkJpaConfiguration(DataSource dataSource, JpaProperties properties, ObjectProvider<JtaTransactionManager> jtaTransactionManager, ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
-        super(dataSource, properties, jtaTransactionManager);
+    public EclipselinkJpaConfiguration(DataSource routingDataSource, JpaProperties properties, ObjectProvider<JtaTransactionManager> jtaTransactionManager, ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+        super(routingDataSource, properties, jtaTransactionManager);
     }
 
     @Override
@@ -45,19 +42,12 @@ public class EclipselinkJpaConfiguration extends JpaBaseConfiguration {
     protected Map<String, Object> getVendorProperties() {
         HashMap<String, Object> map = new HashMap<>();
         map.put(PersistenceUnitProperties.WEAVING, detectWeavingMode());
-
-        if (reset) {
-            logger.info("drop-and-create tables because reset is enabled");
-            map.put(PersistenceUnitProperties.DDL_GENERATION, "drop-and-create-tables");
-        } else {
-            logger.info("no reset, updating tables ");
-            map.put(PersistenceUnitProperties.DDL_GENERATION, "create-or-extend-tables");
-        }
-
+        map.put(PersistenceUnitProperties.DDL_GENERATION, "none");
         map.put(PersistenceUnitProperties.LOGGING_LEVEL, "INFO");
+        map.put(PersistenceUnitProperties.DDL_GENERATION_MODE, "sql-script");
         map.put("eclipselink.jdbc.batch-writing", "JDBC");
         map.put("eclipselink.jdbc.batch-writing.size", "1000");
-        map.put("eclipselink.jdbc.cache-statements", "true");
+        map.put("eclipselink.cache.shared.default", "false");
 
         map.put("eclipselink.logging.level.sql", "INFO");
         map.put("eclipselink.logging.parameters", "true");

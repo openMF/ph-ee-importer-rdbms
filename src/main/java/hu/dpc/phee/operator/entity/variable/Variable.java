@@ -1,24 +1,19 @@
-package hu.dpc.phee.operator.audit;
+package hu.dpc.phee.operator.entity.variable;
 
 
+import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
 import org.eclipse.persistence.annotations.Index;
 
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "variables")
 @Cacheable(false)
-public class Variable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class Variable extends AbstractPersistableCustom<Long> {
 
     @Column(name = "WORKFLOW_KEY")
     private Long workflowKey;
@@ -36,15 +31,6 @@ public class Variable {
     @Lob
     @Column(name = "VALUE")
     private String value;
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public Long getWorkflowKey() {
         return workflowKey;

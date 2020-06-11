@@ -1,6 +1,9 @@
 package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.DocumentContext;
+import hu.dpc.phee.operator.entity.tenant.TenantServerConnection;
+import hu.dpc.phee.operator.entity.tenant.TenantServerConnectionRepository;
+import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,10 +13,15 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class KafkaConsumer implements ConsumerSeekAware {
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${importer.kafka.topic}")
@@ -26,28 +34,75 @@ public class KafkaConsumer implements ConsumerSeekAware {
     private RecordParser recordParser;
 
     @Autowired
-    private TransactionParser transactionParser;
+    private TenantServerConnectionRepository repository;
 
+    @Autowired
+    private TempDocumentStore tempDocumentStore;
 
     @KafkaListener(topics = "${importer.kafka.topic}")
     public void listen(String rawData) {
-        DocumentContext json = JsonPathReader.parse(rawData);
-        logger.debug("from kafka: {}", json.jsonString());
+        try {
+            DocumentContext incomingRecord = JsonPathReader.parse(rawData);
+            logger.debug("from kafka: {}", incomingRecord.jsonString());
 
-        String valueType = json.read("$.valueType");
-        switch (valueType) {
-            case "VARIABLE":
-                recordParser.parseVariable(json);
-                transactionParser.processVariable(json);
-                break;
+            Long workflowKey = incomingRecord.read("$.value.workflowKey");
+            String bpmnprocessId = incomingRecord.read("$.value.bpmnProcessId");
+            Long recordKey = incomingRecord.read("$.key");
+            if(bpmnprocessId == null) {
+                bpmnprocessId = tempDocumentStore.getBpmnprocessId(workflowKey);
+                if (bpmnprocessId == null) {
+                    tempDocumentStore.storeDocument(workflowKey, incomingRecord);
+                    logger.info("Record with key {} workflowkey {} has no associated bpmn, stored temporarly", recordKey, workflowKey);
+                    return;
+                }
+            } else {
+                tempDocumentStore.setBpmnprocessId(workflowKey, bpmnprocessId);
+            }
+            String[] bpmnprocessIdParts = bpmnprocessId.split("-");
+            TenantServerConnection tenant = repository.findOneBySchemaName(bpmnprocessIdParts[1]);
+            ThreadLocalContextUtil.setTenant(tenant);
 
-            case "JOB":
-                recordParser.parseTask(json);
-                break;
+            List<DocumentContext> documents = new ArrayList<>();
+            List<DocumentContext> storedDocuments = tempDocumentStore.takeStoredDocuments(workflowKey);
+            if(!storedDocuments.isEmpty()) {
+                logger.info("Reprocessing {} previously stored records with workflowKey {}", storedDocuments.size(), workflowKey);
+                documents.addAll(storedDocuments);
+            }
+            documents.add(incomingRecord);
 
-            case "WORKFLOW_INSTANCE":
-                transactionParser.processWorkflowInstance(json);
-                break;
+            for(DocumentContext doc : documents) {
+                try {
+                    String valueType = doc.read("$.valueType");
+                    switch (valueType) {
+                        case "VARIABLE":
+                            DocumentContext processedVariable = recordParser.processVariable(doc); // TODO prepare for parent workflow
+                            recordParser.addVariableToEntity(processedVariable, bpmnprocessIdParts[0]);
+                            break;
+                        case "JOB":
+                            recordParser.processTask(doc);
+                            break;
+                        case "WORKFLOW_INSTANCE":
+                            if ("PROCESS".equals(doc.read("$.value.bpmnElementType"))) {
+                                recordParser.processWorkflowInstance(doc);
+                            }
+                            break;
+                    }
+                } catch (Exception ex) {
+                    logger.error("Failed to process document: {} error: {} trace: {}", doc, ex.getMessage(), Arrays.stream(ex.getStackTrace())
+                            .map(StackTraceElement::toString)
+                            .collect(Collectors.joining("\n")));
+                    tempDocumentStore.storeDocument(workflowKey, doc);
+                }
+            }
+        } catch (Exception ex) {
+            logger.error("Could not parse zeebe event: {} error: {} trace: {}",
+                    rawData,
+                    ex.getMessage(),
+                    Arrays.stream(ex.getStackTrace())
+                            .map(StackTraceElement::toString)
+                            .collect(Collectors.joining("\n")));
+        } finally {
+            ThreadLocalContextUtil.clear();
         }
     }
 
