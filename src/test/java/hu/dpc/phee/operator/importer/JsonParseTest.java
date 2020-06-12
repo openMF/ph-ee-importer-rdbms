@@ -48,34 +48,28 @@ public class JsonParseTest {
             "  \"timestamp\": 1586104064972\n" +
             "}";
 
-    String processActivating = "{\n" +
-            "  \"partitionId\": 3,\n" +
-            "  \"sourceRecordPosition\": 12885411520,\n" +
-            "  \"recordType\": \"EVENT\",\n" +
-            "  \"valueType\": \"WORKFLOW_INSTANCE\",\n" +
-            "  \"position\": 12885411896,\n" +
-            "  \"rejectionType\": \"NULL_VAL\",\n" +
-            "  \"rejectionReason\": \"\",\n" +
-            "  \"value\": {\n" +
-            "    \"elementId\": \"Task_1lfzg19\",\n" +
-            "    \"variables\": {},\n" +
-            "    \"errorMessage\": \"\",\n" +
-            "    \"errorCode\": \"\",\n" +
-            "    \"type\": \"PayerFundTransfer-DFSPID\",\n" +
-            "    \"retries\": 3,\n" +
-            "    \"elementInstanceKey\": 6755399441058323,\n" +
-            "    \"workflowKey\": 2251799813687425,\n" +
-            "    \"workflowInstanceKey\": 6755399441058311,\n" +
-            "    \"bpmnProcessId\": \"PayerFundTransfer-tn01\",\n" +
-            "    \"bpmnElementType\": \"PROCESS\",\n" +
-            "    \"deadline\": -1,\n" +
-            "    \"worker\": \"\",\n" +
-            "    \"customHeaders\": {},\n" +
-            "    \"workflowDefinitionVersion\": 1\n" +
-            "  },\n" +
-            "  \"intent\": \"ELEMENT_ACTIVATING\",\n" +
-            "  \"key\": 6755399441058324,\n" +
-            "  \"timestamp\": 1586104064972\n" +
+    String processActivating = "{\"partitionId\":1,\n" +
+            "\"value\":\n" +
+            "{\n" +
+            "\"version\":1,\n" +
+            "\"flowScopeKey\":-1,\n" +
+            "\"bpmnElementType\":\"PROCESS\",\n" +
+            "\"parentWorkflowInstanceKey\":-1,\n" +
+            "\"parentElementInstanceKey\":-1,\n" +
+            "\"workflowInstanceKey\":2251799813686963,\n" +
+            "\"bpmnProcessId\":\"PayerFundTransfer-tn01\",\n" +
+            "\"workflowKey\":2251799813686925,\n" +
+            "\"elementId\":\"PayerFundTransfer-tn01\"\n" +
+            "},\n" +
+            "\"sourceRecordPosition\":4296365776,\n" +
+            "\"position\":4296367480,\n" +
+            "\"key\":2251799813686963,\n" +
+            "\"timestamp\":1590762784476,\n" +
+            "\"valueType\":\"WORKFLOW_INSTANCE\",\n" +
+            "\"recordType\":\"EVENT\",\n" +
+            "\"rejectionType\":\"NULL_VAL\",\n" +
+            "\"rejectionReason\":\"\",\n" +
+            "\"intent\":\"ELEMENT_ACTIVATING\"\n" +
             "}";
 
     String deployment = "{\n" +
@@ -153,7 +147,7 @@ public class JsonParseTest {
         kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         KafkaProducer<Object, Object> producer = new KafkaProducer<>(kafkaProperties);
 
-        producer.send(new ProducerRecord<>("zeebe-export", "0-1", deployment));
+        producer.send(new ProducerRecord<>("zeebe-export", "0-1", processActivating));
         producer.flush();
     }
 }

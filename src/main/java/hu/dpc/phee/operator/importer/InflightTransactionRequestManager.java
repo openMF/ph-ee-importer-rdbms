@@ -27,6 +27,8 @@ public class InflightTransactionRequestManager {
             transactionRequest.setStartedAt(new Date(timestamp));
             transactionRequestRepository.save(transactionRequest);
             logger.debug("started in-flight {} transactionRequest {}", transactionRequest.getDirection(), transactionRequest.getWorkflowInstanceKey());
+        } else {
+            logger.debug("transactionRequest {} already started at {}", workflowInstanceKey, transactionRequest.getStartedAt());
         }
     }
 

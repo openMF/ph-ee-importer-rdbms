@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,7 +66,7 @@ public class RecordParser {
 
         String name = newVariable.read("$.value.name");
         Long workflowInstanceKey = newVariable.read("$.value.workflowInstanceKey");
-        if(inflightCallActivities.containsKey(workflowInstanceKey)) {
+        if (inflightCallActivities.containsKey(workflowInstanceKey)) {
             workflowInstanceKey = inflightCallActivities.get(workflowInstanceKey);
             logger.debug("variable {} has parent workflowInstance {}", name, workflowInstanceKey);
         }
@@ -127,20 +126,25 @@ public class RecordParser {
         Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
         Long timestamp = json.read("$.timestamp");
         String intent = json.read("$.intent");
-        Long parentWorkflowInstanceKey = json.read("$.value.parentWorkflowInstanceKey");
+        Object parentWorkflowInstanceKey = json.read("$.value.parentWorkflowInstanceKey");
+        boolean hasParent = false;
+        if (parentWorkflowInstanceKey instanceof Long && (Long) parentWorkflowInstanceKey > 0) {
+            hasParent = true;
+        }
+
         String elementId = json.read("$.value.elementId");
         Long callActivityKey = json.read("$.key");
 
         if (transferType.equals(bpmnProcess.getType())) {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
-                if(parentWorkflowInstanceKey != null && parentWorkflowInstanceKey != -1) {
+                if (hasParent) {
                     logger.debug("Call activity {} started from instance {} with new key {}", elementId, workflowInstanceKey, callActivityKey);
-                    inflightCallActivities.put(callActivityKey, parentWorkflowInstanceKey);
+                    inflightCallActivities.put(callActivityKey, (Long) parentWorkflowInstanceKey);
                 } else {
                     inflightTransferManager.transferStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
                 }
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
-                if(inflightCallActivities.containsKey(workflowInstanceKey)) {
+                if (inflightCallActivities.containsKey(workflowInstanceKey)) {
                     Long parentInstanceKey = inflightCallActivities.remove(workflowInstanceKey);
                     logger.debug("Call activity {} ended with key {} from instance {}", elementId, workflowInstanceKey, parentInstanceKey);
                 }
@@ -148,14 +152,14 @@ public class RecordParser {
             }
         } else if (transactionRequestType.equals(bpmnProcess.getType())) {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
-                if(parentWorkflowInstanceKey != null && parentWorkflowInstanceKey != -1) {
+                if (hasParent) {
                     logger.debug("Call activity {} started from instance {} with new key {}", elementId, workflowInstanceKey, callActivityKey);
-                    inflightCallActivities.put(callActivityKey, parentWorkflowInstanceKey);
+                    inflightCallActivities.put(callActivityKey, (Long) parentWorkflowInstanceKey);
                 } else {
                     inflightTransactionRequestManager.transactionRequestStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
                 }
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
-                if(inflightCallActivities.containsKey(workflowInstanceKey)) {
+                if (inflightCallActivities.containsKey(workflowInstanceKey)) {
                     Long parentInstanceKey = inflightCallActivities.remove(workflowInstanceKey);
                     logger.debug("Call activity {} ended with key {} from instance {}", elementId, workflowInstanceKey, parentInstanceKey);
                 }
