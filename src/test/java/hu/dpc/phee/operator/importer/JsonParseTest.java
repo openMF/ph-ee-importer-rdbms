@@ -10,6 +10,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -77,6 +78,35 @@ public class JsonParseTest {
             "  \"timestamp\": 1586104064972\n" +
             "}";
 
+    String deployment = "{\n" +
+            "\"partitionId\":1,\n" +
+            "\"value\":\n" +
+            "{\n" +
+            "\"resources\":\n" +
+            "[{\n" +
+            "\"resource\":\"---------\",\n" +
+            "\"resourceName\":\"./orchestration/feel/transfer-process-DFSPID.bpmn\",\n" +
+            "\"resourceType\":\"BPMN_XML\"\n" +
+            "}],\n" +
+            "\"deployedWorkflows\":\n" +
+            "[{\n" +
+            "\"version\":1,\n" +
+            "\"resourceName\":\"./orchestration/feel/transfer-process-DFSPID.bpmn\",\n" +
+            "\"bpmnProcessId\":\"transfer-process-tn02\",\n" +
+            "\"workflowKey\":2251799813688244\n" +
+            "}]\n" +
+            "},\n" +
+            "\"sourceRecordPosition\":4299925008,\n" +
+            "\"position\":4299964072,\n" +
+            "\"key\":2251799813688245,\n" +
+            "\"timestamp\":1591957096471,\n" +
+            "\"valueType\":\"DEPLOYMENT\",\n" +
+            "\"rejectionType\":\"NULL_VAL\",\n" +
+            "\"rejectionReason\":\"\",\n" +
+            "\"intent\":\"CREATED\",\n" +
+            "\"recordType\":\"EVENT\"\n" +
+            "}";
+
     String variableCreated = "{\n" +
             "  \"partitionId\": 3,\n" +
             "  \"sourceRecordPosition\": 12885411520,\n" +
@@ -113,6 +143,7 @@ public class JsonParseTest {
     }
 
     @Test
+    @Ignore
     public void testSendKafkaMessage() {
         Map<String, Object> kafkaProperties = new HashMap<>();
 
@@ -122,7 +153,7 @@ public class JsonParseTest {
         kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         KafkaProducer<Object, Object> producer = new KafkaProducer<>(kafkaProperties);
 
-        producer.send(new ProducerRecord<>("zeebe-export", "0-1", variableCreated));
+        producer.send(new ProducerRecord<>("zeebe-export", "0-1", deployment));
         producer.flush();
     }
 }

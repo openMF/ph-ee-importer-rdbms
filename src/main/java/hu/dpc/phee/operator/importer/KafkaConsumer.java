@@ -44,6 +44,10 @@ public class KafkaConsumer implements ConsumerSeekAware {
         try {
             DocumentContext incomingRecord = JsonPathReader.parse(rawData);
             logger.debug("from kafka: {}", incomingRecord.jsonString());
+            if("DEPLOYMENT".equals(incomingRecord.read("$.valueType"))) {
+                logger.info("Deployment event arrived for bpmn: {}, skip processing", incomingRecord.read("$.value.deployedWorkflows[0].bpmnProcessId", String.class));
+                return;
+            }
 
             Long workflowKey = incomingRecord.read("$.value.workflowKey");
             String bpmnprocessId = incomingRecord.read("$.value.bpmnProcessId");
@@ -88,22 +92,28 @@ public class KafkaConsumer implements ConsumerSeekAware {
                             break;
                     }
                 } catch (Exception ex) {
-                    logger.error("Failed to process document: {} error: {} trace: {}", doc, ex.getMessage(), Arrays.stream(ex.getStackTrace())
-                            .map(StackTraceElement::toString)
-                            .collect(Collectors.joining("\n")));
+                    logger.error("Failed to process document:\n{}\nerror: {}\ntrace: {}",
+                            doc,
+                            ex.getMessage(),
+                            limitStackTrace(ex));
                     tempDocumentStore.storeDocument(workflowKey, doc);
                 }
             }
         } catch (Exception ex) {
-            logger.error("Could not parse zeebe event: {} error: {} trace: {}",
+            logger.error("Could not parse zeebe event:\n{}\nerror: {}\ntrace: {}",
                     rawData,
                     ex.getMessage(),
-                    Arrays.stream(ex.getStackTrace())
-                            .map(StackTraceElement::toString)
-                            .collect(Collectors.joining("\n")));
+                    limitStackTrace(ex));
         } finally {
             ThreadLocalContextUtil.clear();
         }
+    }
+
+    private String limitStackTrace(Exception ex) {
+        return Arrays.stream(ex.getStackTrace())
+                .limit(10)
+                .map(StackTraceElement::toString)
+                .collect(Collectors.joining("\n"));
     }
 
     @Override
