@@ -160,7 +160,7 @@ public class VariableParser {
 
     private void parseTransactionRequestResponse(TransactionRequest transactionRequest, String jsonString) {
         DocumentContext json = JsonPathReader.parseEscaped(jsonString);
-        transactionRequest.setState(json.read("$.transactionRequestState"));
+        transactionRequest.setState(TransactionRequestState.valueOf(json.read("$.transactionRequestState")));
     }
 
     private void parseTransactionRequestFailed(TransactionRequest transactionRequest, String value) {
