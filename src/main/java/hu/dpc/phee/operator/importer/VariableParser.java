@@ -50,7 +50,7 @@ public class VariableParser {
         transactionRequestParsers.put("authType", pair -> pair.getFirst().setAuthType(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionId", pair -> pair.getFirst().setTransactionId(strip(pair.getSecond())));
         transactionRequestParsers.put("partyLookupFspId", pair -> pair.getFirst().setPayerDfspId(strip(pair.getSecond())));
-        transactionRequestParsers.put("initiatorFspId", pair -> pair.getFirst().setPayeeDfspId(strip(pair.getSecond())));
+        transactionRequestParsers.put("initiatorFspId", pair -> parseInitiatorFspId(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("channelRequest", pair -> parseTransactionChannelRequest(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("transactionRequestResponse", pair -> parseTransactionRequestResponse(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("transactionRequestFailed", pair -> parseTransactionRequestFailed(pair.getFirst(), pair.getSecond()));
@@ -58,7 +58,7 @@ public class VariableParser {
         transactionRequestParsers.put("localQuoteResponse", pair -> parseTransactionRequestLocalQuoteResponse(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("payeeQuoteResponse", pair -> parseTransactionRequestPayeeQuoteResponse(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("quoteId", pair -> pair.getFirst().setPayeeQuoteCode(strip(pair.getSecond())));
-        transactionRequestParsers.put("transActionState", pair -> pair.getFirst().setState(TransactionRequestState.valueOf(strip(pair.getSecond()))));
+        transactionRequestParsers.put("transActionState", pair -> parseTransActionState(pair.getFirst(), pair.getSecond()));
     }
 
     public Map<String, Consumer<Pair<Transfer, String>>> getTransferParsers() {
@@ -182,8 +182,10 @@ public class VariableParser {
 
         transactionRequest.setPayerPartyId(json.read("$.payer.partyIdentifier"));
         transactionRequest.setPayerPartyIdType(json.read("$.payer.partyIdType"));
+        transactionRequest.setPayerDfspId(json.read("$.payer.fspId"));
 
-        transactionRequest.setAuthType(json.read("$.authenticationType"));
+        String authenticationType = json.read("$.authenticationType");
+        transactionRequest.setAuthType(authenticationType == null ? "NONE" : authenticationType);
         transactionRequest.setScenario(json.read("$.transactionType.scenario"));
         transactionRequest.setInitiatorType(json.read("$.transactionType.initiatorType"));
     }
@@ -197,5 +199,17 @@ public class VariableParser {
     private void parseTransactionRequestPayeeQuoteResponse(TransactionRequest transactionRequest, String jsonString) {
         DocumentContext json = JsonPathReader.parseEscaped(jsonString);
         transactionRequest.setPayeeFee(json.read("$.payeeFspFee.amount", BigDecimal.class));
+    }
+
+    private void parseInitiatorFspId(TransactionRequest transactionRequest, String jsonString) {
+        if(outgoingDirection.equals(transactionRequest.getDirection())) {
+            transactionRequest.setPayerDfspId(strip(jsonString));
+        }
+    }
+
+    private void parseTransActionState(TransactionRequest transactionRequest, String jsonString) {
+        if(incomingDirection.equals(transactionRequest.getDirection())) {
+            transactionRequest.setState(TransactionRequestState.valueOf(strip(jsonString)));
+        }
     }
 }
