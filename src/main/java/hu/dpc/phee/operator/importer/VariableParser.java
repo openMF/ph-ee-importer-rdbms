@@ -58,7 +58,7 @@ public class VariableParser {
         transactionRequestParsers.put("localQuoteResponse", pair -> parseTransactionRequestLocalQuoteResponse(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("payeeQuoteResponse", pair -> parseTransactionRequestPayeeQuoteResponse(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("quoteId", pair -> pair.getFirst().setPayeeQuoteCode(strip(pair.getSecond())));
-        transactionRequestParsers.put("transActionState", pair -> parseTransActionState(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("transactionState", pair -> parseTransActionState(pair.getFirst(), pair.getSecond()));
     }
 
     public Map<String, Consumer<Pair<Transfer, String>>> getTransferParsers() {
