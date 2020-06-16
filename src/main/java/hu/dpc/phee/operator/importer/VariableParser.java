@@ -203,7 +203,7 @@ public class VariableParser {
 
     private void parseInitiatorFspId(TransactionRequest transactionRequest, String jsonString) {
         if(outgoingDirection.equals(transactionRequest.getDirection())) {
-            transactionRequest.setPayerDfspId(strip(jsonString));
+            transactionRequest.setPayeeDfspId(strip(jsonString));
         }
     }
 
