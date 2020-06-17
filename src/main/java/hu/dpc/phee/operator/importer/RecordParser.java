@@ -140,9 +140,8 @@ public class RecordParser {
                 if (hasParent) {
                     logger.debug("Call activity {} started from instance {} with new key {}", elementId, workflowInstanceKey, callActivityKey);
                     inflightCallActivities.put(callActivityKey, (Long) parentWorkflowInstanceKey);
-                } else {
-                    inflightTransferManager.transferStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
                 }
+                inflightTransferManager.transferStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 if (inflightCallActivities.containsKey(workflowInstanceKey)) {
                     Long parentInstanceKey = inflightCallActivities.remove(workflowInstanceKey);
@@ -152,17 +151,8 @@ public class RecordParser {
             }
         } else if (transactionRequestType.equals(bpmnProcess.getType())) {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
-                if (hasParent) {
-                    logger.debug("Call activity {} started from instance {} with new key {}", elementId, workflowInstanceKey, callActivityKey);
-                    inflightCallActivities.put(callActivityKey, (Long) parentWorkflowInstanceKey);
-                } else {
-                    inflightTransactionRequestManager.transactionRequestStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
-                }
+                inflightTransactionRequestManager.transactionRequestStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
-                if (inflightCallActivities.containsKey(workflowInstanceKey)) {
-                    Long parentInstanceKey = inflightCallActivities.remove(workflowInstanceKey);
-                    logger.debug("Call activity {} ended with key {} from instance {}", elementId, workflowInstanceKey, parentInstanceKey);
-                }
                 inflightTransactionRequestManager.transactionRequestEnded(workflowInstanceKey, timestamp);
             }
         } else {
