@@ -33,6 +33,9 @@ public class RecordParser {
     @Value("${bpmn.transaction-request-type}")
     private String transactionRequestType;
 
+    @Value("${bpmn.outgoing-direction}")
+    private String outgoingDirection;
+
     @Autowired
     private TaskRepository taskRepository;
 
@@ -67,8 +70,9 @@ public class RecordParser {
         String name = newVariable.read("$.value.name");
         Long workflowInstanceKey = newVariable.read("$.value.workflowInstanceKey");
         if (inflightCallActivities.containsKey(workflowInstanceKey)) {
-            workflowInstanceKey = inflightCallActivities.get(workflowInstanceKey);
-            logger.debug("variable {} has parent workflowInstance {}", name, workflowInstanceKey);
+            Long parentInstanceKey = inflightCallActivities.get(workflowInstanceKey);
+            logger.debug("variable {} in instance {} has parent workflowInstance {}", name, workflowInstanceKey, parentInstanceKey);
+            workflowInstanceKey = parentInstanceKey;
         }
 
         BpmnProcess bpmnProcess = bpmnProcessProperties.getById(bpmnProcessId);
@@ -140,6 +144,7 @@ public class RecordParser {
                 if (hasParent) {
                     logger.debug("Sub process {} with key {} started from parent instance {}", bpmnProcessId, callActivityKey, parentWorkflowInstanceKey);
                     inflightCallActivities.put(callActivityKey, (Long) parentWorkflowInstanceKey);
+                    inflightTransferManager.transferStarted((Long) parentWorkflowInstanceKey, timestamp, outgoingDirection);
                 } else {
                     inflightTransferManager.transferStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
                 }
