@@ -26,7 +26,6 @@ public class InflightTransferManager {
             transfer.setDirection(direction);
             transfer.setStartedAt(new Date(timestamp));
             transferRepository.save(transfer);
-            logger.debug("started in-flight {} transfer {}", transfer.getDirection(), transfer.getWorkflowInstanceKey());
         } else {
             logger.debug("transfer {} already started at {}", workflowInstanceKey, transfer.getStartedAt());
         }
@@ -56,6 +55,7 @@ public class InflightTransferManager {
                 transfer = transferRepository.findByWorkflowInstanceKey(workflowInstanceKey);
                 if (transfer == null) {
                     transfer = new Transfer(workflowInstanceKey);
+                    logger.debug("started in-flight transfer {}", transfer.getWorkflowInstanceKey());
                 }
                 inflightTransfers.put(workflowInstanceKey, transfer);
             }

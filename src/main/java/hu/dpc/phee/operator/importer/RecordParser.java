@@ -138,14 +138,16 @@ public class RecordParser {
         if (transferType.equals(bpmnProcess.getType())) {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 if (hasParent) {
-                    logger.debug("Call activity {} started from instance {} with new key {}", elementId, workflowInstanceKey, callActivityKey);
+                    logger.debug("Sub process {} with key {} started from parent instance {}", bpmnProcessId, callActivityKey, parentWorkflowInstanceKey);
                     inflightCallActivities.put(callActivityKey, (Long) parentWorkflowInstanceKey);
+                } else {
+                    inflightTransferManager.transferStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
                 }
-                inflightTransferManager.transferStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 if (inflightCallActivities.containsKey(workflowInstanceKey)) {
                     Long parentInstanceKey = inflightCallActivities.remove(workflowInstanceKey);
-                    logger.debug("Call activity {} ended with key {} from instance {}", elementId, workflowInstanceKey, parentInstanceKey);
+                    logger.debug("Sub process {} with key {} ended from parent instance {}", bpmnProcessId, callActivityKey, parentInstanceKey);
+                    workflowInstanceKey = parentInstanceKey;
                 }
                 inflightTransferManager.transferEnded(workflowInstanceKey, timestamp);
             }
