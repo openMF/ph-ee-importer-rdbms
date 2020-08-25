@@ -12,10 +12,11 @@
         </encoder>
     </appender>
 
-    <logger name="hu.dpc" level="TRACE"/>
+    <logger name="hu.dpc" level="INFO"/>
     <logger name="io" level="INFO"/>
     <logger name="org" level="INFO"/>
-    <logger name="org.eclipse" level="DEBUG"/>
+<!--    <logger name="org.eclipse" level="DEBUG"/>-->
+    <logger name="org.eclipse" level="WARN"/>
     <logger name="org.apache.camel.component.undertow" level="TRACE"/>
     <logger name="com.jayway" level="INFO"/>
     <logger name="com.zaxxer" level="INFO"/>
