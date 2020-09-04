@@ -63,6 +63,12 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 tempDocumentStore.setBpmnprocessId(workflowKey, bpmnprocessId);
             }
             String[] bpmnprocessIdParts = bpmnprocessId.split("-");
+            String tenantName = "";
+            for (int i=1; i < bpmnprocessIdParts.length; i++) {
+                tenantName += bpmnprocessIdParts[i];
+                if(bpmnprocessIdParts.length - i > 1)
+                    tenantName += "-";
+            }
             TenantServerConnection tenant = repository.findOneBySchemaName(bpmnprocessIdParts[1]);
             ThreadLocalContextUtil.setTenant(tenant);
 
