@@ -63,6 +63,7 @@ public class RecordParser {
     private final Map<Long, Long> inflightCallActivities = new ConcurrentHashMap<>();
 
     public void addVariableToEntity(DocumentContext newVariable, String bpmnProcessId) {
+        logger.debug("newVariable in RecordParser: {}", newVariable.jsonString()); //
         if (newVariable == null) {
             return;
         }
@@ -95,7 +96,7 @@ public class RecordParser {
                 transactionRequestRepository.save(transactionRequest);
             }
         } else {
-            logger.debug("Skip adding variable to {}", bpmnProcessId);
+            logger.debug("Skip adding variable to {} and type is {}", bpmnProcessId, bpmnProcess.getType()); // xx
         }
     }
 

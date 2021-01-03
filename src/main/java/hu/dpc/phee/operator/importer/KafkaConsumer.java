@@ -50,26 +50,24 @@ public class KafkaConsumer implements ConsumerSeekAware {
             }
 
             Long workflowKey = incomingRecord.read("$.value.workflowKey");
-            String bpmnprocessId = incomingRecord.read("$.value.bpmnProcessId");
+            String bpmnprocessIdWithTenant = incomingRecord.read("$.value.bpmnProcessId");
             Long recordKey = incomingRecord.read("$.key");
-            if(bpmnprocessId == null) {
-                bpmnprocessId = tempDocumentStore.getBpmnprocessId(workflowKey);
-                if (bpmnprocessId == null) {
+
+            if(bpmnprocessIdWithTenant == null) {
+                bpmnprocessIdWithTenant = tempDocumentStore.getBpmnprocessId(workflowKey);
+                if (bpmnprocessIdWithTenant == null) {
                     tempDocumentStore.storeDocument(workflowKey, incomingRecord);
                     logger.info("Record with key {} workflowkey {} has no associated bpmn, stored temporarly", recordKey, workflowKey);
                     return;
                 }
             } else {
-                tempDocumentStore.setBpmnprocessId(workflowKey, bpmnprocessId);
+                tempDocumentStore.setBpmnprocessId(workflowKey, bpmnprocessIdWithTenant);
             }
-            String[] bpmnprocessIdParts = bpmnprocessId.split("-");
-            String tenantName = "";
-            for (int i=1; i < bpmnprocessIdParts.length; i++) {
-                tenantName += bpmnprocessIdParts[i];
-                if(bpmnprocessIdParts.length - i > 1)
-                    tenantName += "-";
-            }
-            TenantServerConnection tenant = repository.findOneBySchemaName(bpmnprocessIdParts[1]);
+
+            String tenantName = bpmnprocessIdWithTenant.substring(bpmnprocessIdWithTenant.indexOf("-") + 1);
+            String bpmnprocessId = bpmnprocessIdWithTenant.substring(0, bpmnprocessIdWithTenant.indexOf("-"));
+
+            TenantServerConnection tenant = repository.findOneBySchemaName(tenantName);
             ThreadLocalContextUtil.setTenant(tenant);
 
             List<DocumentContext> documents = new ArrayList<>();
@@ -86,7 +84,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
                     switch (valueType) {
                         case "VARIABLE":
                             DocumentContext processedVariable = recordParser.processVariable(doc); // TODO prepare for parent workflow
-                            recordParser.addVariableToEntity(processedVariable, bpmnprocessIdParts[0]);
+                            recordParser.addVariableToEntity(processedVariable, bpmnprocessId); // Call to store transfer
                             break;
                         case "JOB":
                             recordParser.processTask(doc);
