@@ -16,7 +16,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven-shade-plugin.version>3.2.2</maven-shade-plugin.version>
 
-        <eclipselink.version>2.7.6</eclipselink.version>
+        <eclipselink.version>2.7.8</eclipselink.version>
         <elasticsearch.version>7.6.0</elasticsearch.version>
         <json.version>20190722</json.version>
         <kafka-streams.version>2.4.0</kafka-streams.version>
