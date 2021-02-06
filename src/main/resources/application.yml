@@ -48,6 +48,3 @@ bpmn:
     - id: "PayeeTransactionRequest"
       direction: "${bpmn.outgoing-direction}"
       type: "${bpmn.transaction-request-type}"
-    - id: "transferProcess"
-      direction: "UNKNOWN"
-      type: "${bpmn.transfer-type}"
