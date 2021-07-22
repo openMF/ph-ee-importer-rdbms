@@ -2,7 +2,6 @@ package hu.dpc.phee.operator.entity.transfer;
 
 
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
-import org.eclipse.persistence.annotations.Index;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -67,6 +66,12 @@ public class Transfer extends AbstractPersistableCustom<Long> {
 
     @Column(name = "direction")
     private String direction;
+
+    @Column(name = "error_information")
+    private String errorInformation;
+
+    @Column(name = "BATCH_ID")
+    private String batchId;
 
     public Transfer() {
     }
@@ -242,5 +247,21 @@ public class Transfer extends AbstractPersistableCustom<Long> {
 
     public void setDirection(String direction) {
         this.direction = direction;
+    }
+
+    public String getErrorInformation() {
+        return errorInformation;
+    }
+
+    public void setErrorInformation(String errorInformation) {
+        this.errorInformation = errorInformation;
+    }
+
+    public String getBatchId() {
+        return batchId;
+    }
+
+    public void setBatchId(String batchId) {
+        this.batchId = batchId;
     }
 }
