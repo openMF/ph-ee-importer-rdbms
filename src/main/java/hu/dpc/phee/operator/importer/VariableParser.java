@@ -2,6 +2,7 @@ package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.OperatorUtils;
+import hu.dpc.phee.operator.entity.batch.Batch;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequest;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestState;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
@@ -33,6 +34,7 @@ public class VariableParser {
     private final Logger logger = LoggerFactory.getLogger(VariableParser.class);
     private final Map<String, Consumer<Pair<Transfer, String>>> transferParsers = new HashMap<>();
     private final Map<String, Consumer<Pair<TransactionRequest, String>>> transactionRequestParsers = new HashMap<>();
+    private final Map<String, Consumer<Pair<Batch, String>>> batchParsers = new HashMap<>();
 
     public VariableParser() {
         transferParsers.put("localQuoteResponse", pair -> parseTransferLocalQuoteResponse(pair.getFirst(), strip(pair.getSecond())));
@@ -46,6 +48,8 @@ public class VariableParser {
         transferParsers.put("partyLookupFspId", pair -> pair.getFirst().setPayeeDfspId(strip(pair.getSecond())));
         transferParsers.put("initiatorFspId", pair -> pair.getFirst().setPayerDfspId(strip(pair.getSecond())));
         transferParsers.put("channelRequest", pair -> parseChannelRequest(pair.getFirst(), pair.getSecond()));
+        transferParsers.put("errorInformation", pair -> parseErrorInformation(pair.getFirst(), pair.getSecond()));
+        transferParsers.put("batchId", pair -> pair.getFirst().setBatchId(pair.getSecond()));
 
         transactionRequestParsers.put("authType", pair -> pair.getFirst().setAuthType(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionId", pair -> pair.getFirst().setTransactionId(strip(pair.getSecond())));
@@ -59,6 +63,11 @@ public class VariableParser {
         transactionRequestParsers.put("payeeQuoteResponse", pair -> parseTransactionRequestPayeeQuoteResponse(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("quoteId", pair -> pair.getFirst().setPayeeQuoteCode(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionState", pair -> parseTransActionState(pair.getFirst(), pair.getSecond()));
+
+        batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(pair.getSecond()));
+        batchParsers.put("fileName", pair -> pair.getFirst().setRequestFile(pair.getSecond()));
+        batchParsers.put("requestId", pair -> pair.getFirst().setRequestFile(pair.getSecond()));
+        batchParsers.put("note", pair -> pair.getFirst().setNote(pair.getSecond()));
     }
 
     public Map<String, Consumer<Pair<Transfer, String>>> getTransferParsers() {
@@ -67,6 +76,10 @@ public class VariableParser {
 
     public Map<String, Consumer<Pair<TransactionRequest, String>>> getTransactionRequestParsers() {
         return transactionRequestParsers;
+    }
+
+    public Map<String, Consumer<Pair<Batch, String>>> getBatchParsers() {
+        return batchParsers;
     }
 
     private void parseQuoteSwitchRequest(Transfer transfer, String jsonString) {
@@ -115,7 +128,7 @@ public class VariableParser {
         }
     }
 
-    private void parseTransferCreateFailed(Transfer transfer, String value) {
+    private void parseTransferCreateFailed(Transfer transfer, String value) { // Handles error only based on book funds failure
         transfer.setStatus("false".equals(value) ? TransferStatus.COMPLETED : TransferStatus.FAILED);
     }
 
@@ -141,6 +154,10 @@ public class VariableParser {
 
         transfer.setAmount(json.read("$.amount.amount", BigDecimal.class));
         transfer.setCurrency(json.read("$.amount.currency"));
+    }
+
+    private void parseErrorInformation(Transfer transfer, String jsonString) {
+        transfer.setErrorInformation(jsonString);
     }
 
     private void parseTransactionChannelRequest(TransactionRequest transactionRequest, String jsonString) {
@@ -212,4 +229,6 @@ public class VariableParser {
             transactionRequest.setState(TransactionRequestState.valueOf(strip(jsonString)));
         }
     }
+
+
 }

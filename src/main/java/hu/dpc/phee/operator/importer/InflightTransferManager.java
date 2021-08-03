@@ -54,7 +54,7 @@ public class InflightTransferManager {
             if (transfer == null) {
                 transfer = transferRepository.findByWorkflowInstanceKey(workflowInstanceKey);
                 if (transfer == null) {
-                    transfer = new Transfer(workflowInstanceKey);
+                    transfer = new Transfer(workflowInstanceKey); // Sets status to ONGOING
                     logger.debug("started in-flight transfer {}", transfer.getWorkflowInstanceKey());
                 }
                 inflightTransfers.put(workflowInstanceKey, transfer);

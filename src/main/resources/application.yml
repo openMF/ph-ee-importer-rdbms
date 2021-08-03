@@ -33,6 +33,7 @@ server:
 bpmn:
   transfer-type: "TRANSFER"
   transaction-request-type: "TRANSACTION-REQUEST"
+  batch-type: "BATCH"
   incoming-direction: "INCOMING"
   outgoing-direction: "OUTGOING"
   processes:
@@ -48,3 +49,15 @@ bpmn:
     - id: "PayeeTransactionRequest"
       direction: "${bpmn.outgoing-direction}"
       type: "${bpmn.transaction-request-type}"
+    - id: "transferProcess"
+      direction: "UNKNOWN"
+      type: "${bpmn.transfer-type}"
+    - id: "bulk_processor"
+      direction: "UNKNOWN"
+      type: "${bpmn.batch-type}"
+    - id: "international_remittance_payee_process"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "international_remittance_payer_process"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"

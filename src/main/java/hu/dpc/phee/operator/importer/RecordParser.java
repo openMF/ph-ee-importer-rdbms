@@ -3,6 +3,8 @@ package hu.dpc.phee.operator.importer;
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.BpmnProcess;
 import hu.dpc.phee.operator.config.BpmnProcessProperties;
+import hu.dpc.phee.operator.entity.batch.Batch;
+import hu.dpc.phee.operator.entity.batch.BatchRepository;
 import hu.dpc.phee.operator.entity.task.Task;
 import hu.dpc.phee.operator.entity.task.TaskRepository;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequest;
@@ -33,6 +35,9 @@ public class RecordParser {
     @Value("${bpmn.transaction-request-type}")
     private String transactionRequestType;
 
+    @Value("${bpmn.batch-type}")
+    private String batchType;
+
     @Value("${bpmn.outgoing-direction}")
     private String outgoingDirection;
 
@@ -49,6 +54,9 @@ public class RecordParser {
     private TransactionRequestRepository transactionRequestRepository;
 
     @Autowired
+    private BatchRepository batchRepository;
+
+    @Autowired
     private BpmnProcessProperties bpmnProcessProperties;
 
     @Autowired
@@ -58,11 +66,15 @@ public class RecordParser {
     private InflightTransactionRequestManager inflightTransactionRequestManager;
 
     @Autowired
+    private InflightBatchManager inflightBatchManager;
+
+    @Autowired
     private VariableParser variableParser;
 
     private final Map<Long, Long> inflightCallActivities = new ConcurrentHashMap<>();
 
     public void addVariableToEntity(DocumentContext newVariable, String bpmnProcessId) {
+        logger.debug("newVariable in RecordParser: {}", newVariable.jsonString()); //
         if (newVariable == null) {
             return;
         }
@@ -94,8 +106,18 @@ public class RecordParser {
                 variableParser.getTransactionRequestParsers().get(name).accept(Pair.of(transactionRequest, value));
                 transactionRequestRepository.save(transactionRequest);
             }
-        } else {
-            logger.debug("Skip adding variable to {}", bpmnProcessId);
+        } else if (batchType.equals(bpmnProcess.getType())) {
+            if (variableParser.getBatchParsers().containsKey(name)) {
+                logger.debug("add variable {} to batch for workflow {}", name, workflowInstanceKey);
+                String value = newVariable.read("$.value.value");
+
+                Batch batch = inflightBatchManager.getOrCreateBatch(workflowInstanceKey);
+                variableParser.getBatchParsers().get(name).accept(Pair.of(batch, value));
+                batchRepository.save(batch);
+            }
+        }
+        else {
+            logger.debug("Skip adding variable to {} and type is {}", bpmnProcessId, bpmnProcess.getType()); // xx
         }
     }
 
@@ -161,6 +183,12 @@ public class RecordParser {
                 inflightTransactionRequestManager.transactionRequestStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 inflightTransactionRequestManager.transactionRequestEnded(workflowInstanceKey, timestamp);
+            }
+        } else if (batchType.equals(bpmnProcess.getType())) {
+            if ("ELEMENT_ACTIVATING".equals(intent)) {
+                inflightBatchManager.batchStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
+            } else if ("ELEMENT_COMPLETED".equals(intent)) {
+                inflightBatchManager.batchEnded(workflowInstanceKey, timestamp);
             }
         } else {
             logger.error("Skip parsing bpmnProcess: {}", bpmnProcessId);
