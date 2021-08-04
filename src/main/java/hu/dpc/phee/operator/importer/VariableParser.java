@@ -49,7 +49,7 @@ public class VariableParser {
         transferParsers.put("initiatorFspId", pair -> pair.getFirst().setPayerDfspId(strip(pair.getSecond())));
         transferParsers.put("channelRequest", pair -> parseChannelRequest(pair.getFirst(), pair.getSecond()));
         transferParsers.put("errorInformation", pair -> parseErrorInformation(pair.getFirst(), pair.getSecond()));
-        transferParsers.put("batchId", pair -> pair.getFirst().setBatchId(pair.getSecond()));
+        transferParsers.put("batchId", pair -> pair.getFirst().setBatchId(strip(pair.getSecond())));
 
         transactionRequestParsers.put("authType", pair -> pair.getFirst().setAuthType(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionId", pair -> pair.getFirst().setTransactionId(strip(pair.getSecond())));
