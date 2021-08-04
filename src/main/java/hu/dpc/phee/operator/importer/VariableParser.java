@@ -64,10 +64,10 @@ public class VariableParser {
         transactionRequestParsers.put("quoteId", pair -> pair.getFirst().setPayeeQuoteCode(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionState", pair -> parseTransActionState(pair.getFirst(), pair.getSecond()));
 
-        batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(pair.getSecond()));
-        batchParsers.put("fileName", pair -> pair.getFirst().setRequestFile(pair.getSecond()));
-        batchParsers.put("requestId", pair -> pair.getFirst().setRequestId(pair.getSecond()));
-        batchParsers.put("note", pair -> pair.getFirst().setNote(pair.getSecond()));
+        batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(strip(pair.getSecond())));
+        batchParsers.put("fileName", pair -> pair.getFirst().setRequestFile(strip(pair.getSecond())));
+        batchParsers.put("requestId", pair -> pair.getFirst().setRequestId(strip(pair.getSecond())));
+        batchParsers.put("note", pair -> pair.getFirst().setNote(strip(pair.getSecond())));
     }
 
     public Map<String, Consumer<Pair<Transfer, String>>> getTransferParsers() {
@@ -157,7 +157,7 @@ public class VariableParser {
     }
 
     private void parseErrorInformation(Transfer transfer, String jsonString) {
-        transfer.setErrorInformation(jsonString);
+        transfer.setErrorInformation(strip(jsonString));
     }
 
     private void parseTransactionChannelRequest(TransactionRequest transactionRequest, String jsonString) {
