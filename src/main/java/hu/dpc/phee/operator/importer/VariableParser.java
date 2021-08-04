@@ -66,7 +66,7 @@ public class VariableParser {
 
         batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(pair.getSecond()));
         batchParsers.put("fileName", pair -> pair.getFirst().setRequestFile(pair.getSecond()));
-        batchParsers.put("requestId", pair -> pair.getFirst().setRequestFile(pair.getSecond()));
+        batchParsers.put("requestId", pair -> pair.getFirst().setRequestId(pair.getSecond()));
         batchParsers.put("note", pair -> pair.getFirst().setNote(pair.getSecond()));
     }
 

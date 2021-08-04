@@ -12,7 +12,7 @@
         </encoder>
     </appender>
 
-    <logger name="hu.dpc" level="INFO"/>
+    <logger name="hu.dpc" level="DEBUG"/>
     <logger name="io" level="INFO"/>
     <logger name="org" level="INFO"/>
 <!--    <logger name="org.eclipse" level="DEBUG"/>-->
