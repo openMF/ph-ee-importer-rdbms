@@ -4,3 +4,7 @@ target
 .project
 .classpath
 .settings
+bin
+bin/
+.gradle
+.gradle/
