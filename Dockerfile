@@ -1,6 +1,6 @@
 FROM openjdk:13
 EXPOSE 8000
 
-COPY target/importer-*.jar .
+COPY build/libs/*.jar .
 CMD java -jar *.jar
 
