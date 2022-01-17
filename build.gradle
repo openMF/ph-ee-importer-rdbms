@@ -33,6 +33,10 @@ group = 'hu.dpc.phee'
 version = '1.0.0-SNAPSHOT'
 sourceCompatibility = '1.8'
 
+test {
+    useJUnitPlatform()
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
