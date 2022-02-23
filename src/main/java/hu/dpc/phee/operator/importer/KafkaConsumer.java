@@ -49,7 +49,12 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 return;
             }
 
-            Long workflowKey = incomingRecord.read("$.value.workflowKey");
+            if(incomingRecord.read("$.valueType").equals("VARIABLE_DOCUMENT")) {
+                logger.info("Skipping VARIABLE_DOCUMENT record ");
+                return;
+            }
+
+            Long workflowKey = incomingRecord.read("$.value.processDefinitionKey");
             String bpmnprocessIdWithTenant = incomingRecord.read("$.value.bpmnProcessId");
             Long recordKey = incomingRecord.read("$.key");
 

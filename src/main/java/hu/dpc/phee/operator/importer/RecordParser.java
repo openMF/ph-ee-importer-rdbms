@@ -80,7 +80,7 @@ public class RecordParser {
         }
 
         String name = newVariable.read("$.value.name");
-        Long workflowInstanceKey = newVariable.read("$.value.workflowInstanceKey");
+        Long workflowInstanceKey = newVariable.read("$.value.processDefinitionKey");
         if (inflightCallActivities.containsKey(workflowInstanceKey)) {
             Long parentInstanceKey = inflightCallActivities.get(workflowInstanceKey);
             logger.debug("variable {} in instance {} has parent workflowInstance {}", name, workflowInstanceKey, parentInstanceKey);
@@ -201,7 +201,7 @@ public class RecordParser {
             return;
         }
 
-        Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
+        Long workflowInstanceKey = json.read("$.value.processInstanceKey");
         String newElementId = json.read("$.value.elementId");
         Long newTimestamp = json.read("$.timestamp");
         String newIntent = json.read("$.intent");
@@ -221,7 +221,7 @@ public class RecordParser {
 
         Task task = new Task();
         task.setWorkflowInstanceKey(workflowInstanceKey);
-        task.setWorkflowKey(json.read("$.value.workflowKey"));
+        task.setWorkflowKey(json.read("$.value.processDefinitionKey"));
         task.setTimestamp(newTimestamp);
         task.setIntent(newIntent);
         task.setRecordType(json.read("$.recordType"));
