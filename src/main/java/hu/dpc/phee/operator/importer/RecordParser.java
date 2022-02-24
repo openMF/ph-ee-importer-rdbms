@@ -80,7 +80,7 @@ public class RecordParser {
         }
 
         String name = newVariable.read("$.value.name");
-        Long workflowInstanceKey = newVariable.read("$.value.processDefinitionKey");
+        Long workflowInstanceKey = newVariable.read("$.value.processInstanceKey");
         if (inflightCallActivities.containsKey(workflowInstanceKey)) {
             Long parentInstanceKey = inflightCallActivities.get(workflowInstanceKey);
             logger.debug("variable {} in instance {} has parent workflowInstance {}", name, workflowInstanceKey, parentInstanceKey);
