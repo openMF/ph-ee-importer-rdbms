@@ -22,7 +22,7 @@ datasource:
     driverclass_name: "com.mysql.cj.jdbc.Driver"
   core:
     port: 3306
-    host: "operations-mysql"
+    host: "operationsmysql"
     schema: "tenants"
     username: "mifos"
     password: "password"
@@ -61,3 +61,6 @@ bpmn:
     - id: "international_remittance_payer_process"
       direction: "${bpmn.outgoing-direction}"
       type: "${bpmn.transfer-type}"
+    - id: "mpesa_flow"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transaction-request-type}"
