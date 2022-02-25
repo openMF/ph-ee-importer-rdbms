@@ -152,10 +152,10 @@ public class RecordParser {
     public void processWorkflowInstance(DocumentContext json) {
         String bpmnProcessId = json.read("$.value.bpmnProcessId");
         BpmnProcess bpmnProcess = bpmnProcessProperties.getById(bpmnProcessId.split("-")[0]);
-        Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
+        Long workflowInstanceKey = json.read("$.value.processInstanceKey");
         Long timestamp = json.read("$.timestamp");
         String intent = json.read("$.intent");
-        Object parentWorkflowInstanceKey = json.read("$.value.parentWorkflowInstanceKey");
+        Object parentWorkflowInstanceKey = json.read("$.value.parentprocessInstanceKey");
         boolean hasParent = false;
         if (parentWorkflowInstanceKey instanceof Long && (Long) parentWorkflowInstanceKey > 0) {
             hasParent = true;
