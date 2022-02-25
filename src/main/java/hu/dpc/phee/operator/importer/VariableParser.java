@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -63,6 +64,8 @@ public class VariableParser {
         transactionRequestParsers.put("payeeQuoteResponse", pair -> parseTransactionRequestPayeeQuoteResponse(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("quoteId", pair -> pair.getFirst().setPayeeQuoteCode(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionState", pair -> parseTransActionState(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("mpesaChannelRequest", pair -> parseTransactionMpesaRequest(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("originDate", pair -> pair.getFirst().setStartedAt(new Date(Long.parseLong(pair.getSecond()))));
 
         batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(pair.getSecond()));
         batchParsers.put("fileName", pair -> pair.getFirst().setRequestFile(pair.getSecond()));
@@ -171,6 +174,16 @@ public class VariableParser {
         transactionRequest.setAmount(json.read("$.amount.amount", BigDecimal.class));
         transactionRequest.setCurrency(json.read("$.amount.currency"));
 
+        if(transactionRequest.getInitiatorType() == null ) {
+            transactionRequest.setInitiatorType(json.read("$.transactionType.initiatorType"));
+        }
+        if(transactionRequest.getScenario() == null) {
+            transactionRequest.setScenario(json.read("$.transactionType.scenario"));
+        }
+    }
+
+    private void parseTransactionMpesaRequest(TransactionRequest transactionRequest, String jsonString) {
+        DocumentContext json = JsonPathReader.parseEscaped(jsonString);
         transactionRequest.setInitiatorType(json.read("$.transactionType.initiatorType"));
         transactionRequest.setScenario(json.read("$.transactionType.scenario"));
     }

@@ -104,6 +104,9 @@ public class RecordParser {
 
                 TransactionRequest transactionRequest = inflightTransactionRequestManager.getOrCreateTransactionRequest(workflowInstanceKey);
                 variableParser.getTransactionRequestParsers().get(name).accept(Pair.of(transactionRequest, value));
+                if(transactionRequest.getDirection() == null) {
+                    transactionRequest.setDirection(bpmnProcess.getDirection());
+                }
                 transactionRequestRepository.save(transactionRequest);
             }
         } else if (batchType.equals(bpmnProcess.getType())) {
@@ -122,7 +125,7 @@ public class RecordParser {
     }
 
     public DocumentContext processVariable(DocumentContext json) {
-        Long workflowInstanceKey = json.read("$.value.workflowInstanceKey");
+        Long workflowInstanceKey = json.read("$.value.processInstanceKey");
         String name = json.read("$.value.name");
         Long newTimestamp = json.read("$.timestamp");
         List<Variable> existingVariables = variableRepository.findByWorkflowInstanceKey(workflowInstanceKey);
@@ -138,7 +141,7 @@ public class RecordParser {
         Variable variable = new Variable();
         variable.setWorkflowInstanceKey(workflowInstanceKey);
         variable.setTimestamp(newTimestamp);
-        variable.setWorkflowKey(json.read("$.value.workflowKey"));
+        variable.setWorkflowKey(json.read("$.value.processDefinitionKey"));
         variable.setName(name);
         String value = json.read("$.value.value");
         variable.setValue(value);
