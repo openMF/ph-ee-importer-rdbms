@@ -65,6 +65,9 @@ public class VariableParser {
         transactionRequestParsers.put("quoteId", pair -> pair.getFirst().setPayeeQuoteCode(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionState", pair -> parseTransActionState(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("mpesaChannelRequest", pair -> parseTransactionMpesaRequest(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("partyLookupFailed", pair -> parsePartyLookUpState(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("transactionFailed", pair -> parseTransactionFailed(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("transferSettlementFailed", pair -> parseSettlementFiled(pair.getFirst(), pair.getSecond()));
 
         batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(pair.getSecond()));
         batchParsers.put("fileName", pair -> pair.getFirst().setRequestFile(pair.getSecond()));
@@ -78,6 +81,39 @@ public class VariableParser {
 
     public Map<String, Consumer<Pair<TransactionRequest, String>>> getTransactionRequestParsers() {
         return transactionRequestParsers;
+    }
+
+    public void parseSettlementFiled(TransactionRequest request, String jsonString) {
+        if (jsonString == null || jsonString.isEmpty()) {
+            return;
+        }
+        if(jsonString.equals("true")) {
+            request.setState(TransactionRequestState.FAILED);
+        } else {
+            request.setState(TransactionRequestState.ACCEPTED);
+        }
+    }
+
+    public void parseTransactionFailed(TransactionRequest request, String jsonString) {
+        if (jsonString == null || jsonString.isEmpty()) {
+            return;
+        }
+        if(jsonString.equals("true")) {
+            request.setState(TransactionRequestState.FAILED);
+        } else {
+            request.setState(TransactionRequestState.IN_PROGRESS);
+        }
+    }
+
+    public void parsePartyLookUpState(TransactionRequest request, String jsonString) {
+        if (jsonString == null || jsonString.isEmpty()) {
+            return;
+        }
+        if(jsonString.equals("true")) {
+            request.setState(TransactionRequestState.FAILED);
+        } else {
+            request.setState(TransactionRequestState.RECEIVED);
+        }
     }
 
     public Map<String, Consumer<Pair<Batch, String>>> getBatchParsers() {
