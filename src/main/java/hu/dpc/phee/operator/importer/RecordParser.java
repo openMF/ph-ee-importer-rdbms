@@ -155,7 +155,7 @@ public class RecordParser {
         Long workflowInstanceKey = json.read("$.value.processInstanceKey");
         Long timestamp = json.read("$.timestamp");
         String intent = json.read("$.intent");
-        Object parentWorkflowInstanceKey = json.read("$.value.parentprocessInstanceKey");
+        Object parentWorkflowInstanceKey = json.read("$.value.parentProcessInstanceKey");
         boolean hasParent = false;
         if (parentWorkflowInstanceKey instanceof Long && (Long) parentWorkflowInstanceKey > 0) {
             hasParent = true;

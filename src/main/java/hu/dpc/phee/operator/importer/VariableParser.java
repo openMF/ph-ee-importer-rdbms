@@ -65,7 +65,6 @@ public class VariableParser {
         transactionRequestParsers.put("quoteId", pair -> pair.getFirst().setPayeeQuoteCode(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionState", pair -> parseTransActionState(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("mpesaChannelRequest", pair -> parseTransactionMpesaRequest(pair.getFirst(), pair.getSecond()));
-        transactionRequestParsers.put("originDate", pair -> pair.getFirst().setStartedAt(new Date(Long.parseLong(pair.getSecond()))));
 
         batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(pair.getSecond()));
         batchParsers.put("fileName", pair -> pair.getFirst().setRequestFile(pair.getSecond()));
