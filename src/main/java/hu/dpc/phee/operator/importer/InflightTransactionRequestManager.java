@@ -45,6 +45,7 @@ public class InflightTransactionRequestManager {
             }
 
             transactionRequest.setCompletedAt(new Date(timestamp));
+
             transactionRequestRepository.save(transactionRequest);
             logger.debug("transactionRequest {} finished", transactionRequest.getWorkflowInstanceKey());
         }
