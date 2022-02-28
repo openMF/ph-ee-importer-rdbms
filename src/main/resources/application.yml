@@ -64,3 +64,7 @@ bpmn:
     - id: "mpesa_flow"
       direction: "${bpmn.incoming-direction}"
       type: "${bpmn.transaction-request-type}"
+
+logging:
+  level:
+    ROOT: ERROR
