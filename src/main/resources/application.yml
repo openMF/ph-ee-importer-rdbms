@@ -64,6 +64,12 @@ bpmn:
     - id: "mpesa_flow"
       direction: "${bpmn.incoming-direction}"
       type: "${bpmn.transaction-request-type}"
+    - id: "mpesa_flow_roster"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transaction-request-type}"
+    - id: "mpesa_flow-paygops"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transaction-request-type}"
 
 logging:
   level:
