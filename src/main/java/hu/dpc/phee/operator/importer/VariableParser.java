@@ -49,8 +49,9 @@ public class VariableParser {
         transferParsers.put("partyLookupFspId", pair -> pair.getFirst().setPayeeDfspId(strip(pair.getSecond())));
         transferParsers.put("initiatorFspId", pair -> pair.getFirst().setPayerDfspId(strip(pair.getSecond())));
         transferParsers.put("channelRequest", pair -> parseChannelRequest(pair.getFirst(), pair.getSecond()));
-        transferParsers.put("errorInformation", pair -> parseErrorInformation(pair.getFirst(), pair.getSecond()));
-        transferParsers.put("batchId", pair -> pair.getFirst().setBatchId(pair.getSecond()));
+        transferParsers.put("errorInformation", pair -> {parseErrorInformation(pair.getFirst(), pair.getSecond());
+            parseTransferCreateFailed(pair.getFirst(), pair.getSecond());});
+        transferParsers.put("batchId", pair -> pair.getFirst().setBatchId(strip(pair.getSecond())));
 
         transactionRequestParsers.put("authType", pair -> pair.getFirst().setAuthType(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionId", pair -> pair.getFirst().setTransactionId(strip(pair.getSecond())));
@@ -69,10 +70,10 @@ public class VariableParser {
         transactionRequestParsers.put("transactionFailed", pair -> parseTransactionFailed(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("transferSettlementFailed", pair -> parseSettlementFiled(pair.getFirst(), pair.getSecond()));
 
-        batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(pair.getSecond()));
-        batchParsers.put("fileName", pair -> pair.getFirst().setRequestFile(pair.getSecond()));
-        batchParsers.put("requestId", pair -> pair.getFirst().setRequestFile(pair.getSecond()));
-        batchParsers.put("note", pair -> pair.getFirst().setNote(pair.getSecond()));
+        batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(strip(pair.getSecond())));
+        batchParsers.put("fileName", pair -> pair.getFirst().setRequestFile(strip(pair.getSecond())));
+        batchParsers.put("requestId", pair -> pair.getFirst().setRequestId(strip(pair.getSecond())));
+        batchParsers.put("note", pair -> pair.getFirst().setNote(strip(pair.getSecond())));
     }
 
     public Map<String, Consumer<Pair<Transfer, String>>> getTransferParsers() {
@@ -195,7 +196,7 @@ public class VariableParser {
     }
 
     private void parseErrorInformation(Transfer transfer, String jsonString) {
-        transfer.setErrorInformation(jsonString);
+        transfer.setErrorInformation(strip(jsonString));
     }
 
     private void parseTransactionChannelRequest(TransactionRequest transactionRequest, String jsonString) {
