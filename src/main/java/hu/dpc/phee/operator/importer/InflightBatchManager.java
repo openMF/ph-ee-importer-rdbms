@@ -25,9 +25,9 @@ public class InflightBatchManager {
         if (batch.getStartedAt() == null) {
             batch.setStartedAt(new Date(timestamp));
             batchRepository.save(batch);
-            logger.debug("started in-flight batch {}", batch.getWorkflowInstanceKey());
+            logger.debug("saving batch {}", batch.getWorkflowInstanceKey());
         } else {
-            logger.debug("transactionRequest {} already started at {}", workflowInstanceKey, batch.getStartedAt());
+            logger.debug("batch {} already started at {}", workflowInstanceKey, batch.getStartedAt());
         }
     }
 
@@ -56,6 +56,7 @@ public class InflightBatchManager {
                 batch = batchRepository.findByWorkflowInstanceKey(workflowInstanceKey);
                 if (batch == null) {
                     batch = new Batch(workflowInstanceKey);
+                    logger.debug("started in-flight batch {}", batch.getWorkflowInstanceKey());
                 }
                 inflightBatches.put(workflowInstanceKey, batch);
             }
