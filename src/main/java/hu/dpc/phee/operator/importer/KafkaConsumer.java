@@ -57,7 +57,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
             Long workflowKey = incomingRecord.read("$.value.processDefinitionKey");
             String bpmnprocessIdWithTenant = incomingRecord.read("$.value.bpmnProcessId");
             Long recordKey = incomingRecord.read("$.key");
-
+            logger.info("bpmnprocessIdWithTenant: " + bpmnprocessIdWithTenant);
             if(bpmnprocessIdWithTenant == null) {
                 bpmnprocessIdWithTenant = tempDocumentStore.getBpmnprocessId(workflowKey);
                 if (bpmnprocessIdWithTenant == null) {
@@ -71,8 +71,12 @@ public class KafkaConsumer implements ConsumerSeekAware {
 
             String tenantName = bpmnprocessIdWithTenant.substring(bpmnprocessIdWithTenant.indexOf("-") + 1);
             String bpmnprocessId = bpmnprocessIdWithTenant.substring(0, bpmnprocessIdWithTenant.indexOf("-"));
-
+            logger.info("Tenant name: " + tenantName);
+            logger.info("bpmnprocessId: " + bpmnprocessId);
             TenantServerConnection tenant = repository.findOneBySchemaName(tenantName);
+            if(tenant != null) {
+                logger.info("TenantServerConnection: " + tenant.toString());
+            }
             ThreadLocalContextUtil.setTenant(tenant);
 
             List<DocumentContext> documents = new ArrayList<>();
