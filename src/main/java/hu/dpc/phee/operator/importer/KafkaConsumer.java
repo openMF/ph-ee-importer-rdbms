@@ -74,7 +74,9 @@ public class KafkaConsumer implements ConsumerSeekAware {
             logger.info("Tenant name: " + tenantName);
             logger.info("bpmnprocessId: " + bpmnprocessId);
             TenantServerConnection tenant = repository.findOneBySchemaName(tenantName);
-            logger.info("TenantServerConnection: " + tenant.toString());
+            if(tenant != null) {
+                logger.info("TenantServerConnection: " + tenant.toString());
+            }
             ThreadLocalContextUtil.setTenant(tenant);
 
             List<DocumentContext> documents = new ArrayList<>();
