@@ -48,6 +48,18 @@ public class TenantServerConnection extends AbstractPersistableCustom<Long> {
     @Column(name = "auto_update")
     private boolean autoUpdateEnabled;
 
+    @Override
+    public String toString() {
+        return "TenantServerConnection{" +
+                "schemaServer='" + schemaServer + '\'' +
+                ", schemaName='" + schemaName + '\'' +
+                ", schemaServerPort='" + schemaServerPort + '\'' +
+                ", schemaUsername='" + schemaUsername + '\'' +
+                ", schemaPassword='" + schemaPassword + '\'' +
+                ", autoUpdateEnabled=" + autoUpdateEnabled +
+                '}';
+    }
+
     public TenantServerConnection() {}
 
     public String getSchemaServer() {
