@@ -57,7 +57,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
             Long workflowKey = incomingRecord.read("$.value.processDefinitionKey");
             String bpmnprocessIdWithTenant = incomingRecord.read("$.value.bpmnProcessId");
             Long recordKey = incomingRecord.read("$.key");
-
+            logger.info("bpmnprocessIdWithTenant: " + bpmnprocessIdWithTenant);
             if(bpmnprocessIdWithTenant == null) {
                 bpmnprocessIdWithTenant = tempDocumentStore.getBpmnprocessId(workflowKey);
                 if (bpmnprocessIdWithTenant == null) {
