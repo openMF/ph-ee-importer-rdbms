@@ -20,7 +20,7 @@
         <elasticsearch.version>7.6.0</elasticsearch.version>
         <json.version>20190722</json.version>
         <kafka-streams.version>2.4.0</kafka-streams.version>
-        <mysql.version>8.0.20</mysql.version>
+        <mysql.version>8.0.28</mysql.version>
         <spring-boot.version>2.2.4.RELEASE</spring-boot.version>
     </properties>
 
