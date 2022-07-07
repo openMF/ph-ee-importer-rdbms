@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -66,6 +65,7 @@ public class VariableParser {
         transactionRequestParsers.put("quoteId", pair -> pair.getFirst().setPayeeQuoteCode(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionState", pair -> parseTransActionState(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("mpesaChannelRequest", pair -> parseTransactionMpesaRequest(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("externalId", pair -> parseExternalId(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("partyLookupFailed", pair -> parsePartyLookUpState(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("transactionFailed", pair -> parseTransactionFailed(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("transferSettlementFailed", pair -> parseSettlementFiled(pair.getFirst(), pair.getSecond()));
@@ -222,6 +222,10 @@ public class VariableParser {
         DocumentContext json = JsonPathReader.parseEscaped(jsonString);
         transactionRequest.setInitiatorType(json.read("$.transactionType.initiatorType"));
         transactionRequest.setScenario(json.read("$.transactionType.scenario"));
+    }
+
+    private void parseExternalId(TransactionRequest transactionRequest, String receiptNumber) {
+        transactionRequest.setExternalId(receiptNumber);
     }
 
     private void parseTransactionRequestResponse(TransactionRequest transactionRequest, String jsonString) {
