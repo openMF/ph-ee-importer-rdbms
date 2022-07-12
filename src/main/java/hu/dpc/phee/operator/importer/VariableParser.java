@@ -224,8 +224,8 @@ public class VariableParser {
         transactionRequest.setScenario(json.read("$.transactionType.scenario"));
     }
 
-    private void parseExternalId(TransactionRequest transactionRequest, String receiptNumber) {
-        transactionRequest.setExternalId(receiptNumber);
+    private void parseExternalId(TransactionRequest transactionRequest, String externalId) {
+        transactionRequest.setExternalId(externalId);
     }
 
     private void parseTransactionRequestResponse(TransactionRequest transactionRequest, String jsonString) {
