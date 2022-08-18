@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -62,7 +61,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 bpmnprocessIdWithTenant = tempDocumentStore.getBpmnprocessId(workflowKey);
                 if (bpmnprocessIdWithTenant == null) {
                     tempDocumentStore.storeDocument(workflowKey, incomingRecord);
-                    logger.info("Record with key {} workflowkey {} has no associated bpmn, stored temporarly", recordKey, workflowKey);
+                    logger.info("Record with key {} workflowkey {} has no associated bpmn, stored temporarily", recordKey, workflowKey);
                     return;
                 }
             } else {
@@ -87,9 +86,12 @@ public class KafkaConsumer implements ConsumerSeekAware {
             }
             documents.add(incomingRecord);
 
+            logger.debug("Start processing of {} documents.", documents.size());
             for(DocumentContext doc : documents) {
+                String valueType = null;
                 try {
-                    String valueType = doc.read("$.valueType");
+                    valueType = doc.read("$.valueType");
+                    logger.info("Processing document of type {}", valueType);
                     switch (valueType) {
                         case "VARIABLE":
                             DocumentContext processedVariable = recordParser.processVariable(doc); // TODO prepare for parent workflow
@@ -105,8 +107,9 @@ public class KafkaConsumer implements ConsumerSeekAware {
                             break;
                     }
                 } catch (Exception ex) {
-                    logger.error("Failed to process document:\n{}\nerror: {}\ntrace: {}",
-                            doc,
+                    logger.error("Failed to process document:\n{}\nof valueType:\n{}\nerror: {}\ntrace: {}",
+                            doc.jsonString(),
+                            valueType,
                             ex.getMessage(),
                             limitStackTrace(ex));
                     tempDocumentStore.storeDocument(workflowKey, doc);
