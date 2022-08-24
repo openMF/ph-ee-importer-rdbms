@@ -35,6 +35,15 @@ public class TempDocumentStore {
         }
     }
 
+    public void deleteDocument(Long workflowKey) {
+        synchronized (tempVariableEvents) {
+            tempVariableEvents.remove(workflowKey);
+        }
+        synchronized (workflowkeyBpmnAccociations){
+            workflowkeyBpmnAccociations.remove(workflowKey);
+        }
+    }
+
     public List<DocumentContext> takeStoredDocuments(Long workflowKey) {
         synchronized (tempVariableEvents) {
             List<DocumentContext> removedDocuments = tempVariableEvents.remove(workflowKey);

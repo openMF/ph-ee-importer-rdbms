@@ -20,6 +20,9 @@ public class InflightTransactionRequestManager {
     @Autowired
     private TransactionRequestRepository transactionRequestRepository;
 
+    @Autowired
+    private TempDocumentStore tempDocumentStore;
+
     public void transactionRequestStarted(Long workflowInstanceKey, Long timestamp, String direction) {
         TransactionRequest transactionRequest = getOrCreateTransactionRequest(workflowInstanceKey);
         if (transactionRequest.getStartedAt() == null) {
@@ -47,6 +50,7 @@ public class InflightTransactionRequestManager {
             transactionRequest.setCompletedAt(new Date(timestamp));
 
             transactionRequestRepository.save(transactionRequest);
+            tempDocumentStore.deleteDocument(workflowInstanceKey);
             logger.debug("transactionRequest {} finished", transactionRequest.getWorkflowInstanceKey());
         }
     }

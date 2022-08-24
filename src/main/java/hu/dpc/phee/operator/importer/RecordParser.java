@@ -74,11 +74,11 @@ public class RecordParser {
     private final Map<Long, Long> inflightCallActivities = new ConcurrentHashMap<>();
 
     public void addVariableToEntity(DocumentContext newVariable, String bpmnProcessId) {
-        logger.debug("newVariable in RecordParser: {}", newVariable.jsonString()); //
+
         if (newVariable == null) {
             return;
         }
-
+        logger.debug("newVariable in RecordParser: {}", newVariable.jsonString()); //
         String name = newVariable.read("$.value.name");
         Long workflowInstanceKey = newVariable.read("$.value.processInstanceKey");
         if (inflightCallActivities.containsKey(workflowInstanceKey)) {
