@@ -40,6 +40,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
 
     @KafkaListener(topics = "${importer.kafka.topic}")
     public void listen(String rawData) {
+        Long startTime = System.currentTimeMillis();
         try {
             DocumentContext incomingRecord = JsonPathReader.parse(rawData);
             logger.debug("from kafka: {}", incomingRecord.jsonString());
@@ -77,7 +78,8 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 logger.info("TenantServerConnection: " + tenant.toString());
             }
             ThreadLocalContextUtil.setTenant(tenant);
-
+            Long midTime1 = System.currentTimeMillis();
+            logger.debug("Mid Time 1 {}", (midTime1-startTime));
             List<DocumentContext> documents = new ArrayList<>();
             List<DocumentContext> storedDocuments = tempDocumentStore.takeStoredDocuments(workflowKey);
             if(!storedDocuments.isEmpty()) {
@@ -85,6 +87,8 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 documents.addAll(storedDocuments);
             }
             documents.add(incomingRecord);
+            Long midTime2 = System.currentTimeMillis();
+            logger.debug("Mid Time 2 {}", (midTime2-startTime));
 
             logger.debug("Start processing of {} documents.", documents.size());
             for(DocumentContext doc : documents) {
@@ -115,6 +119,8 @@ public class KafkaConsumer implements ConsumerSeekAware {
                     tempDocumentStore.storeDocument(workflowKey, doc);
                 }
             }
+            Long endTime = System.currentTimeMillis();
+            logger.debug("Total Time 1 {}", (endTime-startTime));
         } catch (Exception ex) {
             logger.error("Could not parse zeebe event:\n{}\nerror: {}\ntrace: {}",
                     rawData,
@@ -122,6 +128,8 @@ public class KafkaConsumer implements ConsumerSeekAware {
                     limitStackTrace(ex));
         } finally {
             ThreadLocalContextUtil.clear();
+            Long endTime2 = System.currentTimeMillis();
+            logger.debug("Total Time 2 {}", (endTime2-startTime));
         }
     }
 
