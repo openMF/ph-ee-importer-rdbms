@@ -194,7 +194,7 @@ public class RecordParser {
                 inflightBatchManager.batchEnded(workflowInstanceKey, timestamp);
             }
         } else {
-            logger.error("Skip parsing bpmnProcess: {}", bpmnProcessId);
+            logger.error("Skip parsing bpmnProcess: {}, bpmnProcessId: {}, document: {}", bpmnProcess, bpmnProcessId, json.jsonString());
         }
     }
 

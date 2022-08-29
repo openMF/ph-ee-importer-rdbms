@@ -16,6 +16,9 @@ public class Batch extends AbstractPersistableCustom<Long> {
     @Column(name = "BATCH_ID")
     private String batchId;
 
+    @Column(name = "SUB_BATCH_ID")
+    private String subBatchId;
+
     @Column(name = "REQUEST_ID")
     private String requestId;
 
@@ -173,5 +176,13 @@ public class Batch extends AbstractPersistableCustom<Long> {
 
     public void setCompletedAt(Date completedAt) {
         this.completedAt = completedAt;
+    }
+
+    public String getSubBatchId() {
+        return subBatchId;
+    }
+
+    public void setSubBatchId(String subBatchId) {
+        this.subBatchId = subBatchId;
     }
 }
