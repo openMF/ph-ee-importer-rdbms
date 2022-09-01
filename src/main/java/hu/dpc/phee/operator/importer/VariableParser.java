@@ -79,6 +79,10 @@ public class VariableParser {
         batchParsers.put("ongoingTransactions", pair -> pair.getFirst().setOngoing(Long.parseLong(pair.getSecond())));
         batchParsers.put("failedTransactions", pair -> pair.getFirst().setFailed(Long.parseLong(pair.getSecond())));
         batchParsers.put("completedTransactions", pair -> pair.getFirst().setCompleted(Long.parseLong(pair.getSecond())));
+        batchParsers.put("totalAmount", pair -> pair.getFirst().setTotalAmount(Long.parseLong(pair.getSecond())));
+        batchParsers.put("ongoingAmount", pair -> pair.getFirst().setOngoingAmount(Long.parseLong(pair.getSecond())));
+        batchParsers.put("failedAmount", pair -> pair.getFirst().setFailedAmount(Long.parseLong(pair.getSecond())));
+        batchParsers.put("completedAmount", pair -> pair.getFirst().setCompletedAmount(Long.parseLong(pair.getSecond())));
     }
 
     public Map<String, Consumer<Pair<Transfer, String>>> getTransferParsers() {
