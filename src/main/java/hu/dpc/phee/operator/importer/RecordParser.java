@@ -1,10 +1,14 @@
 package hu.dpc.phee.operator.importer;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.BpmnProcess;
 import hu.dpc.phee.operator.config.BpmnProcessProperties;
 import hu.dpc.phee.operator.entity.batch.Batch;
 import hu.dpc.phee.operator.entity.batch.BatchRepository;
+import hu.dpc.phee.operator.entity.batch.Transaction;
 import hu.dpc.phee.operator.entity.task.Task;
 import hu.dpc.phee.operator.entity.task.TaskRepository;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequest;
@@ -13,6 +17,8 @@ import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferRepository;
 import hu.dpc.phee.operator.entity.variable.Variable;
 import hu.dpc.phee.operator.entity.variable.VariableRepository;
+import hu.dpc.phee.operator.file.FileTransferService;
+import hu.dpc.phee.operator.util.BatchFormatToTransferMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +26,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,6 +49,9 @@ public class RecordParser {
 
     @Value("${bpmn.outgoing-direction}")
     private String outgoingDirection;
+
+    @Value("${application.bucket-name}")
+    private String bucketName;
 
     @Autowired
     private TaskRepository taskRepository;
@@ -70,6 +82,15 @@ public class RecordParser {
 
     @Autowired
     private VariableParser variableParser;
+
+    @Autowired
+    private TempDocumentStore tempDocumentStore;
+
+    @Autowired
+    private FileTransferService fileTransferService;
+
+    @Autowired
+    private CsvMapper csvMapper;
 
     private final Map<Long, Long> inflightCallActivities = new ConcurrentHashMap<>();
 
@@ -117,6 +138,17 @@ public class RecordParser {
                 Batch batch = inflightBatchManager.getOrCreateBatch(workflowInstanceKey);
                 variableParser.getBatchParsers().get(name).accept(Pair.of(batch, value));
                 batchRepository.save(batch);
+
+                if (!bpmnProcess.getId().equalsIgnoreCase("bulk_processor")) {
+                    if (name.equals("filename")) {
+                        logger.debug("store filename {} in tempDocStore for instance {}", value, workflowInstanceKey);
+                        tempDocumentStore.storeBatchFileName(workflowInstanceKey, value);
+                    }
+                    if (name.equals("batchId")) {
+                        logger.debug("store filename {} in tempDocStore for instance {}", value, workflowInstanceKey);
+                        tempDocumentStore.storeBatchId(workflowInstanceKey, value);
+                    }
+                }
             }
         }
         else {
@@ -192,6 +224,9 @@ public class RecordParser {
                 inflightBatchManager.batchStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 inflightBatchManager.batchEnded(workflowInstanceKey, timestamp);
+                if (!bpmnProcess.getId().equalsIgnoreCase("bulk_processor")) {
+                    checkWorkerIdAndUpdateTransferData(workflowInstanceKey, json.read("$.value.elementId"));
+                }
             }
         } else {
             logger.error("Skip parsing bpmnProcess: {}, bpmnProcessId: {}, document: {}", bpmnProcess, bpmnProcessId, json.jsonString());
@@ -231,5 +266,47 @@ public class RecordParser {
         task.setType(type);
         task.setElementId(newElementId);
         taskRepository.save(task);
+    }
+
+
+    private void checkWorkerIdAndUpdateTransferData(Long workflowInstanceKey, String workerId) {
+        if (!workerId.equals("initiateTransfer") && !workerId.equals("reconciliation")){
+            return;
+        }
+        updateTransferTableForBatch(workflowInstanceKey);
+    }
+
+    // reads data from csv file and write data to transfers table
+    private void updateTransferTableForBatch(Long workflowInstanceKey) {
+        String filename = tempDocumentStore.getBatchFileName(workflowInstanceKey);
+        String localFilePath = fileTransferService.downloadFile(filename, bucketName);
+        if (localFilePath == null) {
+            logger.error("Null localFilePath, Error updating transfer table for batch with instance key {} and batch filename {}", workflowInstanceKey, filename);
+            return;
+        }
+        List<Transaction> transactionList;
+        try {
+            CsvSchema schema = CsvSchema.emptySchema().withHeader();
+            FileReader reader = new FileReader(filename);
+            MappingIterator<Transaction> readValues = csvMapper.readerWithSchemaFor(Transaction.class).with(schema).readValues(reader);
+            transactionList = new ArrayList<>();
+            while (readValues.hasNext()) {
+                Transaction current = readValues.next();
+                transactionList.add(current);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("Error building TransactionList for batch with instance key {} and batch filename {}", workflowInstanceKey, filename);
+            return;
+        }
+
+        for (Transaction transaction: transactionList) {
+            Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
+            transfer.setWorkflowInstanceKey(workflowInstanceKey);
+            transfer.setBatchId(tempDocumentStore.getBatchId(workflowInstanceKey));
+
+            transferRepository.save(transfer);
+        }
+
     }
 }

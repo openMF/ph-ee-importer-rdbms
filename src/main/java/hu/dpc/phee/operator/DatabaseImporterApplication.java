@@ -1,10 +1,12 @@
 package hu.dpc.phee.operator;
 
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class,
@@ -18,5 +20,10 @@ public class DatabaseImporterApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(DatabaseImporterApplication.class, args);
+    }
+
+    @Bean
+    public CsvMapper csvMapper() {
+        return new CsvMapper();
     }
 }
