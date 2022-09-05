@@ -70,10 +70,7 @@ bpmn:
     - id: "mpesa_flow-paygops"
       direction: "${bpmn.incoming-direction}"
       type: "${bpmn.transaction-request-type}"
-    - id: "slcb-ibank-usa"
-      direction: "UNKNOWN"
-      type: "${bpmn.batch-type}"
-    - id: "slcb-ibank-india"
+    - id: "slcb"
       direction: "UNKNOWN"
       type: "${bpmn.batch-type}"
 

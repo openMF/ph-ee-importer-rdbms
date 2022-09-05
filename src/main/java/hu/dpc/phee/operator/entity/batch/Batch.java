@@ -16,6 +16,9 @@ public class Batch extends AbstractPersistableCustom<Long> {
     @Column(name = "BATCH_ID")
     private String batchId;
 
+    @Column(name = "SUB_BATCH_ID")
+    private String subBatchId;
+
     @Column(name = "REQUEST_ID")
     private String requestId;
 
@@ -33,6 +36,18 @@ public class Batch extends AbstractPersistableCustom<Long> {
 
     @Column(name = "COMPLETED")
     private Long completed;
+
+    @Column(name = "TOTAL_AMOUNT")
+    private Long totalAmount;
+
+    @Column(name = "ONGOING_AMOUNT")
+    private Long ongoingAmount;
+
+    @Column(name = "FAILED_AMOUNT")
+    private Long failedAmount;
+
+    @Column(name = "COMPLETED_AMOUNT")
+    private Long completedAmount;
 
     @Column(name = "RESULT_FILE")
     private String result_file;
@@ -173,5 +188,45 @@ public class Batch extends AbstractPersistableCustom<Long> {
 
     public void setCompletedAt(Date completedAt) {
         this.completedAt = completedAt;
+    }
+
+    public String getSubBatchId() {
+        return subBatchId;
+    }
+
+    public void setSubBatchId(String subBatchId) {
+        this.subBatchId = subBatchId;
+    }
+
+    public Long getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(Long totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public Long getOngoingAmount() {
+        return ongoingAmount;
+    }
+
+    public void setOngoingAmount(Long ongoingAmount) {
+        this.ongoingAmount = ongoingAmount;
+    }
+
+    public Long getFailedAmount() {
+        return failedAmount;
+    }
+
+    public void setFailedAmount(Long failedAmount) {
+        this.failedAmount = failedAmount;
+    }
+
+    public Long getCompletedAmount() {
+        return completedAmount;
+    }
+
+    public void setCompletedAmount(Long completedAmount) {
+        this.completedAmount = completedAmount;
     }
 }

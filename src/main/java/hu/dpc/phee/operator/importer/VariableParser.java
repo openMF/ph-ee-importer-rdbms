@@ -71,9 +71,18 @@ public class VariableParser {
         transactionRequestParsers.put("transferSettlementFailed", pair -> parseSettlementFiled(pair.getFirst(), pair.getSecond()));
 
         batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(strip(pair.getSecond())));
-        batchParsers.put("fileName", pair -> pair.getFirst().setRequestFile(strip(pair.getSecond())));
+        batchParsers.put("filename", pair -> pair.getFirst().setRequestFile(strip(pair.getSecond())));
         batchParsers.put("requestId", pair -> pair.getFirst().setRequestId(strip(pair.getSecond())));
         batchParsers.put("note", pair -> pair.getFirst().setNote(strip(pair.getSecond())));
+        batchParsers.put("subBatchId", pair -> pair.getFirst().setSubBatchId(strip(pair.getSecond())));
+        batchParsers.put("totalTransactions", pair -> pair.getFirst().setTotalTransactions(Long.parseLong(pair.getSecond())));
+        batchParsers.put("ongoingTransactions", pair -> pair.getFirst().setOngoing(Long.parseLong(pair.getSecond())));
+        batchParsers.put("failedTransactions", pair -> pair.getFirst().setFailed(Long.parseLong(pair.getSecond())));
+        batchParsers.put("completedTransactions", pair -> pair.getFirst().setCompleted(Long.parseLong(pair.getSecond())));
+        batchParsers.put("totalAmount", pair -> pair.getFirst().setTotalAmount(Long.parseLong(pair.getSecond())));
+        batchParsers.put("ongoingAmount", pair -> pair.getFirst().setOngoingAmount(Long.parseLong(pair.getSecond())));
+        batchParsers.put("failedAmount", pair -> pair.getFirst().setFailedAmount(Long.parseLong(pair.getSecond())));
+        batchParsers.put("completedAmount", pair -> pair.getFirst().setCompletedAmount(Long.parseLong(pair.getSecond())));
     }
 
     public Map<String, Consumer<Pair<Transfer, String>>> getTransferParsers() {
