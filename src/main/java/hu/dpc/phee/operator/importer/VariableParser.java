@@ -83,6 +83,7 @@ public class VariableParser {
         batchParsers.put("ongoingAmount", pair -> pair.getFirst().setOngoingAmount(Long.parseLong(pair.getSecond())));
         batchParsers.put("failedAmount", pair -> pair.getFirst().setFailedAmount(Long.parseLong(pair.getSecond())));
         batchParsers.put("completedAmount", pair -> pair.getFirst().setCompletedAmount(Long.parseLong(pair.getSecond())));
+        batchParsers.put("resultFile", pair -> pair.getFirst().setResult_file(strip(pair.getSecond())));
     }
 
     public Map<String, Consumer<Pair<Transfer, String>>> getTransferParsers() {
