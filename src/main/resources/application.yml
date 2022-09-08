@@ -30,6 +30,18 @@ datasource:
 server:
   port: 8000
 
+application:
+  bucket-name: paymenthub-ee-dev
+
+cloud:
+  aws:
+    enabled: true
+    credentials:
+      access-key: ${AWS_ACCESS_KEY:AKIAX32JM37TZOJ5AKFB}
+      secret-key: ${AWS_SECRET_KEY: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}
+    region:
+      static: us-east-2
+
 bpmn:
   transfer-type: "TRANSFER"
   transaction-request-type: "TRANSACTION-REQUEST"

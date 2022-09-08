@@ -16,6 +16,10 @@ public class TempDocumentStore {
     private final Map<Long, List<DocumentContext>> tempVariableEvents = new HashMap<>();
     private final Map<Long, String> workflowkeyBpmnAccociations = new ConcurrentHashMap<>();
 
+    private final Map<Long, String> workflowKeyBatchFileNameAssociations = new HashMap<>();
+
+    private final Map<Long, String> workflowKeyBatchIdAssociations = new HashMap<>();
+
     public String getBpmnprocessId(Long workflowKey) {
         return workflowkeyBpmnAccociations.get(workflowKey);
     }
@@ -48,6 +52,31 @@ public class TempDocumentStore {
         synchronized (tempVariableEvents) {
             List<DocumentContext> removedDocuments = tempVariableEvents.remove(workflowKey);
             return removedDocuments == null ? Collections.emptyList() : removedDocuments;
+        }
+    }
+
+
+    public void storeBatchFileName(Long workflowKey, String filename) {
+        synchronized (workflowKeyBatchFileNameAssociations) {
+            workflowKeyBatchFileNameAssociations.put(workflowKey, filename);
+        }
+    }
+
+    public String getBatchFileName(Long workflowKey) {
+        synchronized (workflowKeyBatchFileNameAssociations) {
+            return workflowKeyBatchFileNameAssociations.get(workflowKey);
+        }
+    }
+
+    public void storeBatchId(Long workflowKey, String batchId) {
+        synchronized (workflowKeyBatchFileNameAssociations) {
+            workflowKeyBatchIdAssociations.put(workflowKey, batchId);
+        }
+    }
+
+    public String getBatchId(Long workflowKey) {
+        synchronized (workflowKeyBatchFileNameAssociations) {
+            return workflowKeyBatchIdAssociations.get(workflowKey);
         }
     }
 }
