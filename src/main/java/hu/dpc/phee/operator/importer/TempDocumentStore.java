@@ -64,19 +64,19 @@ public class TempDocumentStore {
 
     public String getBatchFileName(Long workflowKey) {
         synchronized (workflowKeyBatchFileNameAssociations) {
-            return workflowKeyBatchFileNameAssociations.remove(workflowKey);
+            return workflowKeyBatchFileNameAssociations.get(workflowKey);
         }
     }
 
     public void storeBatchId(Long workflowKey, String batchId) {
         synchronized (workflowKeyBatchFileNameAssociations) {
-            workflowKeyBatchFileNameAssociations.put(workflowKey, batchId);
+            workflowKeyBatchIdAssociations.put(workflowKey, batchId);
         }
     }
 
     public String getBatchId(Long workflowKey) {
         synchronized (workflowKeyBatchFileNameAssociations) {
-            return workflowKeyBatchFileNameAssociations.remove(workflowKey);
+            return workflowKeyBatchIdAssociations.get(workflowKey);
         }
     }
 }

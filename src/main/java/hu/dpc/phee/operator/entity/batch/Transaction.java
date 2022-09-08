@@ -108,8 +108,8 @@ public class Transaction implements CsvSchema {
     @JsonIgnore
     @Override
     public String getCsvString() {
-        if (!status.isEmpty()) {
-            return String.format("%s,%s,%s,%s,%s,%s,%s,%s", id, request_id, payment_mode, account_number, amount, currency, note, status);
+        if (status == null || !status.isEmpty()) {
+            return String.format("%s,%s,%s,%s,%s,%s,%s", id, request_id, payment_mode, account_number, amount, currency, note);
         }
         return String.format("%s,%s,%s,%s,%s,%s,%s,%s", id, request_id, payment_mode, account_number, amount, currency, note, status);
     }

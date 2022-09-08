@@ -29,9 +29,12 @@ import org.springframework.stereotype.Component;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static hu.dpc.phee.operator.OperatorUtils.strip;
 
 @Component
 public class RecordParser {
@@ -140,12 +143,13 @@ public class RecordParser {
                 batchRepository.save(batch);
 
                 if (!bpmnProcess.getId().equalsIgnoreCase("bulk_processor")) {
+                    logger.info("Inside if condition");
                     if (name.equals("filename")) {
-                        logger.debug("store filename {} in tempDocStore for instance {}", value, workflowInstanceKey);
+                        logger.info("store filename {} in tempDocStore for instance {}", strip(value), workflowInstanceKey);
                         tempDocumentStore.storeBatchFileName(workflowInstanceKey, value);
                     }
                     if (name.equals("batchId")) {
-                        logger.debug("store filename {} in tempDocStore for instance {}", value, workflowInstanceKey);
+                        logger.info("store batchid {} in tempDocStore for instance {}", strip(value), workflowInstanceKey);
                         tempDocumentStore.storeBatchId(workflowInstanceKey, value);
                     }
                 }
@@ -223,10 +227,11 @@ public class RecordParser {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 inflightBatchManager.batchStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
-                inflightBatchManager.batchEnded(workflowInstanceKey, timestamp);
                 if (!bpmnProcess.getId().equalsIgnoreCase("bulk_processor")) {
-                    checkWorkerIdAndUpdateTransferData(workflowInstanceKey, json.read("$.value.elementId"));
+                    logger.info("Inside if condition PROCESS_INSTANCE, json {}", json.jsonString());
+                    checkWorkerIdAndUpdateTransferData(workflowInstanceKey, timestamp);
                 }
+                inflightBatchManager.batchEnded(workflowInstanceKey, timestamp);
             }
         } else {
             logger.error("Skip parsing bpmnProcess: {}, bpmnProcessId: {}, document: {}", bpmnProcess, bpmnProcessId, json.jsonString());
@@ -269,16 +274,18 @@ public class RecordParser {
     }
 
 
-    private void checkWorkerIdAndUpdateTransferData(Long workflowInstanceKey, String workerId) {
-        if (!workerId.equals("initiateTransfer") && !workerId.equals("reconciliation")){
-            return;
-        }
-        updateTransferTableForBatch(workflowInstanceKey);
+    private void checkWorkerIdAndUpdateTransferData(Long workflowInstanceKey, Long completeTimestamp) {
+        updateTransferTableForBatch(workflowInstanceKey, completeTimestamp);
     }
 
     // reads data from csv file and write data to transfers table
-    private void updateTransferTableForBatch(Long workflowInstanceKey) {
+    private void updateTransferTableForBatch(Long workflowInstanceKey, Long completeTimestamp) {
         String filename = tempDocumentStore.getBatchFileName(workflowInstanceKey);
+        logger.info("Filename {}", filename);
+        if (filename == null) {
+            return;
+        }
+        filename = strip(filename);
         String localFilePath = fileTransferService.downloadFile(filename, bucketName);
         if (localFilePath == null) {
             logger.error("Null localFilePath, Error updating transfer table for batch with instance key {} and batch filename {}", workflowInstanceKey, filename);
@@ -300,10 +307,13 @@ public class RecordParser {
             return;
         }
 
+        Batch batch = batchRepository.findByWorkflowInstanceKey(workflowInstanceKey);
         for (Transaction transaction: transactionList) {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
-            transfer.setBatchId(tempDocumentStore.getBatchId(workflowInstanceKey));
+            transfer.setBatchId(strip(tempDocumentStore.getBatchId(workflowInstanceKey)));
+            transfer.setCompletedAt(new Date(completeTimestamp));
+            BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
 
             transferRepository.save(transfer);
         }

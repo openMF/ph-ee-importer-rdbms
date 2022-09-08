@@ -109,6 +109,9 @@ public class KafkaConsumer implements ConsumerSeekAware {
                                 recordParser.processWorkflowInstance(doc);
                             }
                             break;
+                        case "INCIDENT":
+                            logger.info("Doc {}", incomingRecord.jsonString());
+                            break;
                     }
                 } catch (Exception ex) {
                     logger.error("Failed to process document:\n{}\nof valueType:\n{}\nerror: {}\ntrace: {}",
