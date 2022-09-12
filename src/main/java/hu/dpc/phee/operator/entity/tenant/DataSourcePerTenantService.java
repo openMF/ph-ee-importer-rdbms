@@ -115,17 +115,15 @@ public class DataSourcePerTenantService implements DisposableBean {
     }
 
     private String createJdbcUrl(String jdbcProtocol, String jdbcSubprotocol, String hostname, int port, String dbName) {
-        return new StringBuilder()
-                .append(jdbcProtocol)
-                .append(':')
-                .append(jdbcSubprotocol)
-                .append("://")
-                .append(hostname)
-                .append(':')
-                .append(port)
-                .append('/')
-                .append(dbName)
-                .toString();
+        return jdbcProtocol +
+                ':' +
+                jdbcSubprotocol +
+                "://" +
+                hostname +
+                ':' +
+                port +
+                '/' +
+                dbName;
     }
 
     @Override

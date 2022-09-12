@@ -27,7 +27,7 @@ import java.util.Map;
 @EnableTransactionManagement(proxyTargetClass = true)
 public class EclipselinkJpaConfiguration extends JpaBaseConfiguration {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public EclipselinkJpaConfiguration(DataSource routingDataSource, JpaProperties properties, ObjectProvider<JtaTransactionManager> jtaTransactionManager, ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
         super(routingDataSource, properties, jtaTransactionManager);

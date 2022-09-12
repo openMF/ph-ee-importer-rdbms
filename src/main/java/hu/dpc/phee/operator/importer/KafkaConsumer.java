@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Component
 public class KafkaConsumer implements ConsumerSeekAware {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${importer.kafka.topic}")
     private String kafkaTopic;
@@ -74,7 +74,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
             logger.info("bpmnprocessId: " + bpmnprocessId);
             TenantServerConnection tenant = repository.findOneBySchemaName(tenantName);
             if(tenant != null) {
-                logger.info("TenantServerConnection: " + tenant.toString());
+                logger.info("TenantServerConnection: " + tenant);
             }
             ThreadLocalContextUtil.setTenant(tenant);
 

@@ -10,7 +10,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import static hu.dpc.phee.operator.OperatorUtils.strip;
 
 public class JsonPathReader {
-    private static ParseContext jsonParser;
+    private static final ParseContext jsonParser;
 
     static {
         Configuration config = Configuration.defaultConfiguration()

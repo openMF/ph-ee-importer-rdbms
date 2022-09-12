@@ -24,7 +24,7 @@ import java.util.UUID;
 @Configuration
 public class KafkaConfiguration {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${kafka.brokers}")
     private String kafkaBrokers;

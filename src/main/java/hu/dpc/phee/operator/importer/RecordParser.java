@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class RecordParser {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${bpmn.transfer-type}")
     private String transferType;
@@ -156,10 +156,7 @@ public class RecordParser {
         Long timestamp = json.read("$.timestamp");
         String intent = json.read("$.intent");
         Object parentWorkflowInstanceKey = json.read("$.value.parentProcessInstanceKey");
-        boolean hasParent = false;
-        if (parentWorkflowInstanceKey instanceof Long && (Long) parentWorkflowInstanceKey > 0) {
-            hasParent = true;
-        }
+        boolean hasParent = parentWorkflowInstanceKey instanceof Long && (Long) parentWorkflowInstanceKey > 0;
 
         String elementId = json.read("$.value.elementId");
         Long callActivityKey = json.read("$.key");

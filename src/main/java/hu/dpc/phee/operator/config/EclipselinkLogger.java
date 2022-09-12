@@ -21,7 +21,7 @@ public class EclipselinkLogger extends AbstractSessionLog {
     public static final String DEFAULT_ECLIPSELINK_NAMESPACE = ECLIPSELINK_NAMESPACE + "." + DEFAULT_CATEGORY;
 
     private Map<Integer, LogLevel> mapLevels;
-    private Map<String, Logger> categoryLoggers = new HashMap<>();
+    private final Map<String, Logger> categoryLoggers = new HashMap<>();
 
     public EclipselinkLogger() {
         super();
@@ -38,11 +38,8 @@ public class EclipselinkLogger extends AbstractSessionLog {
         Logger logger = getLogger(entry.getNameSpace());
         LogLevel logLevel = getLogLevel(entry.getLevel());
 
-        StringBuilder message = new StringBuilder();
-        message.append(getSupplementDetailString(entry));
-        message.append(formatMessage(entry));
-
-        String finalMesssage = message.toString();
+        String finalMesssage = getSupplementDetailString(entry) +
+                formatMessage(entry);
         switch (logLevel) {
             case TRACE:
                 logger.trace(finalMesssage);

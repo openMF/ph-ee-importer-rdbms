@@ -6,5 +6,5 @@ public enum TransactionRequestState {
     RECEIVED,
     ACCEPTED,
     REJECTED,
-    FAILED;
+    FAILED
 }
