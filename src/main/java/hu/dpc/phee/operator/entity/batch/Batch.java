@@ -71,6 +71,9 @@ public class Batch extends AbstractPersistableCustom<Long> {
     @Column(name = "COMPLETED_AT")
     private Date completedAt;
 
+    @Column(name = "PAYMENT_MODE")
+    private String paymentMode;
+
     public Batch() {
     }
 
@@ -228,5 +231,13 @@ public class Batch extends AbstractPersistableCustom<Long> {
 
     public void setCompletedAmount(Long completedAmount) {
         this.completedAmount = completedAmount;
+    }
+
+    public String getPaymentMode() {
+        return paymentMode;
+    }
+
+    public void setPaymentMode(String mode) {
+        this.paymentMode = mode;
     }
 }
