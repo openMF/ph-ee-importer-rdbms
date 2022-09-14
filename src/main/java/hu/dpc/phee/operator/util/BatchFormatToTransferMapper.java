@@ -14,7 +14,7 @@ public class BatchFormatToTransferMapper {
 
         transfer.setAmount(BigDecimal.valueOf(Long.parseLong(transaction.getAmount())));
         transfer.setPayeePartyIdType("accountnumber");
-        transfer.setPayeePartyId(transaction.getAccount_number());
+        transfer.setPayeePartyId(transaction.getAccountNumber());
         transfer.setDirection("UNKNOWN");
         transfer.setCurrency(transaction.getCurrency());
         TransferStatus status;
