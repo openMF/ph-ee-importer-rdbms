@@ -13,8 +13,17 @@ public class BatchFormatToTransferMapper {
         Transfer transfer = new Transfer();
 
         transfer.setAmount(BigDecimal.valueOf(Long.parseLong(transaction.getAmount())));
-        transfer.setPayeePartyIdType("accountnumber");
-        transfer.setPayeePartyId(transaction.getAccountNumber());
+        // below condition check will make sure backward compatibility with old batch format
+        if (transaction.getAccountNumber() != null && !transaction.getAccountNumber().equalsIgnoreCase("")) {
+            transfer.setPayeePartyId(transaction.getAccountNumber());
+            transfer.setPayeePartyIdType("accountnumber");
+        } else {
+            transfer.setPayeePartyId(transaction.getPayeeIdentifier());
+            transfer.setPayeePartyIdType(transaction.getPayeeIdentifierType());
+        }
+        // below 2 fields will work only for new CSV specs
+        transfer.setPayerPartyIdType(transaction.getPayerIdentifierType());
+        transfer.setPayerPartyId(transaction.getPayerIdentifier());
         transfer.setDirection("UNKNOWN");
         transfer.setCurrency(transaction.getCurrency());
         TransferStatus status;
