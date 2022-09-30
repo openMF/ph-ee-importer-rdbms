@@ -11,6 +11,7 @@ import hu.dpc.phee.operator.entity.batch.BatchRepository;
 import hu.dpc.phee.operator.entity.batch.Transaction;
 import hu.dpc.phee.operator.entity.task.Task;
 import hu.dpc.phee.operator.entity.task.TaskRepository;
+import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequest;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestRepository;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -143,7 +145,7 @@ public class RecordParser {
                 batchRepository.save(batch);
 
                 if (!bpmnProcess.getId().equalsIgnoreCase("bulk_processor")) {
-                    logger.info("Inside if condition");
+                    logger.info("Inside if condition {}", name);
                     if (name.equals("filename")) {
                         logger.info("store filename {} in tempDocStore for instance {}", strip(value), workflowInstanceKey);
                         tempDocumentStore.storeBatchFileName(workflowInstanceKey, value);
@@ -313,6 +315,15 @@ public class RecordParser {
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
             transfer.setBatchId(strip(tempDocumentStore.getBatchId(workflowInstanceKey)));
             transfer.setCompletedAt(new Date(completeTimestamp));
+
+            transfer.setPayeeDfspId(batch.getPaymentMode());
+            transfer.setPayerDfspId(ThreadLocalContextUtil.getTenant().getSchemaName());
+
+            transfer.setPayeeFeeCurrency(transaction.getCurrency());
+            transfer.setPayeeFee(BigDecimal.ZERO);
+            transfer.setPayerFeeCurrency(transaction.getCurrency());
+            transfer.setPayerFee(BigDecimal.ZERO);
+
             BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
 
             transferRepository.save(transfer);
