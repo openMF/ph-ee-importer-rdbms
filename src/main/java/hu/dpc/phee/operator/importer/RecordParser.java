@@ -316,6 +316,7 @@ public class RecordParser {
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
             transfer.setBatchId(strip(tempDocumentStore.getBatchId(workflowInstanceKey)));
             transfer.setCompletedAt(new Date(completeTimestamp));
+            transfer.setTransactionId(transaction.getRequestId());
 
             transfer.setPayeeDfspId(batch.getPaymentMode());
             transfer.setPayerDfspId(ThreadLocalContextUtil.getTenant().getSchemaName());
