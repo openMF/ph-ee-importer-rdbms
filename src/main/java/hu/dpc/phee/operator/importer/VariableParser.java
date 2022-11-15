@@ -51,6 +51,9 @@ public class VariableParser {
         transferParsers.put("errorInformation", pair -> {parseErrorInformation(pair.getFirst(), pair.getSecond());
             parseTransferCreateFailed(pair.getFirst(), pair.getSecond());});
         transferParsers.put("batchId", pair -> pair.getFirst().setBatchId(strip(pair.getSecond())));
+        transferParsers.put("clientCorrelationId", pair -> parseClientCorrelationIdTransfers(pair.getFirst(), pair.getSecond()));
+
+
 
         transactionRequestParsers.put("authType", pair -> pair.getFirst().setAuthType(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionId", pair -> pair.getFirst().setTransactionId(strip(pair.getSecond())));
@@ -69,6 +72,7 @@ public class VariableParser {
         transactionRequestParsers.put("partyLookupFailed", pair -> parsePartyLookUpState(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("transactionFailed", pair -> parseTransactionFailed(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("transferSettlementFailed", pair -> parseSettlementFiled(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("clientCorrelationId", pair -> parseClientCorrelationId(pair.getFirst(), pair.getSecond()));
 
         batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(strip(pair.getSecond())));
         batchParsers.put("filename", pair -> pair.getFirst().setRequestFile(strip(pair.getSecond())));
@@ -237,6 +241,13 @@ public class VariableParser {
 
     private void parseExternalId(TransactionRequest transactionRequest, String externalId) {
         transactionRequest.setExternalId(externalId);
+    }
+
+    private void parseClientCorrelationId(TransactionRequest transactionRequest, String clientCorrelationId) {
+        transactionRequest.setClientCorrelationId(clientCorrelationId);
+    }
+    private void parseClientCorrelationIdTransfers(Transfer transfer, String clientCorrelationId) {
+        transfer.setClientCorrelationId(clientCorrelationId);
     }
 
     private void parseTransactionRequestResponse(TransactionRequest transactionRequest, String jsonString) {
