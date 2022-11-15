@@ -76,6 +76,9 @@ public class TransactionRequest extends AbstractPersistableCustom<Long> {
     @Column(name = "EXTERNAL_ID")
     private String externalId;
 
+    @Column(name = "CLIENTCORRELATIONID")
+    private String clientCorrelationId;
+
     public TransactionRequest() {
     }
 
@@ -258,5 +261,13 @@ public class TransactionRequest extends AbstractPersistableCustom<Long> {
 
     public void setScenario(String scenario) {
         this.scenario = scenario;
+    }
+
+    public void setClientCorrelationId(String clientCorrelationId) {
+        this.clientCorrelationId = clientCorrelationId;
+    }
+
+    public String getClientCorrelationId() {
+        return clientCorrelationId;
     }
 }
