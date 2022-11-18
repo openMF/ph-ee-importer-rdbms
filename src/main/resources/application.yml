@@ -37,8 +37,8 @@ cloud:
   aws:
     enabled: true
     credentials:
-      access-key: ${AWS_ACCESS_KEY:AKIAX32JM37TZOJ5AKFB}
-      secret-key: ${AWS_SECRET_KEY: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}
+      access-key: ${AWS_ACCESS_KEY:access_key_from_aws}
+      secret-key: ${AWS_SECRET_KEY:secret_key_from_aws}
     region:
       static: us-east-2
 
