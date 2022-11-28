@@ -44,9 +44,9 @@ public class KafkaConfiguration {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs());
     }
 
-    @Bean
     public Map<String, Object> consumerConfigs() {
         String hostname = buildKafkaClientId(logger);
+        logger.info("configuring Kafka consumer {} for bootstrap servers {}", hostname, kafkaBrokers);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokers);

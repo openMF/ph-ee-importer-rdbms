@@ -27,6 +27,7 @@ public class Transfer extends AbstractPersistableCustom<Long> {
     private Date completedAt;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private TransferStatus status;
 
     @Column(name = "STATUS_DETAIL")

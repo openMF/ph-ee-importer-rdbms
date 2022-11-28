@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,12 +45,12 @@ public class KafkaConsumer implements ConsumerSeekAware {
         try {
             DocumentContext incomingRecord = JsonPathReader.parse(rawData);
             logger.debug("from kafka: {}", incomingRecord.jsonString());
-            if("DEPLOYMENT".equals(incomingRecord.read("$.valueType"))) {
+            if ("DEPLOYMENT".equals(incomingRecord.read("$.valueType"))) {
                 logger.info("Deployment event arrived for bpmn: {}, skip processing", incomingRecord.read("$.value.deployedWorkflows[0].bpmnProcessId", String.class));
                 return;
             }
 
-            if(incomingRecord.read("$.valueType").equals("VARIABLE_DOCUMENT")) {
+            if (incomingRecord.read("$.valueType").equals("VARIABLE_DOCUMENT")) {
                 logger.info("Skipping VARIABLE_DOCUMENT record ");
                 return;
             }
@@ -58,7 +59,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
             String bpmnprocessIdWithTenant = incomingRecord.read("$.value.bpmnProcessId");
             Long recordKey = incomingRecord.read("$.key");
             logger.info("bpmnprocessIdWithTenant: " + bpmnprocessIdWithTenant);
-            if(bpmnprocessIdWithTenant == null) {
+            if (bpmnprocessIdWithTenant == null) {
                 bpmnprocessIdWithTenant = tempDocumentStore.getBpmnprocessId(workflowKey);
                 if (bpmnprocessIdWithTenant == null) {
                     tempDocumentStore.storeDocument(workflowKey, incomingRecord);
@@ -74,24 +75,18 @@ public class KafkaConsumer implements ConsumerSeekAware {
             logger.info("Tenant name: " + tenantName);
             logger.info("bpmnprocessId: " + bpmnprocessId);
             TenantServerConnection tenant = repository.findOneBySchemaName(tenantName);
-            if(tenant != null) {
-                logger.info("TenantServerConnection: " + tenant.toString());
-            }
+            logger.info("TenantServerConnection: {}", tenant);
             ThreadLocalContextUtil.setTenant(tenant);
-            Long midTime1 = System.currentTimeMillis();
-            logger.debug("Mid Time 1 {}", (midTime1-startTime));
             List<DocumentContext> documents = new ArrayList<>();
             List<DocumentContext> storedDocuments = tempDocumentStore.takeStoredDocuments(workflowKey);
-            if(!storedDocuments.isEmpty()) {
+            if (!storedDocuments.isEmpty()) {
                 logger.info("Reprocessing {} previously stored records with workflowKey {}", storedDocuments.size(), workflowKey);
                 documents.addAll(storedDocuments);
             }
             documents.add(incomingRecord);
-            Long midTime2 = System.currentTimeMillis();
-            logger.debug("Mid Time 2 {}", (midTime2-startTime));
 
-            logger.debug("Start processing of {} documents.", documents.size());
-            for(DocumentContext doc : documents) {
+            logger.debug("Start processing of {} documents", documents.size());
+            for (DocumentContext doc : documents) {
                 String valueType = null;
                 try {
                     valueType = doc.read("$.valueType");
@@ -123,7 +118,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 }
             }
             Long endTime = System.currentTimeMillis();
-            logger.debug("Total Time 1 {}", (endTime-startTime));
+            logger.debug("Total Time 1 {}", (endTime - startTime));
         } catch (Exception ex) {
             logger.error("Could not parse zeebe event:\n{}\nerror: {}\ntrace: {}",
                     rawData,
@@ -132,7 +127,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
         } finally {
             ThreadLocalContextUtil.clear();
             Long endTime2 = System.currentTimeMillis();
-            logger.debug("Total Time 2 {}", (endTime2-startTime));
+            logger.debug("Total Time 2 {}", (endTime2 - startTime));
         }
     }
 

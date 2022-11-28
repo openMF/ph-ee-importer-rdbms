@@ -1,6 +1,6 @@
 datasource:
   core:
-    host: alluvial-dev.cluster-crhg2ihxmnkn.eu-central-1.rds.amazonaws.com
+    host: localhost
     port: 5432
     schema: ph_ee_operations
     username: postgres
