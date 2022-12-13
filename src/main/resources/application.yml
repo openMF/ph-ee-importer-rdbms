@@ -17,7 +17,7 @@ spring:
           session: true
           thread: true
           timestamp: true
-#          logger: "hu.dpc.phee.operator.config.EclipselinkLogger"
+          logger: "hu.dpc.phee.operator.config.EclipselinkLogger"
     open-in-view: false
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.yaml
