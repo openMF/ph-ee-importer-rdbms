@@ -12,8 +12,15 @@ spring:
     properties:
       eclipselink:
         logging:
-          logger: "hu.dpc.phee.operator.config.EclipselinkLogger"
+          level: "FINE"
+          parameters: true
+          session: true
+          thread: true
+          timestamp: true
+#          logger: "hu.dpc.phee.operator.config.EclipselinkLogger"
     open-in-view: false
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
 
 datasource:
   common:

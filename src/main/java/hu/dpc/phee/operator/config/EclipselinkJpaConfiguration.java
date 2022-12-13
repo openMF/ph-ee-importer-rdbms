@@ -4,7 +4,6 @@ import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
@@ -42,15 +41,16 @@ public class EclipselinkJpaConfiguration extends JpaBaseConfiguration {
     protected Map<String, Object> getVendorProperties() {
         HashMap<String, Object> map = new HashMap<>();
         map.put(PersistenceUnitProperties.WEAVING, detectWeavingMode());
+        map.put(PersistenceUnitProperties.LOGGING_LEVEL, "FINEST");
         map.put(PersistenceUnitProperties.DDL_GENERATION, "create-or-extend-tables");
-        map.put(PersistenceUnitProperties.LOGGING_LEVEL, "INFO");
         map.put(PersistenceUnitProperties.DDL_GENERATION_MODE, "both");
 //        map.put(PersistenceUnitProperties.DDL_GENERATION_MODE, "sql-script");
-        map.put("eclipselink.jdbc.batch-writing", "JDBC");
-        map.put("eclipselink.jdbc.batch-writing.size", "1000");
-        map.put("eclipselink.cache.shared.default", "false");
-
-        map.put("eclipselink.logging.level.sql", "INFO");
+//        map.put("eclipselink.jdbc.batch-writing", "JDBC");
+//        map.put("eclipselink.jdbc.batch-writing.size", "1000");
+//        map.put("eclipselink.cache.shared.default", "false");
+        map.put("eclipselink.create-ddl-jdbc-file-name", "create.sql");
+        map.put("eclipselink.drop-ddl-jdbc-file-name", "drop.sql");
+        map.put("eclipselink.logging.level.sql", "FINE");
         map.put("eclipselink.logging.parameters", "true");
         map.put("eclipselink.logging.session", "true");
         map.put("eclipselink.logging.thread", "true");

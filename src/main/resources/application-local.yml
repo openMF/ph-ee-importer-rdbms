@@ -2,9 +2,10 @@ datasource:
   core:
     host: localhost
     port: 5432
-    schema: ph_ee_operations
+    schema: operations
     username: postgres
     password: password
   common:
+    protocol: "jdbc"
     subprotocol: postgresql
     driverclass_name: org.postgresql.Driver
