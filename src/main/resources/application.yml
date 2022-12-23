@@ -85,6 +85,9 @@ bpmn:
     - id: "slcb"
       direction: "UNKNOWN"
       type: "${bpmn.batch-type}"
+    - id: "gsma_base_transaction"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
 
 logging:
   level:
