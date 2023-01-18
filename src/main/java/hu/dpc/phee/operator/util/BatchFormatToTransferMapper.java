@@ -60,11 +60,15 @@ public class BatchFormatToTransferMapper {
                         transfer.setStatus(TransferStatus.COMPLETED);
                     }
                 }
-                if (batch.getCompleted().longValue() == batch.getTotalTransactions().longValue()) {
+                if (batch.getCompleted() != null &&
+                        batch.getTotalTransactions() != null &&
+                        batch.getCompleted().longValue() == batch.getTotalTransactions().longValue()) {
                     transfer.setStatus(TransferStatus.COMPLETED);
-                } else if (batch.getOngoing() != 0 && batch.getCompletedAt() == null) {
+                } else if (batch.getOngoing() != null &&
+                        batch.getOngoing() != 0 && batch.getCompletedAt() == null) {
                     transfer.setStatus(TransferStatus.IN_PROGRESS);
-                } else if (batch.getFailed().longValue() == batch.getFailed().longValue()) {
+                } else if (batch.getFailed() != null && batch.getFailed() != null &&
+                        batch.getFailed().longValue() == batch.getFailed().longValue()) {
                     transfer.setStatus(TransferStatus.FAILED);
                 } else {
                     transfer.setStatus(TransferStatus.IN_PROGRESS);
