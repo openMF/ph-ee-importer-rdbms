@@ -6,6 +6,7 @@ import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferStatus;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 public class BatchFormatToTransferMapper {
 
@@ -55,9 +56,22 @@ public class BatchFormatToTransferMapper {
                 transfer.setStatus(TransferStatus.COMPLETED);
             } else {
                 if (batch.getTotalTransactions() != null && batch.getCompleted() != null) {
-                    if (batch.getTotalTransactions() == batch.getCompleted()) {
+                    if (Objects.equals(batch.getTotalTransactions(), batch.getCompleted())) {
                         transfer.setStatus(TransferStatus.COMPLETED);
                     }
+                }
+                if (batch.getCompleted() != null &&
+                        batch.getTotalTransactions() != null &&
+                        batch.getCompleted().longValue() == batch.getTotalTransactions().longValue()) {
+                    transfer.setStatus(TransferStatus.COMPLETED);
+                } else if (batch.getOngoing() != null &&
+                        batch.getOngoing() != 0 && batch.getCompletedAt() == null) {
+                    transfer.setStatus(TransferStatus.IN_PROGRESS);
+                } else if (batch.getFailed() != null && batch.getFailed() != null &&
+                        batch.getFailed().longValue() == batch.getFailed().longValue()) {
+                    transfer.setStatus(TransferStatus.FAILED);
+                } else {
+                    transfer.setStatus(TransferStatus.IN_PROGRESS);
                 }
             }
         }

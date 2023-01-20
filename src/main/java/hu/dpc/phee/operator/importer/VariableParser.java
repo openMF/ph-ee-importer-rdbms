@@ -73,6 +73,7 @@ public class VariableParser {
         transactionRequestParsers.put("transactionFailed", pair -> parseTransactionFailed(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("transferSettlementFailed", pair -> parseSettlementFiled(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("clientCorrelationId", pair -> parseClientCorrelationId(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("errorInformation", pair -> parseErrorInformation(pair.getFirst(), pair.getSecond()));
 
         batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(strip(pair.getSecond())));
         batchParsers.put("filename", pair -> pair.getFirst().setRequestFile(strip(pair.getSecond())));
@@ -212,6 +213,10 @@ public class VariableParser {
 
     private void parseErrorInformation(Transfer transfer, String jsonString) {
         transfer.setErrorInformation(strip(jsonString));
+    }
+
+    private void parseErrorInformation(TransactionRequest transactionRequest, String jsonString) {
+        transactionRequest.setErrorInformation(strip(jsonString));
     }
 
     private void parseTransactionChannelRequest(TransactionRequest transactionRequest, String jsonString) {
