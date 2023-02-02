@@ -88,6 +88,9 @@ bpmn:
     - id: "gsma_base_transaction"
       direction: "${bpmn.outgoing-direction}"
       type: "${bpmn.transfer-type}"
+    - id: "mpesa_paybill"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transfer-type}"
 
 logging:
   level:
