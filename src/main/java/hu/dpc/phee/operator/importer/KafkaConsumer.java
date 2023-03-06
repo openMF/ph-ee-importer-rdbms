@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Component
+//@Component
 public class KafkaConsumer implements ConsumerSeekAware {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());

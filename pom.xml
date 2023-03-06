@@ -14,11 +14,10 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven-shade-plugin.version>3.2.2</maven-shade-plugin.version>
 
-        <springboot.version>3.0.0</springboot.version>
-        <eclipselink.version>4.0.0</eclipselink.version>
+        <springboot.version>3.0.4</springboot.version>
+        <eclipselink.version>4.0.1</eclipselink.version>
         <elasticsearch.version>7.6.0</elasticsearch.version>
-        <json.version>20220924</json.version>
-        <kafka-streams.version>2.4.0</kafka-streams.version>
+        <json.version>20230227</json.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
     </properties>

@@ -26,6 +26,7 @@
         </encoder>
     </appender>
 
+    <logger name="com" level="INFO"/>
     <logger name="org" level="INFO"/>
     <logger name="org.eclipse.persistence" level="DEBUG"/>
     <logger name="io" level="INFO"/>
