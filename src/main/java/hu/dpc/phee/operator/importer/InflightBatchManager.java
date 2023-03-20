@@ -8,17 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class InflightBatchManager {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Map<Long, Batch> inflightBatches = new HashMap<>();
+    private final Map<Long, Batch> inflightBatches = new ConcurrentHashMap<>();
 
     @Autowired
     private BatchRepository batchRepository;
+
 
     public void batchStarted(Long workflowInstanceKey, Long timestamp, String direction) {
         Batch batch = getOrCreateBatch(workflowInstanceKey);
@@ -32,35 +33,31 @@ public class InflightBatchManager {
     }
 
     public void batchEnded(Long workflowInstanceKey, Long timestamp) {
-        synchronized (inflightBatches) {
-            Batch batch = inflightBatches.remove(workflowInstanceKey);
-            if (batch == null) {
-                logger.error("failed to remove in-flight batch {}", workflowInstanceKey);
-                batch = batchRepository.findByWorkflowInstanceKey(workflowInstanceKey);
-                if (batch == null || batch.getCompletedAt() != null) {
-                    logger.error("completed event arrived for non existent batch {} or it was already finished!", workflowInstanceKey);
-                    return;
-                }
+        Batch batch = inflightBatches.remove(workflowInstanceKey);
+        if (batch == null) {
+            logger.error("failed to remove in-flight batch {}", workflowInstanceKey);
+            batch = batchRepository.findByWorkflowInstanceKey(workflowInstanceKey);
+            if (batch == null || batch.getCompletedAt() != null) {
+                logger.error("completed event arrived for non existent batch {} or it was already finished!", workflowInstanceKey);
+                return;
             }
-
-            batch.setCompletedAt(new Date(timestamp));
-            batchRepository.save(batch);
-            logger.debug("batch {} finished", batch.getWorkflowInstanceKey());
         }
+
+        batch.setCompletedAt(new Date(timestamp));
+        batchRepository.save(batch);
+        logger.debug("batch {} finished", batch.getWorkflowInstanceKey());
     }
 
     public Batch getOrCreateBatch(Long workflowInstanceKey) {
-        synchronized (inflightBatches) {
-            Batch batch = inflightBatches.get(workflowInstanceKey);
+        Batch batch = inflightBatches.get(workflowInstanceKey);
+        if (batch == null) {
+            batch = batchRepository.findByWorkflowInstanceKey(workflowInstanceKey);
             if (batch == null) {
-                batch = batchRepository.findByWorkflowInstanceKey(workflowInstanceKey);
-                if (batch == null) {
-                    batch = new Batch(workflowInstanceKey);
-                    logger.debug("started in-flight batch {}", batch.getWorkflowInstanceKey());
-                }
-                inflightBatches.put(workflowInstanceKey, batch);
+                batch = new Batch(workflowInstanceKey);
+                logger.debug("started in-flight batch {}", batch.getWorkflowInstanceKey());
             }
-            return batch;
+            inflightBatches.put(workflowInstanceKey, batch);
         }
+        return batch;
     }
 }

@@ -130,7 +130,7 @@ public class RecordParser {
 
                 TransactionRequest transactionRequest = inflightTransactionRequestManager.getOrCreateTransactionRequest(workflowInstanceKey);
                 variableParser.getTransactionRequestParsers().get(name).accept(Pair.of(transactionRequest, value));
-                if(transactionRequest.getDirection() == null) {
+                if (transactionRequest.getDirection() == null) {
                     transactionRequest.setDirection(bpmnProcess.getDirection());
                 }
                 transactionRequestRepository.save(transactionRequest);
@@ -156,8 +156,7 @@ public class RecordParser {
                     }
                 }
             }
-        }
-        else {
+        } else {
             logger.debug("Skip adding variable to {} and type is {}", bpmnProcessId, bpmnProcess.getType()); // xx
         }
     }
@@ -310,7 +309,7 @@ public class RecordParser {
         }
 
         Batch batch = batchRepository.findByWorkflowInstanceKey(workflowInstanceKey);
-        for (Transaction transaction: transactionList) {
+        for (Transaction transaction : transactionList) {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
             transfer.setBatchId(strip(tempDocumentStore.getBatchId(workflowInstanceKey)));

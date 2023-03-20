@@ -8,14 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class InflightTransactionRequestManager {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Map<Long, TransactionRequest> inflightTransactionRequests = new HashMap<>();
+    private final Map<Long, TransactionRequest> inflightTransactionRequests = new ConcurrentHashMap<>();
 
     @Autowired
     private TransactionRequestRepository transactionRequestRepository;
@@ -36,36 +36,31 @@ public class InflightTransactionRequestManager {
     }
 
     public void transactionRequestEnded(Long workflowInstanceKey, Long timestamp) {
-        synchronized (inflightTransactionRequests) {
-            TransactionRequest transactionRequest = inflightTransactionRequests.remove(workflowInstanceKey);
-            if (transactionRequest == null) {
-                logger.error("failed to remove in-flight transactionRequest {}", workflowInstanceKey);
-                transactionRequest = transactionRequestRepository.findByWorkflowInstanceKey(workflowInstanceKey);
-                if (transactionRequest == null || transactionRequest.getCompletedAt() != null) {
-                    logger.error("completed event arrived for non existent transactionRequest {} or it was already finished!", workflowInstanceKey);
-                    return;
-                }
+        TransactionRequest transactionRequest = inflightTransactionRequests.remove(workflowInstanceKey);
+        if (transactionRequest == null) {
+            logger.error("failed to remove in-flight transactionRequest {}", workflowInstanceKey);
+            transactionRequest = transactionRequestRepository.findByWorkflowInstanceKey(workflowInstanceKey);
+            if (transactionRequest == null || transactionRequest.getCompletedAt() != null) {
+                logger.error("completed event arrived for non existent transactionRequest {} or it was already finished!", workflowInstanceKey);
+                return;
             }
-
-            transactionRequest.setCompletedAt(new Date(timestamp));
-
-            transactionRequestRepository.save(transactionRequest);
-            tempDocumentStore.deleteDocument(workflowInstanceKey);
-            logger.debug("transactionRequest {} finished", transactionRequest.getWorkflowInstanceKey());
         }
+
+        transactionRequest.setCompletedAt(new Date(timestamp));
+        transactionRequestRepository.save(transactionRequest);
+        tempDocumentStore.deleteDocument(workflowInstanceKey);
+        logger.debug("transactionRequest {} finished", transactionRequest.getWorkflowInstanceKey());
     }
 
     public TransactionRequest getOrCreateTransactionRequest(Long workflowInstanceKey) {
-        synchronized (inflightTransactionRequests) {
-            TransactionRequest transactionRequest = inflightTransactionRequests.get(workflowInstanceKey);
+        TransactionRequest transactionRequest = inflightTransactionRequests.get(workflowInstanceKey);
+        if (transactionRequest == null) {
+            transactionRequest = transactionRequestRepository.findByWorkflowInstanceKey(workflowInstanceKey);
             if (transactionRequest == null) {
-                transactionRequest = transactionRequestRepository.findByWorkflowInstanceKey(workflowInstanceKey);
-                if (transactionRequest == null) {
-                    transactionRequest = new TransactionRequest(workflowInstanceKey);
-                }
-                inflightTransactionRequests.put(workflowInstanceKey, transactionRequest);
+                transactionRequest = new TransactionRequest(workflowInstanceKey);
             }
-            return transactionRequest;
+            inflightTransactionRequests.put(workflowInstanceKey, transactionRequest);
         }
+        return transactionRequest;
     }
 }

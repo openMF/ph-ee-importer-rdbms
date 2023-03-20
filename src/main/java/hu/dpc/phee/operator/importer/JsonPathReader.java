@@ -1,10 +1,6 @@
 package hu.dpc.phee.operator.importer;
 
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
-import com.jayway.jsonpath.ParseContext;
+import com.jayway.jsonpath.*;
 import org.apache.commons.text.StringEscapeUtils;
 
 import static hu.dpc.phee.operator.OperatorUtils.strip;

@@ -8,14 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class InflightTransferManager {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Map<Long, Transfer> inflightTransfers = new HashMap<>();
+    private final Map<Long, Transfer> inflightTransfers = new ConcurrentHashMap<>();
 
     @Autowired
     private TransferRepository transferRepository;
@@ -32,34 +32,30 @@ public class InflightTransferManager {
     }
 
     public void transferEnded(Long workflowInstanceKey, Long timestamp) {
-        synchronized (inflightTransfers) {
-            Transfer transfer = inflightTransfers.remove(workflowInstanceKey);
-            if (transfer == null) {
-                logger.error("failed to remove in-flight transfer {}", workflowInstanceKey);
-                transfer = transferRepository.findByWorkflowInstanceKey(workflowInstanceKey);
-                if (transfer == null || transfer.getCompletedAt() != null) {
-                    logger.error("completed event arrived for non existent transfer {} or it was already finished!", workflowInstanceKey);
-                    return;
-                }
+        Transfer transfer = inflightTransfers.remove(workflowInstanceKey);
+        if (transfer == null) {
+            logger.error("failed to remove in-flight transfer {}", workflowInstanceKey);
+            transfer = transferRepository.findByWorkflowInstanceKey(workflowInstanceKey);
+            if (transfer == null || transfer.getCompletedAt() != null) {
+                logger.error("completed event arrived for non existent transfer {} or it was already finished!", workflowInstanceKey);
+                return;
             }
-            transfer.setCompletedAt(new Date(timestamp));
-            transferRepository.save(transfer);
-            logger.debug("transfer finished {}", transfer.getWorkflowInstanceKey());
         }
+        transfer.setCompletedAt(new Date(timestamp));
+        transferRepository.save(transfer);
+        logger.debug("transfer finished {}", transfer.getWorkflowInstanceKey());
     }
 
     public Transfer getOrCreateTransfer(Long workflowInstanceKey) {
-        synchronized (inflightTransfers) {
-            Transfer transfer = inflightTransfers.get(workflowInstanceKey);
+        Transfer transfer = inflightTransfers.get(workflowInstanceKey);
+        if (transfer == null) {
+            transfer = transferRepository.findByWorkflowInstanceKey(workflowInstanceKey);
             if (transfer == null) {
-                transfer = transferRepository.findByWorkflowInstanceKey(workflowInstanceKey);
-                if (transfer == null) {
-                    transfer = new Transfer(workflowInstanceKey); // Sets status to ONGOING
-                    logger.debug("started in-flight transfer {}", transfer.getWorkflowInstanceKey());
-                }
-                inflightTransfers.put(workflowInstanceKey, transfer);
+                transfer = new Transfer(workflowInstanceKey); // Sets status to ONGOING
+                logger.debug("started in-flight transfer {}", transfer.getWorkflowInstanceKey());
             }
-            return transfer;
+            inflightTransfers.put(workflowInstanceKey, transfer);
         }
+        return transfer;
     }
 }

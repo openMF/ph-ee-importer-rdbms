@@ -39,24 +39,26 @@ public class KafkaConsumer implements ConsumerSeekAware {
     private TempDocumentStore tempDocumentStore;
 
 
-    public void process(String rawData, String s) {
+    public void process(String rawData) {
         try {
             DocumentContext incomingRecord = JsonPathReader.parse(rawData);
-            logger.debug("from kafka: {}", incomingRecord.jsonString());
+            logger.info("from kafka: {}", incomingRecord.jsonString());
             if ("DEPLOYMENT".equals(incomingRecord.read("$.valueType"))) {
                 logger.info("Deployment event arrived for bpmn: {}, skip processing", incomingRecord.read("$.value.deployedWorkflows[0].bpmnProcessId", String.class));
                 return;
             }
 
             if (incomingRecord.read("$.valueType").equals("VARIABLE_DOCUMENT")) {
-                logger.info("Skipping VARIABLE_DOCUMENT record ");
+                logger.info("Skipping VARIABLE_DOCUMENT record");
                 return;
             }
 
             Long workflowKey = incomingRecord.read("$.value.processDefinitionKey");
-            String bpmnprocessIdWithTenant = incomingRecord.read("$.value.bpmnProcessId");
             Long recordKey = incomingRecord.read("$.key");
-            logger.info("bpmnprocessIdWithTenant: " + bpmnprocessIdWithTenant);
+
+            String bpmnprocessIdWithTenant = incomingRecord.read("$.value.bpmnProcessId");
+            logger.trace("bpmnprocessIdWithTenant: " + bpmnprocessIdWithTenant);
+
             if (bpmnprocessIdWithTenant == null) {
                 bpmnprocessIdWithTenant = tempDocumentStore.getBpmnprocessId(workflowKey);
                 if (bpmnprocessIdWithTenant == null) {
@@ -75,7 +77,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 throw new RuntimeException("Tenant not found in database: '" + tenantName + "'");
             }
 
-            logger.info("TenantServerConnection: {}", tenant);
+            logger.trace("using TenantServerConnection: {}", tenant);
             ThreadLocalContextUtil.setTenant(tenant);
             List<DocumentContext> documents = new ArrayList<>();
             List<DocumentContext> storedDocuments = tempDocumentStore.takeStoredDocuments(workflowKey);
@@ -114,7 +116,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 }
             }
         } catch (Exception ex) {
-            logger.error("Could not parse zeebe event:\n{}\nerror: {}\ntrace: {}", rawData, ex.getMessage(), s);
+            logger.error("Could not parse zeebe event: {}", rawData, ex);
         } finally {
             ThreadLocalContextUtil.clear();
         }

@@ -24,7 +24,7 @@ public class AwsStorageConfig {
 
     @Bean
     @ConditionalOnProperty(
-            value="cloud.aws.enabled",
+            value = "cloud.aws.enabled",
             havingValue = "true")
     public AmazonS3 s3Client() {
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, accessSecret);

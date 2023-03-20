@@ -48,11 +48,12 @@ public class VariableParser {
         transferParsers.put("partyLookupFspId", pair -> pair.getFirst().setPayeeDfspId(strip(pair.getSecond())));
         transferParsers.put("initiatorFspId", pair -> pair.getFirst().setPayerDfspId(strip(pair.getSecond())));
         transferParsers.put("channelRequest", pair -> parseChannelRequest(pair.getFirst(), pair.getSecond()));
-        transferParsers.put("errorInformation", pair -> {parseErrorInformation(pair.getFirst(), pair.getSecond());
-            parseTransferCreateFailed(pair.getFirst(), pair.getSecond());});
+        transferParsers.put("errorInformation", pair -> {
+            parseErrorInformation(pair.getFirst(), pair.getSecond());
+            parseTransferCreateFailed(pair.getFirst(), pair.getSecond());
+        });
         transferParsers.put("batchId", pair -> pair.getFirst().setBatchId(strip(pair.getSecond())));
         transferParsers.put("clientCorrelationId", pair -> parseClientCorrelationIdTransfers(pair.getFirst(), pair.getSecond()));
-
 
 
         transactionRequestParsers.put("authType", pair -> pair.getFirst().setAuthType(strip(pair.getSecond())));
@@ -103,7 +104,7 @@ public class VariableParser {
         if (jsonString == null || jsonString.isEmpty()) {
             return;
         }
-        if(jsonString.equals("true")) {
+        if (jsonString.equals("true")) {
             request.setState(TransactionRequestState.FAILED);
         } else {
             request.setState(TransactionRequestState.ACCEPTED);
@@ -114,7 +115,7 @@ public class VariableParser {
         if (jsonString == null || jsonString.isEmpty()) {
             return;
         }
-        if(jsonString.equals("true")) {
+        if (jsonString.equals("true")) {
             request.setState(TransactionRequestState.FAILED);
         } else {
             request.setState(TransactionRequestState.IN_PROGRESS);
@@ -125,7 +126,7 @@ public class VariableParser {
         if (jsonString == null || jsonString.isEmpty()) {
             return;
         }
-        if(jsonString.equals("true")) {
+        if (jsonString.equals("true")) {
             request.setState(TransactionRequestState.FAILED);
         } else {
             request.setState(TransactionRequestState.RECEIVED);
@@ -225,10 +226,10 @@ public class VariableParser {
         transactionRequest.setAmount(json.read("$.amount.amount", BigDecimal.class));
         transactionRequest.setCurrency(json.read("$.amount.currency"));
 
-        if(transactionRequest.getInitiatorType() == null ) {
+        if (transactionRequest.getInitiatorType() == null) {
             transactionRequest.setInitiatorType(json.read("$.transactionType.initiatorType"));
         }
-        if(transactionRequest.getScenario() == null) {
+        if (transactionRequest.getScenario() == null) {
             transactionRequest.setScenario(json.read("$.transactionType.scenario"));
         }
     }
@@ -246,6 +247,7 @@ public class VariableParser {
     private void parseClientCorrelationId(TransactionRequest transactionRequest, String clientCorrelationId) {
         transactionRequest.setClientCorrelationId(clientCorrelationId);
     }
+
     private void parseClientCorrelationIdTransfers(Transfer transfer, String clientCorrelationId) {
         transfer.setClientCorrelationId(clientCorrelationId);
     }
@@ -294,13 +296,13 @@ public class VariableParser {
     }
 
     private void parseInitiatorFspId(TransactionRequest transactionRequest, String jsonString) {
-        if(outgoingDirection.equals(transactionRequest.getDirection())) {
+        if (outgoingDirection.equals(transactionRequest.getDirection())) {
             transactionRequest.setPayeeDfspId(strip(jsonString));
         }
     }
 
     private void parseTransActionState(TransactionRequest transactionRequest, String jsonString) {
-        if(incomingDirection.equals(transactionRequest.getDirection())) {
+        if (incomingDirection.equals(transactionRequest.getDirection())) {
             transactionRequest.setState(TransactionRequestState.valueOf(strip(jsonString)));
         }
     }

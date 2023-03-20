@@ -73,32 +73,42 @@ public class DataSourcePerTenantService implements DisposableBean {
         DataSource tenantDataSource;
 
         final TenantServerConnection tenant = ThreadLocalContextUtil.getTenant();
-        logger.debug("Retrieving datasource for tenant: {}", tenant);
+        logger.trace("Retrieving datasource for tenant: {}", tenant);
 
-        synchronized (this.tenantToDataSourceMap) {
-            if (tenant != null) {
-                if (this.tenantToDataSourceMap.containsKey(tenant.getId())) {
-                    tenantDataSource = this.tenantToDataSourceMap.get(tenant.getId());
-                } else {
-                    logger.info("Creating new datasource for tenant: {}", tenant);
-                    tenantDataSource = createNewDataSourceFor(tenant);
-                    this.tenantToDataSourceMap.put(tenant.getId(), tenantDataSource);
-                    runLiquibaseMigrations(tenantDataSource);
-                }
+        if (tenant != null) {
+            if (this.tenantToDataSourceMap.containsKey(tenant.getId())) {
+                tenantDataSource = this.tenantToDataSourceMap.get(tenant.getId());
             } else {
-                long defaultConnectionKey = 0;
-                if (this.tenantToDataSourceMap.containsKey(defaultConnectionKey)) {
-                    tenantDataSource = this.tenantToDataSourceMap.get(defaultConnectionKey);
-                } else {
-                    logger.info("Creating new datasource for default connection");
-                    TenantServerConnection defaultConnection = new TenantServerConnection();
-                    defaultConnection.setSchemaServer(defaultHostname);
-                    defaultConnection.setSchemaServerPort(String.valueOf(defaultPort));
-                    defaultConnection.setSchemaName(defaultSchema);
-                    defaultConnection.setSchemaUsername(defaultUsername);
-                    defaultConnection.setSchemaPassword(defaultPassword);
-                    tenantDataSource = createNewDataSourceFor(defaultConnection);
-                    this.tenantToDataSourceMap.put(defaultConnectionKey, tenantDataSource);
+                synchronized (this.tenantToDataSourceMap) {
+                    if (this.tenantToDataSourceMap.containsKey(tenant.getId())) {
+                        return this.tenantToDataSourceMap.get(tenant.getId());
+                    } else {
+                        logger.info("Creating new datasource for tenant: {}", tenant);
+                        tenantDataSource = createNewDataSourceFor(tenant);
+                        this.tenantToDataSourceMap.put(tenant.getId(), tenantDataSource);
+                        runLiquibaseMigrations(tenantDataSource);
+                    }
+                }
+            }
+        } else {
+            long defaultConnectionKey = 0;
+            if (this.tenantToDataSourceMap.containsKey(defaultConnectionKey)) {
+                tenantDataSource = this.tenantToDataSourceMap.get(defaultConnectionKey);
+            } else {
+                synchronized (this.tenantToDataSourceMap) {
+                    if (this.tenantToDataSourceMap.containsKey(defaultConnectionKey)) {
+                        return this.tenantToDataSourceMap.get(tenant.getId());
+                    } else {
+                        logger.info("Creating new datasource for default connection");
+                        TenantServerConnection defaultConnection = new TenantServerConnection();
+                        defaultConnection.setSchemaServer(defaultHostname);
+                        defaultConnection.setSchemaServerPort(String.valueOf(defaultPort));
+                        defaultConnection.setSchemaName(defaultSchema);
+                        defaultConnection.setSchemaUsername(defaultUsername);
+                        defaultConnection.setSchemaPassword(defaultPassword);
+                        tenantDataSource = createNewDataSourceFor(defaultConnection);
+                        this.tenantToDataSourceMap.put(defaultConnectionKey, tenantDataSource);
+                    }
                 }
             }
         }

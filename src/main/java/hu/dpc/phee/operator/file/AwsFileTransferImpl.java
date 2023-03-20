@@ -14,7 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 @Service
-public class AwsFileTransferImpl implements FileTransferService{
+public class AwsFileTransferImpl implements FileTransferService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 

@@ -2,12 +2,8 @@ package hu.dpc.phee.operator.entity.transfer;
 
 
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
+import jakarta.persistence.*;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Date;
 

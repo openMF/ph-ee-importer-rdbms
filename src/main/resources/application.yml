@@ -13,7 +13,7 @@ spring:
     properties:
       eclipselink:
         logging:
-          level: "FINE"
+          level: "INFO"
           parameters: true
           session: true
           thread: true
