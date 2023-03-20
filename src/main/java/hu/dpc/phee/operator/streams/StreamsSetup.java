@@ -1,13 +1,14 @@
 package hu.dpc.phee.operator.streams;
 
+import hu.dpc.phee.operator.importer.KafkaConsumer;
 import jakarta.annotation.PostConstruct;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Windowed;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,23 +31,35 @@ public class StreamsSetup {
     @Autowired
     private StreamsBuilder streamsBuilder;
 
+    @Autowired
+    private KafkaConsumer kafkaConsumer;
+
 
     @PostConstruct
     public void setup() {
-        logger.info("## setting up kafka streams on topic `{}`, aggregating every {} secnods", kafkaTopic, aggregationWindowSeconds);
-        streamsBuilder.stream(kafkaTopic, Consumed.with(STRING_SERDE, STRING_SERDE))
+        logger.info("## setting up kafka streams on topic `{}`, aggregating every {} seconds", kafkaTopic, aggregationWindowSeconds);
+        KTable<Windowed<String>, String> reduced = streamsBuilder.stream(kafkaTopic, Consumed.with(STRING_SERDE, STRING_SERDE))
                 .groupByKey()
                 .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(aggregationWindowSeconds)))
-                .reduce(this::aggregate)
+                .reduce(this::aggregate);
+
+        reduced
                 .toStream()
-                .foreach(this::save);
+                .foreach(this::process);
     }
 
     private String aggregate(String agg, String value) {
+        logger.warn("aggregating: {} + {}", agg, value);
         return agg + "|" + value;
     }
 
-    private void save(Windowed<String> key, String value) {
-        logger.info("key: {}, value: {}", key, value);
+    private void process(Windowed<String> key, String value) {
+        logger.info("processing key: {}, value: {}", key, value);
+        try {
+            kafkaConsumer.process(value);
+        } catch (Exception e) {
+            logger.error("PANIC on error", e);  // TODO for now, just exit
+            System.exit(1);
+        }
     }
 }

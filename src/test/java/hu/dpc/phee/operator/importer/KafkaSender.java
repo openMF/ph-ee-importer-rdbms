@@ -25,11 +25,13 @@ public class KafkaSender {
         int otherKey = (int) (Math.random() * 1000000);
         List<ProducerRecord<String, String>> records = Stream.of(
                 new ProducerRecord<>("zeebe-export", "key-" + oneKey, "testOne-1"),
+                null,
                 new ProducerRecord<>("zeebe-export", "key-" + otherKey, "testOther-1"),
                 null,
                 new ProducerRecord<>("zeebe-export", "key-" + oneKey, "testOne-2"),
+                new ProducerRecord<>("zeebe-export", "key-" + oneKey, "testOne-3"),
                 null,
-                new ProducerRecord<>("zeebe-export", "key-" + oneKey, "testOne-3")
+                new ProducerRecord<>("zeebe-export", "key-" + otherKey, "testOther-2")
         ).toList();
 
         for (ProducerRecord<String, String> record : records) {
@@ -45,7 +47,7 @@ public class KafkaSender {
 
     private void sleep() {
         try {
-            Thread.sleep(600);
+            Thread.sleep(1600);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

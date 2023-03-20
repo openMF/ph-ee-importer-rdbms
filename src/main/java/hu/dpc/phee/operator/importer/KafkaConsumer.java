@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-//@Component
+@Component
 public class KafkaConsumer implements ConsumerSeekAware {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -39,9 +38,8 @@ public class KafkaConsumer implements ConsumerSeekAware {
     @Autowired
     private TempDocumentStore tempDocumentStore;
 
-    @KafkaListener(topics = "${importer.kafka.topic}")
-    public void listen(String rawData) {
-        Long startTime = System.currentTimeMillis();
+
+    public void process(String rawData, String s) {
         try {
             DocumentContext incomingRecord = JsonPathReader.parse(rawData);
             logger.debug("from kafka: {}", incomingRecord.jsonString());
@@ -72,9 +70,11 @@ public class KafkaConsumer implements ConsumerSeekAware {
 
             String tenantName = bpmnprocessIdWithTenant.substring(bpmnprocessIdWithTenant.indexOf("-") + 1);
             String bpmnprocessId = bpmnprocessIdWithTenant.substring(0, bpmnprocessIdWithTenant.indexOf("-"));
-            logger.info("Tenant name: " + tenantName);
-            logger.info("bpmnprocessId: " + bpmnprocessId);
             TenantServerConnection tenant = repository.findOneBySchemaName(tenantName);
+            if (tenant == null) {
+                throw new RuntimeException("Tenant not found in database: '" + tenantName + "'");
+            }
+
             logger.info("TenantServerConnection: {}", tenant);
             ThreadLocalContextUtil.setTenant(tenant);
             List<DocumentContext> documents = new ArrayList<>();
@@ -92,21 +92,17 @@ public class KafkaConsumer implements ConsumerSeekAware {
                     valueType = doc.read("$.valueType");
                     logger.info("Processing document of type {}", valueType);
                     switch (valueType) {
-                        case "VARIABLE":
+                        case "VARIABLE" -> {
                             DocumentContext processedVariable = recordParser.processVariable(doc); // TODO prepare for parent workflow
                             recordParser.addVariableToEntity(processedVariable, bpmnprocessId); // Call to store transfer
-                            break;
-                        case "JOB":
-                            recordParser.processTask(doc);
-                            break;
-                        case "PROCESS_INSTANCE":
+                        }
+                        case "JOB" -> recordParser.processTask(doc);
+                        case "PROCESS_INSTANCE" -> {
                             if ("PROCESS".equals(doc.read("$.value.bpmnElementType"))) {
                                 recordParser.processWorkflowInstance(doc);
                             }
-                            break;
-                        case "INCIDENT":
-                            logger.info("Doc {}", incomingRecord.jsonString());
-                            break;
+                        }
+                        case "INCIDENT" -> logger.info("Doc {}", incomingRecord.jsonString());
                     }
                 } catch (Exception ex) {
                     logger.error("Failed to process document:\n{}\nof valueType:\n{}\nerror: {}\ntrace: {}",
@@ -117,17 +113,10 @@ public class KafkaConsumer implements ConsumerSeekAware {
                     tempDocumentStore.storeDocument(workflowKey, doc);
                 }
             }
-            Long endTime = System.currentTimeMillis();
-            logger.debug("Total Time 1 {}", (endTime - startTime));
         } catch (Exception ex) {
-            logger.error("Could not parse zeebe event:\n{}\nerror: {}\ntrace: {}",
-                    rawData,
-                    ex.getMessage(),
-                    limitStackTrace(ex));
+            logger.error("Could not parse zeebe event:\n{}\nerror: {}\ntrace: {}", rawData, ex.getMessage(), s);
         } finally {
             ThreadLocalContextUtil.clear();
-            Long endTime2 = System.currentTimeMillis();
-            logger.debug("Total Time 2 {}", (endTime2 - startTime));
         }
     }
 

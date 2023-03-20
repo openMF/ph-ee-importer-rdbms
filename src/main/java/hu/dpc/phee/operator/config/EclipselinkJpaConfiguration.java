@@ -30,6 +30,7 @@ public class EclipselinkJpaConfiguration extends JpaBaseConfiguration {
 
     public EclipselinkJpaConfiguration(DataSource routingDataSource, JpaProperties properties, ObjectProvider<JtaTransactionManager> jtaTransactionManager, ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
         super(routingDataSource, properties, jtaTransactionManager);
+        logger.info("## Eclipselink datasource: {}", routingDataSource);
     }
 
     @Override
