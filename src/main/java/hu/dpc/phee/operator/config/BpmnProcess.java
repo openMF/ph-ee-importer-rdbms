@@ -11,6 +11,15 @@ public class BpmnProcess {
         this.type = type;
     }
 
+    @Override
+    public String toString() {
+        return "BpmnProcess{" +
+                "id='" + id + '\'' +
+                ", direction='" + direction + '\'' +
+                ", type='" + type + '\'' +
+                '}';
+    }
+
     public String getId() {
         return id;
     }

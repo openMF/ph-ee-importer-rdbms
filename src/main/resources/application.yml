@@ -55,6 +55,9 @@ bpmn:
   incoming-direction: "INCOMING"
   outgoing-direction: "OUTGOING"
   processes:
+    - id: "binx_hct_inst_credit_transfer_creditor_process"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transfer-type}"
     - id: "PayeeQuoteTransfer"
       direction: "${bpmn.incoming-direction}"
       type: "${bpmn.transfer-type}"

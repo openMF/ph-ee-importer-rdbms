@@ -62,9 +62,16 @@ public class StreamsSetup {
         Windowed<String> key = (Windowed<String>) _key;
         List<String> value = (List<String>) _value;
 
+        if (value == null) {
+            logger.warn("skipping processing, null value for key: {}", key);
+            return;
+        }
+
         logger.info("processing key: {}, value: {}", key, value);
         try {
-//            kafkaConsumer.process(value);
+            for (String record : value) {
+                kafkaConsumer.process(record);
+            }
         } catch (Exception e) {
             logger.error("PANIC on error", e);  // TODO for now, just exit
             System.exit(1);
