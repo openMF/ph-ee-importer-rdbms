@@ -58,7 +58,7 @@ public class KafkaConfiguration {
         props.put(BOOTSTRAP_SERVERS_CONFIG, kafkaBrokers);
         props.put(DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-
+        props.put(COMMIT_INTERVAL_MS_CONFIG, 1000);
         return new KafkaStreamsConfiguration(props);
     }
 

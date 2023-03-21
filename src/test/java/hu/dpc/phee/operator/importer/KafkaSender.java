@@ -24,20 +24,21 @@ public class KafkaSender {
         int oneKey = (int) (Math.random() * 1000000);
         int otherKey = (int) (Math.random() * 1000000);
         List<ProducerRecord<String, String>> records = Stream.of(
-                new ProducerRecord<>("zeebe-export", "key-" + oneKey, "testOne-1"),
+                new ProducerRecord<>("zeebe-export", "key-" + oneKey, "{\"test\": \"1a\"}"),
                 null,
-                new ProducerRecord<>("zeebe-export", "key-" + otherKey, "testOther-1"),
-                null,
-                new ProducerRecord<>("zeebe-export", "key-" + oneKey, "testOne-2"),
-                new ProducerRecord<>("zeebe-export", "key-" + oneKey, "testOne-3"),
-                null,
-                new ProducerRecord<>("zeebe-export", "key-" + otherKey, "testOther-2")
+                new ProducerRecord<>("zeebe-export", "key-" + otherKey, "{\"test\": \"2a\"}"),
+//                null,
+                new ProducerRecord<>("zeebe-export", "key-" + oneKey, "{\"test\": \"3a\"}"),
+                new ProducerRecord<>("zeebe-export", "key-" + oneKey, "{\"test\": \"4a\"}"),
+//                null,
+                new ProducerRecord<>("zeebe-export", "key-" + otherKey, "{\"test\": \"5a\"}")
         ).toList();
 
         for (ProducerRecord<String, String> record : records) {
             if (record == null) {
                 sleep();
             } else {
+                logger.debug("sending record: {}", record);
                 producer.send(record);
             }
         }
@@ -47,7 +48,8 @@ public class KafkaSender {
 
     private void sleep() {
         try {
-            Thread.sleep(1600);
+            logger.debug("sleeping..");
+            Thread.sleep(3600);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

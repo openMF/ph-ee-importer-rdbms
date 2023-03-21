@@ -5,10 +5,7 @@ import jakarta.annotation.PostConstruct;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.TimeWindows;
-import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.kstream.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +35,11 @@ public class StreamsSetup {
     @PostConstruct
     public void setup() {
         logger.info("## setting up kafka streams on topic `{}`, aggregating every {} seconds", kafkaTopic, aggregationWindowSeconds);
-        KTable<Windowed<String>, String> reduced = streamsBuilder.stream(kafkaTopic, Consumed.with(STRING_SERDE, STRING_SERDE))
-                .groupByKey()
-                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(aggregationWindowSeconds)))
-                .reduce(this::aggregate);
 
-        reduced
+        streamsBuilder.stream(kafkaTopic, Consumed.with(STRING_SERDE, STRING_SERDE))
+                .groupByKey()
+                .windowedBy(SessionWindows.ofInactivityGapAndGrace(Duration.ofSeconds(2), Duration.ZERO))  // aggregationWindowSeconds
+                .reduce(this::aggregate)
                 .toStream()
                 .foreach(this::process);
     }
@@ -56,7 +52,7 @@ public class StreamsSetup {
     private void process(Windowed<String> key, String value) {
         logger.info("processing key: {}, value: {}", key, value);
         try {
-            kafkaConsumer.process(value);
+//            kafkaConsumer.process(value);
         } catch (Exception e) {
             logger.error("PANIC on error", e);  // TODO for now, just exit
             System.exit(1);

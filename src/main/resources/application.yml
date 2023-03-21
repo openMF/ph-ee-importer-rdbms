@@ -4,7 +4,7 @@ kafka:
 importer:
   kafka:
     topic: "zeebe-export"
-    reset: false
+    reset: true
     aggreation-window-seconds: 2
 
 spring:
@@ -20,9 +20,6 @@ spring:
           timestamp: true
           logger: "hu.dpc.phee.operator.config.EclipselinkLogger"
     open-in-view: false
-  liquibase:
-    enabled: false
-    change-log: classpath:/db/changelog/db.changelog-master.yaml
 
 datasource:
   common:

@@ -70,8 +70,12 @@ public class KafkaConsumer implements ConsumerSeekAware {
                 tempDocumentStore.setBpmnprocessId(workflowKey, bpmnprocessIdWithTenant);
             }
 
-            String tenantName = bpmnprocessIdWithTenant.substring(bpmnprocessIdWithTenant.indexOf("-") + 1);
-            String bpmnprocessId = bpmnprocessIdWithTenant.substring(0, bpmnprocessIdWithTenant.indexOf("-"));
+            String[] split = bpmnprocessIdWithTenant.split("-");
+            if (split.length < 2) {
+                throw new RuntimeException("Invalid bpmnProcessId, has no tenant information: '" + bpmnprocessIdWithTenant + "'");
+            }
+            String bpmnProcessId = split[0];
+            String tenantName = split[1];
             TenantServerConnection tenant = repository.findOneBySchemaName(tenantName);
             if (tenant == null) {
                 throw new RuntimeException("Tenant not found in database: '" + tenantName + "'");
@@ -96,7 +100,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
                     switch (valueType) {
                         case "VARIABLE" -> {
                             DocumentContext processedVariable = recordParser.processVariable(doc); // TODO prepare for parent workflow
-                            recordParser.addVariableToEntity(processedVariable, bpmnprocessId); // Call to store transfer
+                            recordParser.addVariableToEntity(processedVariable, bpmnProcessId); // Call to store transfer
                         }
                         case "JOB" -> recordParser.processTask(doc);
                         case "PROCESS_INSTANCE" -> {
