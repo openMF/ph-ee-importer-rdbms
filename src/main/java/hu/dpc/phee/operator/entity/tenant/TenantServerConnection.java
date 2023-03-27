@@ -21,6 +21,9 @@ package hu.dpc.phee.operator.entity.tenant;
 
 
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,6 +31,9 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "tenant_server_connections")
+@ToString
+@Getter
+@Setter
 public class TenantServerConnection extends AbstractPersistableCustom<Long> {
 
     @Column(name = "schema_server")
@@ -48,65 +54,5 @@ public class TenantServerConnection extends AbstractPersistableCustom<Long> {
     @Column(name = "auto_update")
     private boolean autoUpdateEnabled;
 
-    @Override
-    public String toString() {
-        return "TenantServerConnection{" +
-                "schemaServer='" + schemaServer + '\'' +
-                ", schemaName='" + schemaName + '\'' +
-                ", schemaServerPort='" + schemaServerPort + '\'' +
-                ", schemaUsername='" + schemaUsername + '\'' +
-                ", schemaPassword='" + schemaPassword + '\'' +
-                ", autoUpdateEnabled=" + autoUpdateEnabled +
-                '}';
-    }
-
     public TenantServerConnection() {}
-
-    public String getSchemaServer() {
-        return schemaServer;
-    }
-
-    public void setSchemaServer(String schemaServer) {
-        this.schemaServer = schemaServer;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    public String getSchemaServerPort() {
-        return schemaServerPort;
-    }
-
-    public void setSchemaServerPort(String schemaServerPort) {
-        this.schemaServerPort = schemaServerPort;
-    }
-
-    public String getSchemaUsername() {
-        return schemaUsername;
-    }
-
-    public void setSchemaUsername(String schemaUsername) {
-        this.schemaUsername = schemaUsername;
-    }
-
-    public String getSchemaPassword() {
-        return schemaPassword;
-    }
-
-    public void setSchemaPassword(String schemaPassword) {
-        this.schemaPassword = schemaPassword;
-    }
-
-    public boolean isAutoUpdateEnabled() {
-        return autoUpdateEnabled;
-    }
-
-    public void setAutoUpdateEnabled(boolean autoUpdateEnabled) {
-        this.autoUpdateEnabled = autoUpdateEnabled;
-    }
 }
