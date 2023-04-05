@@ -86,7 +86,6 @@ public class DataSourcePerTenantService implements DisposableBean {
                         logger.info("Creating new datasource for tenant: {}", tenant);
                         tenantDataSource = createNewDataSourceFor(tenant);
                         this.tenantToDataSourceMap.put(tenant.getId(), tenantDataSource);
-                        runLiquibaseMigrations(tenantDataSource);
                     }
                 }
             }
@@ -114,20 +113,6 @@ public class DataSourcePerTenantService implements DisposableBean {
         }
 
         return tenantDataSource;
-    }
-
-    private void runLiquibaseMigrations(DataSource tenantDataSource) {
-        try {
-            logger.info("Running liquibase migrations for datasource: {}", tenantDataSource);
-            JdbcConnection connection = new JdbcConnection(tenantDataSource.getConnection());
-            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-            String migrations = "/db/changelog/db.changelog-master.yaml";
-            new Liquibase(migrations, new ClassLoaderResourceAccessor(), database).update(new Contexts(), new LabelExpression());
-
-        } catch (SQLException | LiquibaseException e) {
-            logger.error("Error while running liquibase migrations", e);
-            throw new RuntimeException("failed to migrate tenant DB: " + tenantDataSource);
-        }
     }
 
     private DataSource createNewDataSourceFor(TenantServerConnection tenant) {
