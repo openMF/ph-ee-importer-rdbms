@@ -103,10 +103,10 @@ bpmn:
     - id: "inbound_transfer-mifos"
       direction: "${bpmn.incoming-direction}"
       type: "${bpmn.transfer-type}"
-    - id: "inbound_transfer-tupande"
+    - id: "inbound_transfer_tupande"
       direction: "${bpmn.incoming-direction}"
       type: "${bpmn.transfer-type}"
-    - id: "inbound_transfer-erply"
+    - id: "inbound_transfer_erply"
       direction: "${bpmn.incoming-direction}"
       type: "${bpmn.transfer-type}"
 
