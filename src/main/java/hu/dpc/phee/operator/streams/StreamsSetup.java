@@ -1,5 +1,6 @@
 package hu.dpc.phee.operator.streams;
 
+import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.importer.KafkaConsumer;
 import jakarta.annotation.PostConstruct;
 import org.apache.kafka.common.serialization.Serde;
@@ -11,6 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionManager;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -38,6 +42,9 @@ public class StreamsSetup {
     @Autowired
     private KafkaConsumer kafkaConsumer;
 
+    @Autowired
+    private EventParser eventParser;
+
 
     @PostConstruct
     public void setup() {
@@ -56,25 +63,31 @@ public class StreamsSetup {
                 .aggregate(ArrayList::new, aggregator, merger, Materialized.with(STRING_SERDE, ListSerde(ArrayList.class, STRING_SERDE)))
                 .toStream()
                 .foreach(this::process);
+
+        // TODO kafka-ba kell leirni a vegen az entitaslistat, nem DB-be, hogy konzisztens es ujrajatszhato legyen !!
     }
 
-    private void process(Object _key, Object _value) {  // foreach generics sticks to ? super ... so we have to cast
+    @Transactional
+    public void process(Object _key, Object _value) {
+        logger.warn("transaction active: {}", TransactionSynchronizationManager.isActualTransactionActive());
         Windowed<String> key = (Windowed<String>) _key;
-        List<String> value = (List<String>) _value;
+        List<String> records = (List<String>) _value;
 
-        if (value == null) {
-            logger.warn("skipping processing, null value for key: {}", key);
+        if (records == null || records.size() == 0) {
+            logger.warn("skipping processing, null records for key: {}", key);
             return;
         }
 
-        logger.info("processing key: {}, value: {}", key, value);
-        try {
-            for (String record : value) {
-                kafkaConsumer.process(record);
+        String first = records.get(0);
+        Transfer transfer = eventParser.retrieveOrCreateTransfer(first);
+
+        logger.info("processing key: {}, records: {}", key, records);
+        for (String record : records) {
+            try {
+                eventParser.process(transfer, record);
+            } catch (Exception e) {
+                logger.error("failed to parse record: {}", record, e);
             }
-        } catch (Exception e) {
-            logger.error("PANIC on error", e);  // TODO for now, just exit
-            System.exit(1);
         }
     }
 }
