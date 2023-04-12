@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
@@ -23,7 +24,7 @@ import java.util.Map;
 @Configuration
 @EntityScan(basePackages = "hu.dpc.phee.operator")
 @EnableJpaRepositories(basePackages = "hu.dpc.phee.operator")
-@EnableTransactionManagement(proxyTargetClass = true)
+@EnableTransactionManagement(proxyTargetClass = true, mode = AdviceMode.PROXY)
 public class EclipselinkJpaConfiguration extends JpaBaseConfiguration {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());

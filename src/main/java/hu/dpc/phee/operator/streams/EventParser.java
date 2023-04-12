@@ -29,9 +29,18 @@ public class EventParser {
     TransferRepository transferRepository;
 
 
-    public Transfer retrieveOrCreateTransfer(String first) {
-        DocumentContext sample = JsonPathReader.parse(first);
-        Long processInstanceKey = sample.read("$.value.processInstanceKey", Long.class);
+    public String retrieveTenant(DocumentContext record) {
+        String bpmnProcessIdWithTenant = record.read("$.value.bpmnProcessId", String.class);
+        String[] split = bpmnProcessIdWithTenant.split("-");
+        if (split.length < 2) {
+            throw new RuntimeException("Invalid bpmnProcessId, has no tenant information: '" + bpmnProcessIdWithTenant + "'");
+        }
+        return split[1];
+    }
+
+    public Transfer retrieveOrCreateTransfer(DocumentContext record) {
+        Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
+
         Transfer transfer = transferRepository.findByWorkflowInstanceKey(processInstanceKey);
         if (transfer == null) {
             logger.debug("creating new Transfer for processInstanceKey: {}", processInstanceKey);
@@ -43,7 +52,7 @@ public class EventParser {
         return transfer;
     }
 
-    public void process(Transfer transfer, String rawData) {
+    public void process(String tenantName, Transfer transfer, String rawData) {
         DocumentContext record = JsonPathReader.parse(rawData);
         logger.info("from kafka: {}", record.jsonString());
 
@@ -51,35 +60,11 @@ public class EventParser {
         logger.debug("processing {} event", recordType);
 
         Long workflowKey = record.read("$.value.processDefinitionKey");
-        Long version = record.read("$.value.version");
         Long workflowInstanceKey = record.read("$.value.processInstanceKey");
-        Long recordKey = record.read("$.key");
         Long timestamp = record.read("$.timestamp");
 
-        String bpmnProcessIdWithTenant = record.read("$.value.bpmnProcessId");
-        String[] split = bpmnProcessIdWithTenant.split("-");
-        if (split.length < 2) {
-            throw new RuntimeException("Invalid bpmnProcessId, has no tenant information: '" + bpmnProcessIdWithTenant + "'");
-        }
-        String bpmnProcessId = split[0];
-        String tenantName = split[1];
-
-
         List<Object> entities = switch (recordType) {
-            case "DEPLOYMENT" -> {
-                logger.info("Deployment event arrived for bpmn: {}, skip processing", record.read("$.value.deployedWorkflows[0].bpmnProcessId", String.class));
-                yield List.of();
-            }
-
-            case "VARIABLE_DOCUMENT" -> {
-                logger.info("Skipping VARIABLE_DOCUMENT record");
-                yield List.of();
-            }
-
-            case "WORKFLOW_INSTANCE" -> {
-                logger.info("WORKFLOW_INSTANCE record");
-                yield List.of();
-            }
+            case "DEPLOYMENT", "VARIABLE_DOCUMENT", "WORKFLOW_INSTANCE", "PROCESS_INSTANCE" -> List.of();
 
             case "JOB" -> List.of(
                     new Task()
@@ -108,14 +93,16 @@ public class EventParser {
             default -> throw new IllegalStateException("Unexpected event type: " + recordType);
         };
 
-        logger.info("Saving {} entities", entities.size());
-        entities.forEach(entity -> {
-            switch (entity) {
-                case Variable variable -> variableRepository.save(variable);
-                case Task task -> taskRepository.save(task);
-                case Transfer transferEntity -> transferRepository.save(transferEntity);
-                default -> throw new IllegalStateException("Unexpected entity type: " + entity.getClass());
-            }
-        });
+        if (entities.size() != 0) {
+            logger.info("Saving {} entities", entities.size());
+            entities.forEach(entity -> {
+                switch (entity) {
+                    case Variable variable -> variableRepository.save(variable);
+                    case Task task -> taskRepository.save(task);
+                    case Transfer transferEntity -> transferRepository.save(transferEntity);
+                    default -> throw new IllegalStateException("Unexpected entity type: " + entity.getClass());
+                }
+            });
+        }
     }
 }

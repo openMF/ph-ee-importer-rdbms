@@ -1,6 +1,11 @@
 package hu.dpc.phee.operator.streams;
 
+import com.jayway.jsonpath.DocumentContext;
+import hu.dpc.phee.operator.entity.tenant.TenantServerConnection;
+import hu.dpc.phee.operator.entity.tenant.TenantServerConnectionRepository;
+import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
+import hu.dpc.phee.operator.importer.JsonPathReader;
 import hu.dpc.phee.operator.importer.KafkaConsumer;
 import jakarta.annotation.PostConstruct;
 import org.apache.kafka.common.serialization.Serde;
@@ -12,9 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionManager;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -45,6 +48,12 @@ public class StreamsSetup {
     @Autowired
     private EventParser eventParser;
 
+    @Autowired
+    private TenantServerConnectionRepository tenantServerConnectionRepository;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
 
     @PostConstruct
     public void setup() {
@@ -67,9 +76,7 @@ public class StreamsSetup {
         // TODO kafka-ba kell leirni a vegen az entitaslistat, nem DB-be, hogy konzisztens es ujrajatszhato legyen !!
     }
 
-    @Transactional
     public void process(Object _key, Object _value) {
-        logger.warn("transaction active: {}", TransactionSynchronizationManager.isActualTransactionActive());
         Windowed<String> key = (Windowed<String>) _key;
         List<String> records = (List<String>) _value;
 
@@ -78,16 +85,33 @@ public class StreamsSetup {
             return;
         }
 
+        String tenantName;
         String first = records.get(0);
-        Transfer transfer = eventParser.retrieveOrCreateTransfer(first);
-
-        logger.info("processing key: {}, records: {}", key, records);
-        for (String record : records) {
-            try {
-                eventParser.process(transfer, record);
-            } catch (Exception e) {
-                logger.error("failed to parse record: {}", record, e);
-            }
+        DocumentContext sample = JsonPathReader.parse(first);
+        try {
+            tenantName = eventParser.retrieveTenant(sample);
+            logger.debug("finding tenant server connection for tenant: {}", tenantName);
+            TenantServerConnection tenant = tenantServerConnectionRepository.findOneBySchemaName(tenantName);
+            logger.info("setting tenant: {}", tenant);
+            ThreadLocalContextUtil.setTenant(tenant);
+        } catch (Exception e) {
+            logger.error("failed to process first record: {}, skipping whole batch", first, e);
+            return;
         }
+
+        transactionTemplate.executeWithoutResult(status -> {
+            Transfer transfer = eventParser.retrieveOrCreateTransfer(sample);
+
+            logger.info("processing key: {}, records: {}", key, records);
+            for (String record : records) {
+                try {
+                    eventParser.process(tenantName, transfer, record);
+                } catch (Exception e) {
+                    logger.error("failed to parse record: {}", record, e);
+                }
+            }
+        });
+
+        ThreadLocalContextUtil.clear();
     }
 }
