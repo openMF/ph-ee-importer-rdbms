@@ -9,6 +9,7 @@ import hu.dpc.phee.operator.entity.transfer.TransferRepository;
 import hu.dpc.phee.operator.entity.variable.Variable;
 import hu.dpc.phee.operator.entity.variable.VariableRepository;
 import hu.dpc.phee.operator.importer.JsonPathReader;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -57,6 +59,8 @@ public class EventParser {
             Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.getFlows().stream().filter(it -> bpmn.equalsIgnoreCase(it.getName())).findAny();
             if (config.isPresent()) {
                 transfer.setDirection(config.get().getDirection());
+            } else {
+                logger.error("No config found for bpmn: {}", bpmn);
             }
             transferRepository.save(transfer);
         } else {
@@ -69,15 +73,26 @@ public class EventParser {
         DocumentContext record = JsonPathReader.parse(rawData);
         logger.info("from kafka: {}", record.jsonString());
 
-        String recordType = record.read("$.valueType", String.class);
-        logger.debug("processing {} event", recordType);
+        String valueType = record.read("$.valueType", String.class);
+        logger.debug("processing {} event", valueType);
 
         Long workflowKey = record.read("$.value.processDefinitionKey");
         Long workflowInstanceKey = record.read("$.value.processInstanceKey");
         Long timestamp = record.read("$.timestamp");
 
-        List<Object> entities = switch (recordType) {
-            case "DEPLOYMENT", "VARIABLE_DOCUMENT", "WORKFLOW_INSTANCE", "PROCESS_INSTANCE" -> List.of();
+        List<Object> entities = switch (valueType) {
+            case "DEPLOYMENT", "VARIABLE_DOCUMENT", "WORKFLOW_INSTANCE" -> List.of();
+            case "PROCESS_INSTANCE" -> {
+                String recordType = record.read("$.recordType", String.class);
+                String intent = record.read("$.intent", String.class);
+                if ("EVENT".equals(recordType)) {
+                    switch (intent) {
+                        case "ELEMENT_ACTIVATED" -> transfer.setStartedAt(new Date(timestamp));
+                        case "ELEMENT_COMPLETED" -> transfer.setCompletedAt(new Date(timestamp));
+                    }
+                }
+                yield List.of();
+            }
 
             case "JOB" -> List.of(
                     new Task()
@@ -85,7 +100,7 @@ public class EventParser {
                             .withWorkflowKey(workflowKey)
                             .withTimestamp(timestamp)
                             .withIntent(record.read("$.intent", String.class))
-                            .withRecordType(recordType)
+                            .withRecordType(valueType)
                             .withType(record.read("$.value.type", String.class))
                             .withElementId(record.read("$.value.elementId", String.class))
             );
@@ -93,7 +108,7 @@ public class EventParser {
             case "VARIABLE" -> {
                 String variableName = record.read("$.value.name", String.class);
                 String variableValue = record.read("$.value.value", String.class);
-                String value = variableValue.startsWith("\"") && variableValue.endsWith("\"") ? variableValue.substring(1, variableValue.length() - 1) : variableValue;
+                String value = variableValue.startsWith("\"") && variableValue.endsWith("\"") ? StringEscapeUtils.unescapeJson(variableValue.substring(1, variableValue.length() - 1)) : variableValue;
 
                 List<Object> results = List.of(
                         new Variable()
@@ -120,7 +135,7 @@ public class EventParser {
                 yield List.of();
             }
 
-            default -> throw new IllegalStateException("Unexpected event type: " + recordType);
+            default -> throw new IllegalStateException("Unexpected event type: " + valueType);
         };
 
         if (entities.size() != 0) {
