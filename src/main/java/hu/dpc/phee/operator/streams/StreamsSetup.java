@@ -6,7 +6,6 @@ import hu.dpc.phee.operator.entity.tenant.TenantServerConnectionRepository;
 import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.importer.JsonPathReader;
-import hu.dpc.phee.operator.importer.KafkaConsumer;
 import jakarta.annotation.PostConstruct;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -16,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -41,9 +41,6 @@ public class StreamsSetup {
 
     @Autowired
     private StreamsBuilder streamsBuilder;
-
-    @Autowired
-    private KafkaConsumer kafkaConsumer;
 
     @Autowired
     private EventParser eventParser;
@@ -85,14 +82,17 @@ public class StreamsSetup {
             return;
         }
 
+        String bpmn;
         String tenantName;
         String first = records.get(0);
         DocumentContext sample = JsonPathReader.parse(first);
         try {
-            tenantName = eventParser.retrieveTenant(sample);
-            logger.debug("finding tenant server connection for tenant: {}", tenantName);
+            Pair<String, String> bpmnAndTenant = eventParser.retrieveTenant(sample);
+            bpmn = bpmnAndTenant.getFirst();
+            tenantName = bpmnAndTenant.getSecond();
+            logger.trace("finding tenant server connection for tenant: {}", tenantName);
             TenantServerConnection tenant = tenantServerConnectionRepository.findOneBySchemaName(tenantName);
-            logger.info("setting tenant: {}", tenant);
+            logger.trace("setting tenant: {}", tenant);
             ThreadLocalContextUtil.setTenant(tenant);
         } catch (Exception e) {
             logger.error("failed to process first record: {}, skipping whole batch", first, e);
@@ -100,12 +100,12 @@ public class StreamsSetup {
         }
 
         transactionTemplate.executeWithoutResult(status -> {
-            Transfer transfer = eventParser.retrieveOrCreateTransfer(sample);
+            Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
 
             logger.info("processing key: {}, records: {}", key, records);
             for (String record : records) {
                 try {
-                    eventParser.process(tenantName, transfer, record);
+                    eventParser.process(bpmn, tenantName, transfer, record);
                 } catch (Exception e) {
                     logger.error("failed to parse record: {}", record, e);
                 }

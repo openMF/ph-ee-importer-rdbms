@@ -1,6 +1,7 @@
 package hu.dpc.phee.operator.streams;
 
 import com.jayway.jsonpath.DocumentContext;
+import hu.dpc.phee.operator.config.TransferTransformerConfig;
 import hu.dpc.phee.operator.entity.task.Task;
 import hu.dpc.phee.operator.entity.task.TaskRepository;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
@@ -8,12 +9,17 @@ import hu.dpc.phee.operator.entity.transfer.TransferRepository;
 import hu.dpc.phee.operator.entity.variable.Variable;
 import hu.dpc.phee.operator.entity.variable.VariableRepository;
 import hu.dpc.phee.operator.importer.JsonPathReader;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class EventParser {
@@ -28,23 +34,30 @@ public class EventParser {
     @Autowired
     TransferRepository transferRepository;
 
+    @Autowired
+    TransferTransformerConfig transferTransformerConfig;
 
-    public String retrieveTenant(DocumentContext record) {
+
+    public Pair<String, String> retrieveTenant(DocumentContext record) {
         String bpmnProcessIdWithTenant = record.read("$.value.bpmnProcessId", String.class);
         String[] split = bpmnProcessIdWithTenant.split("-");
         if (split.length < 2) {
             throw new RuntimeException("Invalid bpmnProcessId, has no tenant information: '" + bpmnProcessIdWithTenant + "'");
         }
-        return split[1];
+        return Pair.of(split[0], split[1]);
     }
 
-    public Transfer retrieveOrCreateTransfer(DocumentContext record) {
+    public Transfer retrieveOrCreateTransfer(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
 
         Transfer transfer = transferRepository.findByWorkflowInstanceKey(processInstanceKey);
         if (transfer == null) {
             logger.debug("creating new Transfer for processInstanceKey: {}", processInstanceKey);
             transfer = new Transfer(processInstanceKey);
+            Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.getFlows().stream().filter(it -> bpmn.equalsIgnoreCase(it.getName())).findAny();
+            if (config.isPresent()) {
+                transfer.setDirection(config.get().getDirection());
+            }
             transferRepository.save(transfer);
         } else {
             logger.debug("found existing Transfer for processInstanceKey: {}", processInstanceKey);
@@ -52,7 +65,7 @@ public class EventParser {
         return transfer;
     }
 
-    public void process(String tenantName, Transfer transfer, String rawData) {
+    public void process(String bpmn, String tenantName, Transfer transfer, String rawData) {
         DocumentContext record = JsonPathReader.parse(rawData);
         logger.info("from kafka: {}", record.jsonString());
 
@@ -77,13 +90,30 @@ public class EventParser {
                             .withElementId(record.read("$.value.elementId", String.class))
             );
 
-            case "VARIABLE" -> List.of(
-                    new Variable()
-                            .withWorkflowInstanceKey(workflowInstanceKey)
-                            .withName(record.read("$.value.name", String.class))
-                            .withWorkflowKey(workflowKey)
-                            .withTimestamp(timestamp)
-                            .withValue(record.read("$.value.value", String.class)));
+            case "VARIABLE" -> {
+                String variableName = record.read("$.value.name", String.class);
+                String variableValue = record.read("$.value.value", String.class);
+                String value = variableValue.startsWith("\"") && variableValue.endsWith("\"") ? variableValue.substring(1, variableValue.length() - 1) : variableValue;
+
+                List<Object> results = List.of(
+                        new Variable()
+                                .withWorkflowInstanceKey(workflowInstanceKey)
+                                .withName(variableName)
+                                .withWorkflowKey(workflowKey)
+                                .withTimestamp(timestamp)
+                                .withValue(variableValue));
+
+                logger.debug("finding transformers for bpmn: {} and variable: {}", bpmn, variableName);
+                List<TransferTransformerConfig.Transformer> matchingTransformers = transferTransformerConfig.getFlows().stream()
+                        .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
+                        .flatMap(it -> it.getTransformers().stream())
+                        .filter(it -> variableName.equalsIgnoreCase(it.getVariableName()))
+                        .toList();
+
+                matchingTransformers.forEach(transformer -> applyTransformer(transfer, variableName, value, transformer));
+
+                yield results;
+            }
 
             case "INCIDENT" -> {
                 logger.warn("TODO: not processing INCIDENT record for now");
@@ -99,10 +129,47 @@ public class EventParser {
                 switch (entity) {
                     case Variable variable -> variableRepository.save(variable);
                     case Task task -> taskRepository.save(task);
-                    case Transfer transferEntity -> transferRepository.save(transferEntity);
                     default -> throw new IllegalStateException("Unexpected entity type: " + entity.getClass());
                 }
             });
+            transferRepository.save(transfer);
+        }
+    }
+
+    private void applyTransformer(Transfer transfer, String variableName, String variableValue, TransferTransformerConfig.Transformer transformer) {
+        logger.debug("applying transformer for field: {}", transformer.getField());
+        try {
+            String fieldName = transformer.getField();
+            if (Strings.isNotBlank(transformer.getConstant())) {
+                logger.debug("setting constant value: {} for variable {}", transformer.getConstant(), variableName);
+                PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, transformer.getConstant());
+                return;
+            }
+
+            if (Strings.isNotBlank(transformer.getJsonPath())) {
+                logger.debug("applying jsonpath for variable {}", variableName);
+                DocumentContext json = JsonPathReader.parse(variableValue);
+                Object result = json.read(transformer.getJsonPath());
+                logger.debug("jsonpath result: {} for variable {}", result, variableName);
+                if (result  != null) {
+                    String value = switch (result) {
+                        case String string -> string;
+                        case List list -> list.stream().map(Object::toString).collect(Collectors.joining(" ")).toString();
+                        default -> result.toString();
+                    };
+                    PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, value);
+                } else {
+                    logger.error("null result when setting field {} from variable {}. Jsonpath: {}, variable value: {}", fieldName, variableName, transformer.getJsonPath(), variableValue);
+                }
+                return;
+
+            }
+
+            logger.debug("setting simple variable value: {} for variable {}", variableValue, variableName);
+            PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, variableValue);
+
+        } catch (Exception e) {
+            logger.error("failed to apply transformer {} to variable {}", transformer, variableName, e);
         }
     }
 }
