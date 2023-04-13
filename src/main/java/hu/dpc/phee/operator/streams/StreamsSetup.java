@@ -1,6 +1,7 @@
 package hu.dpc.phee.operator.streams;
 
 import com.jayway.jsonpath.DocumentContext;
+import hu.dpc.phee.operator.config.TransferTransformerConfig;
 import hu.dpc.phee.operator.entity.tenant.TenantServerConnection;
 import hu.dpc.phee.operator.entity.tenant.TenantServerConnectionRepository;
 import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
@@ -51,6 +52,9 @@ public class StreamsSetup {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
+    @Autowired
+    TransferTransformerConfig transferTransformerConfig;
+
 
     @PostConstruct
     public void setup() {
@@ -96,6 +100,11 @@ public class StreamsSetup {
             ThreadLocalContextUtil.setTenant(tenant);
         } catch (Exception e) {
             logger.error("failed to process first record: {}, skipping whole batch", first, e);
+            return;
+        }
+
+        if (transferTransformerConfig.findFlow(bpmn).isEmpty()) {
+            logger.warn("skip saving flow information, no configured flow found for bpmn: {}", bpmn);
             return;
         }
 

@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
+import java.util.Optional;
 
 @EnableConfigurationProperties
 @Configuration
@@ -38,5 +39,9 @@ public class TransferTransformerConfig {
         private String variableName;
         private String jsonPath;
         private String constant;
+    }
+
+    public Optional<Flow> findFlow(String name) {
+        return flows.stream().filter(flow -> name.equalsIgnoreCase(flow.getName())).findAny();
     }
 }

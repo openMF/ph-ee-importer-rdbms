@@ -56,7 +56,7 @@ public class EventParser {
         if (transfer == null) {
             logger.debug("creating new Transfer for processInstanceKey: {}", processInstanceKey);
             transfer = new Transfer(processInstanceKey);
-            Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.getFlows().stream().filter(it -> bpmn.equalsIgnoreCase(it.getName())).findAny();
+            Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
             if (config.isPresent()) {
                 transfer.setDirection(config.get().getDirection());
             } else {
