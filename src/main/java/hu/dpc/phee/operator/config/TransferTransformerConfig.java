@@ -39,6 +39,7 @@ public class TransferTransformerConfig {
         private String variableName;
         private String jsonPath;
         private String constant;
+        private String xpath;
     }
 
     public Optional<Flow> findFlow(String name) {

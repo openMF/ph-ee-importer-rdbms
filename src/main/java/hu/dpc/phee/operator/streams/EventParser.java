@@ -17,7 +17,13 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
+import java.io.StringReader;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +44,9 @@ public class EventParser {
 
     @Autowired
     TransferTransformerConfig transferTransformerConfig;
+
+    private DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+    private XPathFactory xPathFactory = XPathFactory.newInstance();
 
 
     public Pair<String, String> retrieveTenant(DocumentContext record) {
@@ -166,7 +175,7 @@ public class EventParser {
                 DocumentContext json = JsonPathReader.parse(variableValue);
                 Object result = json.read(transformer.getJsonPath());
                 logger.debug("jsonpath result: {} for variable {}", result, variableName);
-                if (result  != null) {
+                if (result != null) {
                     String value = switch (result) {
                         case String string -> string;
                         case List list -> list.stream().map(Object::toString).collect(Collectors.joining(" ")).toString();
@@ -177,7 +186,19 @@ public class EventParser {
                     logger.error("null result when setting field {} from variable {}. Jsonpath: {}, variable value: {}", fieldName, variableName, transformer.getJsonPath(), variableValue);
                 }
                 return;
+            }
 
+            if (Strings.isNotBlank(transformer.getXpath())) {
+                logger.debug("applying xpath for variable {}", variableName);
+                Document document = documentBuilderFactory.newDocumentBuilder().parse(new InputSource(new StringReader(variableValue)));
+                String result = xPathFactory.newXPath().compile(transformer.getXpath()).evaluate(document);
+                logger.debug("xpath result: {} for variable {}", result, variableName);
+                if (result != null) {
+                    PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, result);
+                } else {
+                    logger.error("null result when setting field {} from variable {}. Xpath: {}, variable value: {}", fieldName, variableName, transformer.getXpath(), variableValue);
+                }
+                return;
             }
 
             logger.debug("setting simple variable value: {} for variable {}", variableValue, variableName);

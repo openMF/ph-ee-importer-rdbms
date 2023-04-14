@@ -36,6 +36,9 @@ public class KafkaConfiguration {
     @Value("${kafka.brokers}")
     private String kafkaBrokers;
 
+    @Value("kafka.consumer-group")
+    private String consumerGroup;
+
     @Bean
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
@@ -54,7 +57,7 @@ public class KafkaConfiguration {
     @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)
     KafkaStreamsConfiguration kStreamsConfig() {
         Map<String, Object> props = new HashMap<>();
-        props.put(APPLICATION_ID_CONFIG, "new20");
+        props.put(APPLICATION_ID_CONFIG, consumerGroup);
         props.put(BOOTSTRAP_SERVERS_CONFIG, kafkaBrokers);
         props.put(DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 //        props.put(DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
