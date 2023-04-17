@@ -6,6 +6,7 @@ import hu.dpc.phee.operator.entity.tenant.TenantServerConnection;
 import hu.dpc.phee.operator.entity.tenant.TenantServerConnectionRepository;
 import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
+import hu.dpc.phee.operator.entity.transfer.TransferRepository;
 import hu.dpc.phee.operator.importer.JsonPathReader;
 import jakarta.annotation.PostConstruct;
 import org.apache.kafka.common.serialization.Serde;
@@ -55,6 +56,9 @@ public class StreamsSetup {
     @Autowired
     TransferTransformerConfig transferTransformerConfig;
 
+    @Autowired
+    TransferRepository transferRepository;
+
 
     @PostConstruct
     public void setup() {
@@ -103,24 +107,26 @@ public class StreamsSetup {
             return;
         }
 
-        if (transferTransformerConfig.findFlow(bpmn).isEmpty()) {
-            logger.warn("skip saving flow information, no configured flow found for bpmn: {}", bpmn);
-            return;
-        }
-
-        transactionTemplate.executeWithoutResult(status -> {
-            Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
-
-            logger.info("processing key: {}, records: {}", key, records);
-            for (String record : records) {
-                try {
-                    eventParser.process(bpmn, tenantName, transfer, record);
-                } catch (Exception e) {
-                    logger.error("failed to parse record: {}", record, e);
-                }
+        try {
+            if (transferTransformerConfig.findFlow(bpmn).isEmpty()) {
+                logger.warn("skip saving flow information, no configured flow found for bpmn: {}", bpmn);
+                return;
             }
-        });
 
-        ThreadLocalContextUtil.clear();
+            transactionTemplate.executeWithoutResult(status -> {
+                Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
+                logger.info("processing key: {}, records: {}", key, records);
+                for (String record : records) {
+                    try {
+                        eventParser.process(bpmn, tenantName, transfer, record);
+                    } catch (Exception e) {
+                        logger.error("failed to parse record: {}", record, e);
+                    }
+                }
+                transferRepository.save(transfer);
+            });
+        } finally {
+            ThreadLocalContextUtil.clear();
+        }
     }
 }

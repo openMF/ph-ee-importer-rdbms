@@ -22,7 +22,6 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
 import java.util.Date;
@@ -99,6 +98,7 @@ public class EventParser {
                     switch (intent) {
                         case "ELEMENT_ACTIVATED" -> transfer.setStartedAt(new Date(timestamp));
                         case "ELEMENT_COMPLETED" -> {
+                            logger.info("finishing transfer for processInstanceKey: {}", workflowInstanceKey);
                             transfer.setCompletedAt(new Date(timestamp));
                             transfer.setStatus(TransferStatus.COMPLETED);
                         }
