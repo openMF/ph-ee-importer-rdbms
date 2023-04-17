@@ -6,6 +6,7 @@ import hu.dpc.phee.operator.entity.task.Task;
 import hu.dpc.phee.operator.entity.task.TaskRepository;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferRepository;
+import hu.dpc.phee.operator.entity.transfer.TransferStatus;
 import hu.dpc.phee.operator.entity.variable.Variable;
 import hu.dpc.phee.operator.entity.variable.VariableRepository;
 import hu.dpc.phee.operator.importer.JsonPathReader;
@@ -97,7 +98,10 @@ public class EventParser {
                 if ("EVENT".equals(recordType)) {
                     switch (intent) {
                         case "ELEMENT_ACTIVATED" -> transfer.setStartedAt(new Date(timestamp));
-                        case "ELEMENT_COMPLETED" -> transfer.setCompletedAt(new Date(timestamp));
+                        case "ELEMENT_COMPLETED" -> {
+                            transfer.setCompletedAt(new Date(timestamp));
+                            transfer.setStatus(TransferStatus.COMPLETED);
+                        }
                     }
                 }
                 yield List.of();

@@ -24,8 +24,7 @@ public class AwsFileTransferImpl implements FileTransferService {
     @Override
     public String downloadFile(String fileName, String bucketName) {
         S3Object s3Object = s3Client.getObject(bucketName, fileName);
-        S3ObjectInputStream inputStream = s3Object.getObjectContent();
-        try {
+        try (S3ObjectInputStream inputStream = s3Object.getObjectContent()) {
             byte[] content = IOUtils.toByteArray(inputStream);
             File file = new File(fileName);
             try (FileOutputStream fos = new FileOutputStream(file)) {
@@ -34,9 +33,7 @@ public class AwsFileTransferImpl implements FileTransferService {
             logger.debug("File {} downloaded at path {}", fileName, file.getAbsolutePath());
             return file.getAbsolutePath();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to download file from S3", e);
         }
-        return null;
     }
-
 }
