@@ -125,6 +125,10 @@ public class StreamsSetup {
                 }
                 transferRepository.save(transfer);
             });
+
+        } catch (Exception e) {
+            logger.error("failed to process batch", e);
+
         } finally {
             ThreadLocalContextUtil.clear();
         }
