@@ -135,7 +135,7 @@ public class EventParser {
                 List<TransferTransformerConfig.Transformer> matchingTransformers = transferTransformerConfig.getFlows().stream()
                         .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
                         .flatMap(it -> it.getTransformers().stream())
-                        .filter(it -> variableName.equalsIgnoreCase(it.getVariableName()))
+                        .filter(it -> variableName.equalsIgnoreCase(it.getVariableName()) || Strings.isNotBlank(it.getConstant()))
                         .toList();
 
                 matchingTransformers.forEach(transformer -> applyTransformer(transfer, variableName, value, transformer));
