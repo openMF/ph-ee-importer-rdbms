@@ -100,12 +100,14 @@ public class EventParser {
                         case "ELEMENT_ACTIVATED" -> {
                             transfer.setStartedAt(new Date(timestamp));
 
-                            Stream<TransferTransformerConfig.Transformer> matchingTransformers = transferTransformerConfig.getFlows().stream()
+                            List<TransferTransformerConfig.Transformer> constantTransformers = transferTransformerConfig.getFlows().stream()
                                     .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
                                     .flatMap(it -> it.getTransformers().stream())
-                                    .filter(it -> Strings.isNotBlank(it.getConstant()));
+                                    .filter(it -> Strings.isNotBlank(it.getConstant()))
+                                    .toList();
 
-                            matchingTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
+                            logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
+                            constantTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
                         }
                         case "ELEMENT_COMPLETED" -> {
                             logger.info("finishing transfer for processInstanceKey: {}", workflowInstanceKey);
