@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class EventParser {
@@ -96,7 +97,16 @@ public class EventParser {
                 String intent = record.read("$.intent", String.class);
                 if ("EVENT".equals(recordType)) {
                     switch (intent) {
-                        case "ELEMENT_ACTIVATED" -> transfer.setStartedAt(new Date(timestamp));
+                        case "ELEMENT_ACTIVATED" -> {
+                            transfer.setStartedAt(new Date(timestamp));
+
+                            Stream<TransferTransformerConfig.Transformer> matchingTransformers = transferTransformerConfig.getFlows().stream()
+                                    .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
+                                    .flatMap(it -> it.getTransformers().stream())
+                                    .filter(it -> Strings.isNotBlank(it.getConstant()));
+
+                            matchingTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
+                        }
                         case "ELEMENT_COMPLETED" -> {
                             logger.info("finishing transfer for processInstanceKey: {}", workflowInstanceKey);
                             transfer.setCompletedAt(new Date(timestamp));
@@ -135,7 +145,7 @@ public class EventParser {
                 List<TransferTransformerConfig.Transformer> matchingTransformers = transferTransformerConfig.getFlows().stream()
                         .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
                         .flatMap(it -> it.getTransformers().stream())
-                        .filter(it -> variableName.equalsIgnoreCase(it.getVariableName()) || Strings.isNotBlank(it.getConstant()))
+                        .filter(it -> variableName.equalsIgnoreCase(it.getVariableName()))
                         .toList();
 
                 matchingTransformers.forEach(transformer -> applyTransformer(transfer, variableName, value, transformer));
