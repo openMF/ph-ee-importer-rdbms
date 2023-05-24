@@ -141,7 +141,7 @@ public class EventParser {
                                 .withName(variableName)
                                 .withWorkflowKey(workflowKey)
                                 .withTimestamp(timestamp)
-                                .withValue(variableValue));
+                                .withValue(value));
 
                 logger.debug("finding transformers for bpmn: {} and variable: {}", bpmn, variableName);
                 List<TransferTransformerConfig.Transformer> matchingTransformers = transferTransformerConfig.getFlows().stream()
