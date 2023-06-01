@@ -118,6 +118,9 @@ bpmn:
     - id: "mock_payment_transfer_debit"
       direction: "${bpmn.outgoing-direction}"
       type: "${bpmn.transfer-type}"
+    - id: "minimal_mock_fund_transfer"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
 
 
 logging:
