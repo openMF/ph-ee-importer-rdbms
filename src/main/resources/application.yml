@@ -46,6 +46,7 @@ bpmn:
   transfer-type: "TRANSFER"
   transaction-request-type: "TRANSACTION-REQUEST"
   batch-type: "BATCH"
+  outbound-message-type: "OUTBOUND_MESSAGES"
   incoming-direction: "INCOMING"
   outgoing-direction: "OUTGOING"
   processes:
@@ -124,10 +125,13 @@ bpmn:
     - id: "minimal_mock_fund_transfer"
       direction: "${bpmn.outgoing-direction}"
       type: "${bpmn.transfer-type}"
+    - id: "notification"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.outbound-message-type}"
 
 logging:
   level:
-    ROOT: ERROR
+    ROOT: INFO
   pattern:
       console: "%clr(%d{dd-MM-yyyy HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr([%35.35t]){faint} %clr(%-28.28logger{28}){cyan} %clr(:){faint}%X{BUSINESS-LOG} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
 
