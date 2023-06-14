@@ -288,8 +288,10 @@ public class RecordParser {
         if (filename == null) {
             return;
         }
+        logger.info("Hello world 1");
         filename = strip(filename);
         String localFilePath = fileTransferService.downloadFile(filename, bucketName);
+        logger.info("local file path:" + localFilePath);
         if (localFilePath == null) {
             logger.error("Null localFilePath, Error updating transfer table for batch with instance key {} and batch filename {}", workflowInstanceKey, filename);
             return;
@@ -311,10 +313,14 @@ public class RecordParser {
         }
 
         Batch batch = batchRepository.findByWorkflowInstanceKey(workflowInstanceKey);
+        logger.info("Batch ID: " + batch.getBatchId());
         for (Transaction transaction: transactionList) {
+            logger.info("Transfer status: " + transaction.getStatus());
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
-            transfer.setBatchId(strip(tempDocumentStore.getBatchId(workflowInstanceKey)));
+
+            String batchId = tempDocumentStore.getBatchId(workflowInstanceKey);
+            transfer.setBatchId(strip(batchId));
             transfer.setCompletedAt(new Date(completeTimestamp));
             transfer.setTransactionId(transaction.getRequestId());
 
@@ -326,8 +332,11 @@ public class RecordParser {
             transfer.setPayerFeeCurrency(transaction.getCurrency());
             transfer.setPayerFee(BigDecimal.ZERO);
 
+            // logging transfer status before updating
+            logger.info("Transfer status: " + transfer.getStatus());
             BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
 
+            logger.info("Transfer content: " + transfer.toString());
             transferRepository.save(transfer);
         }
 
