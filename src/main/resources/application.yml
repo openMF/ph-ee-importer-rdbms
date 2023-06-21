@@ -118,10 +118,12 @@ bpmn:
     - id: "mock_payment_transfer_debit"
       direction: "${bpmn.outgoing-direction}"
       type: "${bpmn.transfer-type}"
+    - id: "bulk_connector_closedloop"
+      direction: "UNKNOWN"
+      type: "${bpmn.batch-type}"
     - id: "minimal_mock_fund_transfer"
       direction: "${bpmn.outgoing-direction}"
       type: "${bpmn.transfer-type}"
-
 
 logging:
   level:

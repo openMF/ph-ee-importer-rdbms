@@ -314,7 +314,9 @@ public class RecordParser {
         for (Transaction transaction: transactionList) {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
-            transfer.setBatchId(strip(tempDocumentStore.getBatchId(workflowInstanceKey)));
+
+            String batchId = tempDocumentStore.getBatchId(workflowInstanceKey);
+            transfer.setBatchId(strip(batchId));
             transfer.setCompletedAt(new Date(completeTimestamp));
             transfer.setTransactionId(transaction.getRequestId());
 
@@ -327,7 +329,6 @@ public class RecordParser {
             transfer.setPayerFee(BigDecimal.ZERO);
 
             BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
-
             transferRepository.save(transfer);
         }
 
