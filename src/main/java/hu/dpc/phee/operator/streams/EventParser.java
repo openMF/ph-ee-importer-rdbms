@@ -181,7 +181,7 @@ public class EventParser {
         try {
             String fieldName = transformer.getField();
             if (Strings.isNotBlank(transformer.getConstant())) {
-                logger.debug("setting constant value: {} for variable {}", transformer.getConstant(), variableName);
+                logger.debug("setting constant value: {}", transformer.getConstant());
                 PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, transformer.getConstant());
                 return;
             }
