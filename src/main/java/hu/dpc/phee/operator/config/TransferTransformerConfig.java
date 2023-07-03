@@ -20,6 +20,9 @@ public class TransferTransformerConfig {
 
     @PostConstruct
     public void setup() {
+        if (flows == null) {
+            throw new RuntimeException("Invalid configuration, no Transfer transformers configured");
+        }
         logger.info("Loaded Transfer transformers for {} flows from configuration", flows.size());
     }
 
