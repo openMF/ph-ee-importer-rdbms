@@ -79,8 +79,8 @@ public class Transfer {
     @Column(name = "BATCH_ID")
     private String batchId;
 
-    @Column(name = "CLIENTCORRELATIONID")
-    private String clientCorrelationId;
+    @Column(name = "ENDTOENDIDENTIFICATION")
+    private String endToEndIdentification;
 
 
     public Transfer(Long workflowInstanceKey) {

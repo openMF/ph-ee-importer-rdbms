@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class EventParser {
@@ -181,10 +180,12 @@ public class EventParser {
         if (entities.size() != 0) {
             logger.info("Saving {} entities", entities.size());
             entities.forEach(entity -> {
-                switch (entity) {
-                    case Variable variable -> variableRepository.save(variable);
-                    case Task task -> taskRepository.save(task);
-                    default -> throw new IllegalStateException("Unexpected entity type: " + entity.getClass());
+                if (entity instanceof Variable) {
+                    variableRepository.save((Variable) entity);
+                } else if (entity instanceof Task) {
+                    taskRepository.save((Task) entity);
+                } else {
+                    throw new IllegalStateException("Unexpected entity type: " + entity.getClass());
                 }
             });
             transferRepository.save(transfer);
@@ -207,11 +208,15 @@ public class EventParser {
                 Object result = json.read(transformer.getJsonPath());
                 logger.debug("jsonpath result: {} for variable {}", result, variableName);
                 if (result != null) {
-                    String value = switch (result) {
-                        case String string -> string;
-                        case List list -> list.stream().map(Object::toString).collect(Collectors.joining(" ")).toString();
-                        default -> result.toString();
-                    };
+                    String value;
+                    if (result instanceof String) {
+                        value = (String) result;
+                    }
+                    if (result instanceof List) {
+                        value = ((List<?>) result).stream().map(Object::toString).collect(Collectors.joining(" "));
+                    } else {
+                        value = result.toString();
+                    }
                     PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, value);
                 } else {
                     logger.error("null result when setting field {} from variable {}. Jsonpath: {}, variable value: {}", fieldName, variableName, transformer.getJsonPath(), variableValue);
