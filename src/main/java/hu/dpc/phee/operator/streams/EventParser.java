@@ -10,6 +10,7 @@ import hu.dpc.phee.operator.entity.transfer.TransferStatus;
 import hu.dpc.phee.operator.entity.variable.Variable;
 import hu.dpc.phee.operator.entity.variable.VariableRepository;
 import hu.dpc.phee.operator.importer.JsonPathReader;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
@@ -207,8 +208,9 @@ public class EventParser {
                 DocumentContext json = JsonPathReader.parse(variableValue);
                 Object result = json.read(transformer.getJsonPath());
                 logger.debug("jsonpath result: {} for variable {}", result, variableName);
+
+                String value = null;
                 if (result != null) {
-                    String value;
                     if (result instanceof String) {
                         value = (String) result;
                     }
@@ -218,7 +220,9 @@ public class EventParser {
                         value = result.toString();
                     }
                     PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, value);
-                } else {
+                }
+
+                if (StringUtils.isBlank(value)) {
                     logger.error("null result when setting field {} from variable {}. Jsonpath: {}, variable value: {}", fieldName, variableName, transformer.getJsonPath(), variableValue);
                 }
                 return;
@@ -229,7 +233,7 @@ public class EventParser {
                 Document document = documentBuilderFactory.newDocumentBuilder().parse(new InputSource(new StringReader(variableValue)));
                 String result = xPathFactory.newXPath().compile(transformer.getXpath()).evaluate(document);
                 logger.debug("xpath result: {} for variable {}", result, variableName);
-                if (result != null) {
+                if (StringUtils.isNotBlank(result)) {
                     PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, result);
                 } else {
                     logger.error("null result when setting field {} from variable {}. Xpath: {}, variable value: {}", fieldName, variableName, transformer.getXpath(), variableValue);
