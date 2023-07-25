@@ -53,6 +53,10 @@ public class TenantsService implements DisposableBean {
                 .toList();
         logger.info("Loaded tenants from configuration: {}", tenants);
 
+        if (tenantConnectionList.getConnections().isEmpty()) {
+            throw new RuntimeException("No tenant connection properties found in configuration");
+        }
+
         this.tenantConnectionProperties = tenantConnectionList.getConnections().stream()
                 .collect(Collectors.toMap(TenantConnectionProperties::getName, it -> it));
         logger.info("loaded {} tenant config properties: {}", tenantConnectionProperties.size(), tenantConnectionProperties);
