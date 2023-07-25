@@ -2,12 +2,11 @@ package hu.dpc.phee.operator.streams;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;
-import hu.dpc.phee.operator.entity.tenant.TenantServerConnection;
-import hu.dpc.phee.operator.entity.tenant.TenantServerConnectionRepository;
 import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferRepository;
 import hu.dpc.phee.operator.importer.JsonPathReader;
+import hu.dpc.phee.operator.tenants.TenantsService;
 import jakarta.annotation.PostConstruct;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -21,6 +20,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.sql.DataSource;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,9 +48,6 @@ public class StreamsSetup {
     private EventParser eventParser;
 
     @Autowired
-    private TenantServerConnectionRepository tenantServerConnectionRepository;
-
-    @Autowired
     private TransactionTemplate transactionTemplate;
 
     @Autowired
@@ -58,6 +55,9 @@ public class StreamsSetup {
 
     @Autowired
     TransferRepository transferRepository;
+
+    @Autowired
+    TenantsService tenantsService;
 
 
     @PostConstruct
@@ -98,9 +98,8 @@ public class StreamsSetup {
             Pair<String, String> bpmnAndTenant = eventParser.retrieveTenant(sample);
             bpmn = bpmnAndTenant.getFirst();
             tenantName = bpmnAndTenant.getSecond();
-            logger.trace("finding tenant server connection for tenant: {}", tenantName);
-            TenantServerConnection tenant = tenantServerConnectionRepository.findOneBySchemaName(tenantName);
-            logger.trace("setting tenant: {}", tenant);
+            logger.trace("resolving tenant server connection for tenant: {}", tenantName);
+            DataSource tenant = tenantsService.getTenantDataSource(tenantName);
             ThreadLocalContextUtil.setTenant(tenant);
         } catch (Exception e) {
             logger.error("failed to process first record: {}, skipping whole batch", first, e);
