@@ -2,6 +2,8 @@ package hu.dpc.phee.operator.entity.businesskey;
 
 
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
+import lombok.Getter;
+import lombok.Setter;
 import org.eclipse.persistence.annotations.Index;
 
 import javax.persistence.Column;
@@ -10,6 +12,8 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "businesskeys")
+@Getter
+@Setter
 public class BusinessKey extends AbstractPersistableCustom<Long> {
 
     @Column(name = "BUSINESS_KEY")
@@ -26,36 +30,4 @@ public class BusinessKey extends AbstractPersistableCustom<Long> {
 
     @Column(name = "TIMESTAMP")
     private Long timestamp;
-
-    public String getBusinessKeyType() {
-        return businessKeyType;
-    }
-
-    public void setBusinessKeyType(String businessKeyType) {
-        this.businessKeyType = businessKeyType;
-    }
-
-    public Long getWorkflowInstanceKey() {
-        return workflowInstanceKey;
-    }
-
-    public void setWorkflowInstanceKey(Long workflowInstanceKey) {
-        this.workflowInstanceKey = workflowInstanceKey;
-    }
-
-    public Long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public String getBusinessKey() {
-        return businessKey;
-    }
-
-    public void setBusinessKey(String transactionId) {
-        this.businessKey = transactionId;
-    }
 }

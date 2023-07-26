@@ -19,6 +19,7 @@
 package hu.dpc.phee.operator.entity.parent;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Setter;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.GeneratedValue;
@@ -29,6 +30,7 @@ import java.io.Serializable;
 
 
 @MappedSuperclass
+@Setter
 public abstract class AbstractPersistableCustom<PK extends Serializable> implements Persistable<Long> {
 
     @Id
@@ -38,11 +40,6 @@ public abstract class AbstractPersistableCustom<PK extends Serializable> impleme
     @Override
     public Long getId() {
         return id;
-    }
-
-    public void setId(final Long id) {
-
-        this.id = id;
     }
 
     @Override
