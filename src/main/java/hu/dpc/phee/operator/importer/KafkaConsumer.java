@@ -73,6 +73,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
             String bpmnprocessId = bpmnprocessIdWithTenant.substring(0, bpmnprocessIdWithTenant.indexOf("-"));
             logger.info("Tenant name: " + tenantName);
             logger.info("bpmnprocessId: " + bpmnprocessId);
+
             TenantServerConnection tenant = repository.findOneBySchemaName(tenantName);
             if(tenant != null) {
                 logger.info("TenantServerConnection: " + tenant.toString());
