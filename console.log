@@ -1,0 +1,96 @@
+08:38:27.320  INFO [                               main] .DatabaseImporterApplication : : Starting DatabaseImporterApplication using Java 17.0.6 with PID 91116 (/Users/ishan/fynarfin/phee/ph-ee-importer-rdbms/build/classes/java/main started by ishan in /Users/ishan/fynarfin/phee/ph-ee-importer-rdbms)
+08:38:27.322 DEBUG [                               main] .DatabaseImporterApplication : : Running with Spring Boot v3.0.4, Spring v6.0.6
+08:38:27.322  INFO [                               main] .DatabaseImporterApplication : : No active profile set, falling back to 1 default profile: "default"
+08:38:27.486  INFO [                               main] ositoryConfigurationDelegate : : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+08:38:27.513  INFO [                               main] ositoryConfigurationDelegate : : Finished Spring Data repository scanning in 23 ms. Found 4 JPA repository interfaces.
+08:38:27.603  WARN [                               main] tionConfigApplicationContext : : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.CannotLoadBeanClassException: Error loading class [hu.dpc.phee.operator.streams.EventParser] for bean with name 'eventParser' defined in file [/Users/ishan/fynarfin/phee/ph-ee-importer-rdbms/build/classes/java/main/hu/dpc/phee/operator/streams/EventParser.class]: problem with class file or dependent class
+08:38:27.608  INFO [                               main] ditionEvaluationReportLogger : : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+08:38:27.614 ERROR [                               main] o.s.boot.SpringApplication   : : Application run failed
+
+org.springframework.beans.factory.CannotLoadBeanClassException: Error loading class [hu.dpc.phee.operator.streams.EventParser] for bean with name 'eventParser' defined in file [/Users/ishan/fynarfin/phee/ph-ee-importer-rdbms/build/classes/java/main/hu/dpc/phee/operator/streams/EventParser.class]: problem with class file or dependent class
+	at org.springframework.beans.factory.support.AbstractBeanFactory.resolveBeanClass(AbstractBeanFactory.java:1508)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.determineTargetType(AbstractAutowireCapableBeanFactory.java:684)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.predictBeanType(AbstractAutowireCapableBeanFactory.java:652)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getType(AbstractBeanFactory.java:692)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.findAnnotationOnBean(DefaultListableBeanFactory.java:732)
+	at org.springframework.boot.sql.init.dependency.AnnotationDependsOnDatabaseInitializationDetector.detect(AnnotationDependsOnDatabaseInitializationDetector.java:36)
+	at org.springframework.boot.sql.init.dependency.DatabaseInitializationDependencyConfigurer$DependsOnDatabaseInitializationPostProcessor.detectDependsOnInitializationBeanNames(DatabaseInitializationDependencyConfigurer.java:152)
+	at org.springframework.boot.sql.init.dependency.DatabaseInitializationDependencyConfigurer$DependsOnDatabaseInitializationPostProcessor.postProcessBeanFactory(DatabaseInitializationDependencyConfigurer.java:115)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:358)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:194)
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:747)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:565)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:732)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:434)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:310)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1304)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1293)
+	at hu.dpc.phee.operator.DatabaseImporterApplication.main(DatabaseImporterApplication.java:24)
+Caused by: java.lang.UnsupportedClassVersionError: Preview features are not enabled for hu/dpc/phee/operator/streams/EventParser (class file version 61.65535). Try running with '--enable-preview'
+	at java.base/java.lang.ClassLoader.defineClass1(Native Method)
+	at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1012)
+	at java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:150)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.defineClass(BuiltinClassLoader.java:862)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.findClassOnClassPathOrNull(BuiltinClassLoader.java:760)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClassOrNull(BuiltinClassLoader.java:681)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:639)
+	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:520)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:467)
+	at org.springframework.util.ClassUtils.forName(ClassUtils.java:283)
+	at org.springframework.beans.factory.support.AbstractBeanDefinition.resolveBeanClass(AbstractBeanDefinition.java:461)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doResolveBeanClass(AbstractBeanFactory.java:1569)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.resolveBeanClass(AbstractBeanFactory.java:1502)
+	... 17 common frames omitted
+
+08:39:27.995  INFO [                               main] .DatabaseImporterApplication : : Starting DatabaseImporterApplication using Java 17.0.6 with PID 91135 (/Users/ishan/fynarfin/phee/ph-ee-importer-rdbms/build/classes/java/main started by ishan in /Users/ishan/fynarfin/phee/ph-ee-importer-rdbms)
+08:39:27.996 DEBUG [                               main] .DatabaseImporterApplication : : Running with Spring Boot v3.0.4, Spring v6.0.6
+08:39:27.997  INFO [                               main] .DatabaseImporterApplication : : No active profile set, falling back to 1 default profile: "default"
+08:39:28.151  INFO [                               main] ositoryConfigurationDelegate : : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+08:39:28.177  INFO [                               main] ositoryConfigurationDelegate : : Finished Spring Data repository scanning in 22 ms. Found 4 JPA repository interfaces.
+08:39:28.267  WARN [                               main] tionConfigApplicationContext : : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.CannotLoadBeanClassException: Error loading class [hu.dpc.phee.operator.streams.EventParser] for bean with name 'eventParser' defined in file [/Users/ishan/fynarfin/phee/ph-ee-importer-rdbms/build/classes/java/main/hu/dpc/phee/operator/streams/EventParser.class]: problem with class file or dependent class
+08:39:28.271  INFO [                               main] ditionEvaluationReportLogger : : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+08:39:28.277 ERROR [                               main] o.s.boot.SpringApplication   : : Application run failed
+
+org.springframework.beans.factory.CannotLoadBeanClassException: Error loading class [hu.dpc.phee.operator.streams.EventParser] for bean with name 'eventParser' defined in file [/Users/ishan/fynarfin/phee/ph-ee-importer-rdbms/build/classes/java/main/hu/dpc/phee/operator/streams/EventParser.class]: problem with class file or dependent class
+	at org.springframework.beans.factory.support.AbstractBeanFactory.resolveBeanClass(AbstractBeanFactory.java:1508)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.determineTargetType(AbstractAutowireCapableBeanFactory.java:684)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.predictBeanType(AbstractAutowireCapableBeanFactory.java:652)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getType(AbstractBeanFactory.java:692)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.findAnnotationOnBean(DefaultListableBeanFactory.java:732)
+	at org.springframework.boot.sql.init.dependency.AnnotationDependsOnDatabaseInitializationDetector.detect(AnnotationDependsOnDatabaseInitializationDetector.java:36)
+	at org.springframework.boot.sql.init.dependency.DatabaseInitializationDependencyConfigurer$DependsOnDatabaseInitializationPostProcessor.detectDependsOnInitializationBeanNames(DatabaseInitializationDependencyConfigurer.java:152)
+	at org.springframework.boot.sql.init.dependency.DatabaseInitializationDependencyConfigurer$DependsOnDatabaseInitializationPostProcessor.postProcessBeanFactory(DatabaseInitializationDependencyConfigurer.java:115)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:358)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:194)
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:747)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:565)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:732)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:434)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:310)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1304)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1293)
+	at hu.dpc.phee.operator.DatabaseImporterApplication.main(DatabaseImporterApplication.java:24)
+Caused by: java.lang.UnsupportedClassVersionError: Preview features are not enabled for hu/dpc/phee/operator/streams/EventParser (class file version 61.65535). Try running with '--enable-preview'
+	at java.base/java.lang.ClassLoader.defineClass1(Native Method)
+	at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1012)
+	at java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:150)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.defineClass(BuiltinClassLoader.java:862)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.findClassOnClassPathOrNull(BuiltinClassLoader.java:760)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClassOrNull(BuiltinClassLoader.java:681)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:639)
+	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:520)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:467)
+	at org.springframework.util.ClassUtils.forName(ClassUtils.java:283)
+	at org.springframework.beans.factory.support.AbstractBeanDefinition.resolveBeanClass(AbstractBeanDefinition.java:461)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doResolveBeanClass(AbstractBeanFactory.java:1569)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.resolveBeanClass(AbstractBeanFactory.java:1502)
+	... 17 common frames omitted
+
