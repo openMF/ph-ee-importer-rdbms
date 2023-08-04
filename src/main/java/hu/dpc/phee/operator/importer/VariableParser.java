@@ -95,6 +95,10 @@ public class VariableParser {
         batchParsers.put("resultFile", pair -> pair.getFirst().setResult_file(strip(pair.getSecond())));
         batchParsers.put("paymentMode", pair -> pair.getFirst().setPaymentMode(strip(pair.getSecond())));
 
+        // new variables to be added
+        batchParsers.put("subBatchesStarted", pair -> pair.getFirst().setPaymentMode(strip(pair.getSecond())));
+        batchParsers.put("subBatchesEnded", pair -> pair.getFirst().setPaymentMode(strip(pair.getSecond())));
+
         outboundMessageParsers.put("tenantId",pair -> pair.getFirst().setTenantId(Long.parseLong(pair.getSecond())));
         outboundMessageParsers.put("externalId",pair -> pair.getFirst().setExternalId(strip(pair.getSecond())));
         outboundMessageParsers.put("internalId",pair -> pair.getFirst().setInternalId(Long.parseLong(pair.getSecond())));
