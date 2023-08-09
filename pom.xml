@@ -14,7 +14,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven-shade-plugin.version>3.2.2</maven-shade-plugin.version>
 
-        <springboot.version>3.0.4</springboot.version>
+        <springboot.version>3.0.9</springboot.version>
         <eclipselink.version>4.0.1</eclipselink.version>
         <elasticsearch.version>7.6.0</elasticsearch.version>
         <json.version>20230227</json.version>
@@ -60,11 +60,6 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>${json.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk</artifactId>
-            <version>1.11.486</version>
         </dependency>
         <dependency>
             <groupId>io.javalin</groupId>
