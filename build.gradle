@@ -6,7 +6,8 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'eclipse'
-    id 'org.springframework.boot' version '2.1.9.RELEASE'
+    id 'org.springframework.boot' version '2.7.14'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
 
 repositories {
@@ -16,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter:2.2.4.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.apache.kafka:kafka-streams:2.3.1'
     implementation 'org.springframework.kafka:spring-kafka:2.3.5.RELEASE'
     implementation 'org.json:json:20190722'
@@ -33,7 +34,7 @@ dependencies {
 
 group = 'hu.dpc.phee'
 version = '1.0.0-SNAPSHOT'
-sourceCompatibility = '11'
+sourceCompatibility = '17'
 
 publishing {
     publications {
