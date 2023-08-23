@@ -82,6 +82,12 @@ public class Transfer {
     @Column(name = "ENDTOENDIDENTIFICATION")
     private String endToEndIdentification;
 
+    @Column(name = "RECALL_STATUS")
+    private String recallStatus;
+
+    @Column(name = "RECALL_DIRECTION")
+    private String recallDirection;
+
 
     public Transfer(Long workflowInstanceKey) {
         this.workflowInstanceKey = workflowInstanceKey;
