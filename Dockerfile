@@ -1,4 +1,4 @@
-FROM openjdk:17-bullseye
+FROM openjdk:17.0
 EXPOSE 8000
 WORKDIR /app
 
