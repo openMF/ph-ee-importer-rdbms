@@ -55,6 +55,7 @@ jobs:
           name: Build Docker image
           command: |
             IMAGE_TAG=$CIRCLE_TAG
+            ./gradlew build --stacktrace
             ./gradlew bootJar
             docker build -t openmf/ph-ee-importer-rdbms:latest .
 
