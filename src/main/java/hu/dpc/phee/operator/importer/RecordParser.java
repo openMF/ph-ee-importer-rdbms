@@ -1,5 +1,6 @@
 package hu.dpc.phee.operator.importer;
 
+import com.amazonaws.services.apigateway.model.Op;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -9,6 +10,8 @@ import hu.dpc.phee.operator.config.BpmnProcessProperties;
 import hu.dpc.phee.operator.entity.batch.Batch;
 import hu.dpc.phee.operator.entity.batch.BatchRepository;
 import hu.dpc.phee.operator.entity.batch.Transaction;
+import hu.dpc.phee.operator.entity.outboundmessages.OutboudMessages;
+import hu.dpc.phee.operator.entity.outboundmessages.OutboundMessagesRepository;
 import hu.dpc.phee.operator.entity.task.Task;
 import hu.dpc.phee.operator.entity.task.TaskRepository;
 import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
@@ -30,10 +33,7 @@ import org.springframework.stereotype.Component;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static hu.dpc.phee.operator.OperatorUtils.strip;
@@ -51,6 +51,8 @@ public class RecordParser {
 
     @Value("${bpmn.batch-type}")
     private String batchType;
+    @Value("${bpmn.outbound-message-type}")
+    private String outboundMessageType;
 
     @Value("${bpmn.outgoing-direction}")
     private String outgoingDirection;
@@ -66,6 +68,9 @@ public class RecordParser {
 
     @Autowired
     private TransferRepository transferRepository;
+
+    @Autowired
+    private OutboundMessagesRepository outboundMessagesRepository;
 
     @Autowired
     private TransactionRequestRepository transactionRequestRepository;
@@ -84,6 +89,8 @@ public class RecordParser {
 
     @Autowired
     private InflightBatchManager inflightBatchManager;
+    @Autowired
+    private InflightOutboundMessageManager inflightOutboundMessageManager;
 
     @Autowired
     private VariableParser variableParser;
@@ -156,7 +163,16 @@ public class RecordParser {
                     }
                 }
             }
-        } else {
+        }else if(outboundMessageType.equals(bpmnProcess.getType())){
+            if (variableParser.getOutboundMessageParsers().containsKey(name)) {
+                logger.debug("add variable {} to outbound messages for workflow {}", name, workflowInstanceKey);
+                String value = newVariable.read("$.value.value");
+                OutboudMessages outboudMessages = inflightOutboundMessageManager.getOrCreateOutboundMessage(workflowInstanceKey);
+                variableParser.getOutboundMessageParsers().get(name).accept(Pair.of(outboudMessages, value));
+                outboundMessagesRepository.save(outboudMessages);
+            }
+        }
+        else {
             logger.debug("Skip adding variable to {} and type is {}", bpmnProcessId, bpmnProcess.getType()); // xx
         }
     }
@@ -200,7 +216,6 @@ public class RecordParser {
 
         String elementId = json.read("$.value.elementId");
         Long callActivityKey = json.read("$.key");
-
         if (transferType.equals(bpmnProcess.getType())) {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 if (hasParent) {
@@ -234,8 +249,16 @@ public class RecordParser {
                 }
                 inflightBatchManager.batchEnded(workflowInstanceKey, timestamp);
             }
-        } else {
-            logger.error("Skip parsing bpmnProcess: {}, bpmnProcessId: {}, document: {}", bpmnProcess, bpmnProcessId, json.jsonString());
+        }else if(outboundMessageType.equals(bpmnProcess.getType())){
+            logger.info("---------------- ELEMENT_ACTIVATING ----------intent - {}, json - {} ",intent,json);
+            if ("ELEMENT_ACTIVATING".equals(intent)) {
+                inflightOutboundMessageManager.outboundMessageStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
+            } else if ("ELEMENT_COMPLETED".equals(intent)) {
+                inflightOutboundMessageManager.outboundMessageEnded(workflowInstanceKey, timestamp);
+            }
+        }else {
+            logger.error("Skip parsing bpmnProcess: {}, bpmnProcessId: {}, document: {} as bpmn isn't set",
+                    bpmnProcess, bpmnProcessId, json.jsonString());
         }
     }
 
@@ -312,8 +335,11 @@ public class RecordParser {
         for (Transaction transaction : transactionList) {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
-            transfer.setBatchId(strip(tempDocumentStore.getBatchId(workflowInstanceKey)));
+
+            String batchId = tempDocumentStore.getBatchId(workflowInstanceKey);
+            transfer.setBatchId(strip(batchId));
             transfer.setCompletedAt(new Date(completeTimestamp));
+            transfer.setTransactionId(transaction.getRequestId());
 
             transfer.setPayeeDfspId(batch.getPaymentMode());
             transfer.setPayerDfspId(ThreadLocalContextUtil.getTenant().getSchemaName());
@@ -324,7 +350,6 @@ public class RecordParser {
             transfer.setPayerFee(BigDecimal.ZERO);
 
             BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
-
             transferRepository.save(transfer);
         }
 

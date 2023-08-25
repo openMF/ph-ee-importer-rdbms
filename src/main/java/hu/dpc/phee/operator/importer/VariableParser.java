@@ -3,10 +3,12 @@ package hu.dpc.phee.operator.importer;
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.OperatorUtils;
 import hu.dpc.phee.operator.entity.batch.Batch;
+import hu.dpc.phee.operator.entity.outboundmessages.OutboudMessages;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequest;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestState;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferStatus;
+import hu.dpc.phee.operator.util.SmsMessageStatusType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +37,8 @@ public class VariableParser {
     private final Map<String, Consumer<Pair<Transfer, String>>> transferParsers = new HashMap<>();
     private final Map<String, Consumer<Pair<TransactionRequest, String>>> transactionRequestParsers = new HashMap<>();
     private final Map<String, Consumer<Pair<Batch, String>>> batchParsers = new HashMap<>();
+
+    private final Map<String, Consumer<Pair<OutboudMessages, String>>> outboundMessageParsers = new HashMap<>();
 
     public VariableParser() {
         transferParsers.put("localQuoteResponse", pair -> parseTransferLocalQuoteResponse(pair.getFirst(), strip(pair.getSecond())));
@@ -74,6 +78,7 @@ public class VariableParser {
         transactionRequestParsers.put("transactionFailed", pair -> parseTransactionFailed(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("transferSettlementFailed", pair -> parseSettlementFiled(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("clientCorrelationId", pair -> parseClientCorrelationId(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("errorInformation", pair -> parseErrorInformation(pair.getFirst(), pair.getSecond()));
 
         batchParsers.put("batchId", pair -> pair.getFirst().setBatchId(strip(pair.getSecond())));
         batchParsers.put("filename", pair -> pair.getFirst().setRequestFile(strip(pair.getSecond())));
@@ -90,6 +95,16 @@ public class VariableParser {
         batchParsers.put("completedAmount", pair -> pair.getFirst().setCompletedAmount(Long.parseLong(pair.getSecond())));
         batchParsers.put("resultFile", pair -> pair.getFirst().setResult_file(strip(pair.getSecond())));
         batchParsers.put("paymentMode", pair -> pair.getFirst().setPaymentMode(strip(pair.getSecond())));
+
+        outboundMessageParsers.put("tenantId",pair -> pair.getFirst().setTenantId(Long.parseLong(pair.getSecond())));
+        outboundMessageParsers.put("externalId",pair -> pair.getFirst().setExternalId(strip(pair.getSecond())));
+        outboundMessageParsers.put("internalId",pair -> pair.getFirst().setInternalId(Long.parseLong(pair.getSecond())));
+        outboundMessageParsers.put("deliveryStatus",pair -> pair.getFirst().setDeliveryStatus(Integer.parseInt(pair.getSecond())));
+        outboundMessageParsers.put("deliveryErrorMessage",pair -> pair.getFirst().setDeliveryErrorMessage(strip(pair.getSecond())));
+        outboundMessageParsers.put("sourceAddress",pair -> pair.getFirst().setSourceAddress(strip(pair.getSecond())));
+        outboundMessageParsers.put("phoneNumber",pair -> pair.getFirst().setMobileNumber(strip(pair.getSecond())));
+        outboundMessageParsers.put("deliveryMessage",pair -> pair.getFirst().setMessage(strip(pair.getSecond())));
+        outboundMessageParsers.put("bridgeId",pair -> pair.getFirst().setBridgeId(Long.parseLong(pair.getSecond())));
     }
 
     public Map<String, Consumer<Pair<Transfer, String>>> getTransferParsers() {
@@ -135,6 +150,9 @@ public class VariableParser {
 
     public Map<String, Consumer<Pair<Batch, String>>> getBatchParsers() {
         return batchParsers;
+    }
+    public Map<String, Consumer<Pair<OutboudMessages, String>>> getOutboundMessageParsers() {
+        return outboundMessageParsers;
     }
 
     private void parseQuoteSwitchRequest(Transfer transfer, String jsonString) {
@@ -213,6 +231,10 @@ public class VariableParser {
 
     private void parseErrorInformation(Transfer transfer, String jsonString) {
         transfer.setErrorInformation(strip(jsonString));
+    }
+
+    private void parseErrorInformation(TransactionRequest transactionRequest, String jsonString) {
+        transactionRequest.setErrorInformation(strip(jsonString));
     }
 
     private void parseTransactionChannelRequest(TransactionRequest transactionRequest, String jsonString) {

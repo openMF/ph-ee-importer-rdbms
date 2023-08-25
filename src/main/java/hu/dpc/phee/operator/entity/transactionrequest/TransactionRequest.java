@@ -75,6 +75,9 @@ public class TransactionRequest extends AbstractPersistableCustom<Long> {
     @Column(name = "CLIENTCORRELATIONID")
     private String clientCorrelationId;
 
+    @Column(name = "ERROR_INFORMATION")
+    private String errorInformation;
+
     public TransactionRequest() {
     }
 
@@ -265,5 +268,13 @@ public class TransactionRequest extends AbstractPersistableCustom<Long> {
 
     public String getClientCorrelationId() {
         return clientCorrelationId;
+    }
+
+    public String getErrorInformation() {
+        return errorInformation;
+    }
+
+    public void setErrorInformation(String errorInformation) {
+        this.errorInformation = errorInformation;
     }
 }
