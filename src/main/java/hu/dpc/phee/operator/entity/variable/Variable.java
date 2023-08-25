@@ -37,4 +37,43 @@ public class Variable {
     @Column(name = "VALUE")
     private String value;
 
+    public Long getWorkflowInstanceKey() {
+        return workflowInstanceKey;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Long getWorkflowKey() {
+        return workflowKey;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setWorkflowInstanceKey(Long workflowInstanceKey) {
+        this.workflowInstanceKey = workflowInstanceKey;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setWorkflowKey(Long workflowKey) {
+        this.workflowKey = workflowKey;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
 }

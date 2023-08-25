@@ -14,7 +14,6 @@ import java.util.Optional;
 @EnableConfigurationProperties
 @Configuration
 @ConfigurationProperties(prefix = "transfer")
-@Data
 public class TransferTransformerConfig {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -25,10 +24,43 @@ public class TransferTransformerConfig {
 
     private List<Flow> flows;
 
+    public void setFlows(List<Flow> flows) {
+        this.flows = flows;
+    }
+
+    public List<Flow> getFlows() {
+        return flows;
+    }
+
     @Data
     public static class Flow {
         private String name;
         private String direction;
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setDirection(String direction) {
+            this.direction = direction;
+        }
+
+        public void setTransformers(List<Transformer> transformers) {
+            this.transformers = transformers;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDirection() {
+            return direction;
+        }
+
+        public List<Transformer> getTransformers() {
+            return transformers;
+        }
+
         private List<Transformer> transformers;
 
     }
@@ -36,8 +68,50 @@ public class TransferTransformerConfig {
     @Data
     public static class Transformer {
         private String field;
+
+        public void setField(String field) {
+            this.field = field;
+        }
+
+        public void setVariableName(String variableName) {
+            this.variableName = variableName;
+        }
+
+        public void setJsonPath(String jsonPath) {
+            this.jsonPath = jsonPath;
+        }
+
+        public void setConstant(String constant) {
+            this.constant = constant;
+        }
+
+        public void setXpath(String xpath) {
+            this.xpath = xpath;
+        }
+
         private String variableName;
         private String jsonPath;
+
+        public String getField() {
+            return field;
+        }
+
+        public String getVariableName() {
+            return variableName;
+        }
+
+        public String getJsonPath() {
+            return jsonPath;
+        }
+
+        public String getConstant() {
+            return constant;
+        }
+
+        public String getXpath() {
+            return xpath;
+        }
+
         private String constant;
         private String xpath;
     }

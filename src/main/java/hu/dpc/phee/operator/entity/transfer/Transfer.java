@@ -15,7 +15,6 @@ import java.util.Date;
 @Cacheable(false)
 @Data
 @With
-@NoArgsConstructor
 @AllArgsConstructor
 public class Transfer {
 
@@ -86,5 +85,200 @@ public class Transfer {
     public Transfer(Long workflowInstanceKey) {
         this.workflowInstanceKey = workflowInstanceKey;
         this.status = TransferStatus.IN_PROGRESS;
+    }
+
+    public Transfer() {
+    }
+
+    public Long getWorkflowInstanceKey() {
+        return workflowInstanceKey;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public Date getStartedAt() {
+        return startedAt;
+    }
+
+    public Date getCompletedAt() {
+        return completedAt;
+    }
+
+    public TransferStatus getStatus() {
+        return status;
+    }
+
+    public String getStatusDetail() {
+        return statusDetail;
+    }
+
+    public String getPayeeDfspId() {
+        return payeeDfspId;
+    }
+
+    public String getPayeePartyId() {
+        return payeePartyId;
+    }
+
+    public String getPayeePartyIdType() {
+        return payeePartyIdType;
+    }
+
+    public BigDecimal getPayeeFee() {
+        return payeeFee;
+    }
+
+    public String getPayeeFeeCurrency() {
+        return payeeFeeCurrency;
+    }
+
+    public String getPayeeQuoteCode() {
+        return payeeQuoteCode;
+    }
+
+    public String getPayerDfspId() {
+        return payerDfspId;
+    }
+
+    public String getPayerPartyId() {
+        return payerPartyId;
+    }
+
+    public String getPayerPartyIdType() {
+        return payerPartyIdType;
+    }
+
+    public BigDecimal getPayerFee() {
+        return payerFee;
+    }
+
+    public String getPayerFeeCurrency() {
+        return payerFeeCurrency;
+    }
+
+    public String getPayerQuoteCode() {
+        return payerQuoteCode;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public String getDirection() {
+        return direction;
+    }
+
+    public String getErrorInformation() {
+        return errorInformation;
+    }
+
+    public String getBatchId() {
+        return batchId;
+    }
+
+    public String getClientCorrelationId() {
+        return clientCorrelationId;
+    }
+
+    public void setWorkflowInstanceKey(Long workflowInstanceKey) {
+        this.workflowInstanceKey = workflowInstanceKey;
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public void setStartedAt(Date startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public void setCompletedAt(Date completedAt) {
+        this.completedAt = completedAt;
+    }
+
+    public void setStatus(TransferStatus status) {
+        this.status = status;
+    }
+
+    public void setStatusDetail(String statusDetail) {
+        this.statusDetail = statusDetail;
+    }
+
+    public void setPayeeDfspId(String payeeDfspId) {
+        this.payeeDfspId = payeeDfspId;
+    }
+
+    public void setPayeePartyId(String payeePartyId) {
+        this.payeePartyId = payeePartyId;
+    }
+
+    public void setPayeePartyIdType(String payeePartyIdType) {
+        this.payeePartyIdType = payeePartyIdType;
+    }
+
+    public void setPayeeFee(BigDecimal payeeFee) {
+        this.payeeFee = payeeFee;
+    }
+
+    public void setPayeeFeeCurrency(String payeeFeeCurrency) {
+        this.payeeFeeCurrency = payeeFeeCurrency;
+    }
+
+    public void setPayeeQuoteCode(String payeeQuoteCode) {
+        this.payeeQuoteCode = payeeQuoteCode;
+    }
+
+    public void setPayerDfspId(String payerDfspId) {
+        this.payerDfspId = payerDfspId;
+    }
+
+    public void setPayerPartyId(String payerPartyId) {
+        this.payerPartyId = payerPartyId;
+    }
+
+    public void setPayerPartyIdType(String payerPartyIdType) {
+        this.payerPartyIdType = payerPartyIdType;
+    }
+
+    public void setPayerFee(BigDecimal payerFee) {
+        this.payerFee = payerFee;
+    }
+
+    public void setPayerFeeCurrency(String payerFeeCurrency) {
+        this.payerFeeCurrency = payerFeeCurrency;
+    }
+
+    public void setPayerQuoteCode(String payerQuoteCode) {
+        this.payerQuoteCode = payerQuoteCode;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public void setDirection(String direction) {
+        this.direction = direction;
+    }
+
+    public void setErrorInformation(String errorInformation) {
+        this.errorInformation = errorInformation;
+    }
+
+    public void setBatchId(String batchId) {
+        this.batchId = batchId;
+    }
+
+    public void setClientCorrelationId(String clientCorrelationId) {
+        this.clientCorrelationId = clientCorrelationId;
     }
 }
