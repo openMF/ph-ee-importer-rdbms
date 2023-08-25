@@ -2,10 +2,12 @@ package hu.dpc.phee.operator.entity.outboundmessages;
 
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
 
-import javax.persistence.*;
+//import javax.persistence.*;
 
 import hu.dpc.phee.operator.entity.transfer.TransferStatus;
 import hu.dpc.phee.operator.util.SmsMessageStatusType;
+import jakarta.persistence.*;
+
 import java.util.Date;
 
 @Entity

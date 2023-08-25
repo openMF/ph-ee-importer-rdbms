@@ -43,7 +43,6 @@ dependencies {
     api 'org.apache.commons:commons-text:1.10.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
     implementation 'org.projectlombok:lombok:1.18.22'
-    implementation 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
