@@ -1,7 +1,5 @@
-FROM openjdk:17-bullseye
+FROM openjdk:17
 EXPOSE 8000
-WORKDIR /app
 
-COPY target/*.jar /app/
+COPY build/libs/*.jar .
 CMD java -jar *.jar
-
