@@ -1,0 +1,24 @@
+{
+  "partitionId": 1,
+  "value": {
+    "version": 3,
+    "processDefinitionKey": 2251799815420374,
+    "elementId": "binx_hct_inst_credit_transfer_debtor_process-binx",
+    "bpmnProcessId": "binx_hct_inst_credit_transfer_debtor_process-binx",
+    "flowScopeKey": -1,
+    "bpmnElementType": "PROCESS",
+    "parentProcessInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "processInstanceKey": 2251799819651146
+  },
+  "key": 2251799819651146,
+  "timestamp": 1681402193759,
+  "valueType": "PROCESS_INSTANCE",
+  "brokerVersion": "8.1.8",
+  "recordType": "EVENT",
+  "sourceRecordPosition": 11927641,
+  "intent": "ELEMENT_ACTIVATED",
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "position": 11927644
+}

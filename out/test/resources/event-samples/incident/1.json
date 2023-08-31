@@ -1,0 +1,24 @@
+{
+  "partitionId": 1,
+  "value": {
+    "errorMessage": "org.springframework.web.client.HttpClientErrorException$BadRequest: 400 : \"{\"developerMessage\":\"The request was invalid. This typically will happen due to validation errors which are provided.\",\"httpStatusCode\":\"400\",\"defaultUserMessage\":\"Validation errors exist.\",\"userMessageGlobalisationCode\":\"validation.msg.validation.errors.exist\",\"errors\":[{\"developerMessage\":\"The parameter `transactionAmount` must be greater than 0.\",\"defaultUserMessage\":\"The parameter `transactionAmount` must be greater than 0.\",\"userMessageGlobalisationCode\":\"validation.msg.savingsaccount.transaction.transactionAmount.not.greater.than.zero\",\"parameterName\":\"transactionAmount\",\"value\":null,\"args\":[{\"value\":0.0},{\"value\":0}]}]}\"",
+    "processDefinitionKey": 2251799813685862,
+    "elementInstanceKey": 2251799817574397,
+    "elementId": "Activity_TransferTheAmountBetweenDisposalAccounts",
+    "bpmnProcessId": "binx_onus_credit_transfer",
+    "jobKey": 2251799817574405,
+    "variableScopeKey": 2251799817574397,
+    "errorType": "JOB_NO_RETRIES",
+    "processInstanceKey": 2251799817574322
+  },
+  "key": 2251799817574407,
+  "timestamp": 1680775431139,
+  "valueType": "INCIDENT",
+  "brokerVersion": "8.1.8",
+  "recordType": "EVENT",
+  "sourceRecordPosition": 8325545,
+  "intent": "RESOLVED",
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "position": 8325548
+}
