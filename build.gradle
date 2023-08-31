@@ -34,13 +34,13 @@ dependencies {
     api 'com.amazonaws:aws-java-sdk:1.11.486'
     api 'io.javalin:javalin:5.2.0'
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
-    api 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.1'
     api 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.14.0'
     api 'com.jayway.jsonpath:json-path:2.7.0'
     api 'mysql:mysql-connector-java:8.0.31'
     api 'org.postgresql:postgresql:42.5.1'
     api 'com.zaxxer:HikariCP:5.0.1'
     api 'org.apache.commons:commons-text:1.10.0'
+    implementation 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.0'
     implementation 'org.springframework.boot:spring-boot-starter'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
@@ -51,8 +51,8 @@ dependencies {
 group = 'hu.dpc.phee'
 version = '1.0.0-SNAPSHOT'
 description = 'importer-rdbms'
-sourceCompatibility = "17.PREVIEW"
-targetCompatibility = "17.PREVIEW"
+sourceCompatibility = "17"
+targetCompatibility = "17"
 
 publishing {
     publications {
@@ -62,24 +62,6 @@ publishing {
     }
 }
 
-
-//test {
-//    useJUnitPlatform()
-//    jvmArgs(['--enable-preview'])
-//}
-//
-//tasks.withType(JavaCompile).each {
-//    it.options.compilerArgs.add('--enable-preview')
-//}
-
-tasks.withType(JavaCompile) {
-    options.compilerArgs += "--enable-preview"
-}
-
-tasks.withType(Test) {
-    jvmArgs += "--enable-preview"
-}
-
-tasks.withType(JavaExec) {
-    jvmArgs += '--enable-preview'
+tasks.named('test') {
+    useJUnitPlatform()
 }
