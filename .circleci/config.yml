@@ -2,7 +2,7 @@ version: 2.1
 executors:
   docker-executor:
     docker:
-      - image: circleci/openjdk:17-buster-node-browsers-legacy
+      - image: circleci/openjdk:13.0-buster-node-browsers-legacy
 
 jobs:
   build_and_push_tag_image:
@@ -10,7 +10,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx512m
       TERM: dumb
-      GITHUB_TOKEN: ${GITHUB_TOKEN}  # Add the GitHub token as an environment variable
+      GITHUB_TOKEN: ${GITHUB_TOKEN} # Add the GitHub token as an environment variable
 
     steps:
       - checkout
@@ -75,7 +75,7 @@ workflows:
       - build_and_push_tag_image:
           filters:
             tags:
-              only: /^v\d+\.\d+\.\d+$/  # Match tags in the format v1.2.3
+              only: /^v\d+\.\d+\.\d+$/ # Match tags in the format v1.2.3
           context:
             - DOCKER
       - build_and_push_latest_image:
