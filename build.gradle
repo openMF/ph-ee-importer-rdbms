@@ -15,6 +15,10 @@ repositories {
     }
 }
 
+ext {
+    springBootVersion = '2.6.2'
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter:2.2.4.RELEASE'
     implementation 'org.apache.kafka:kafka-streams:2.3.1'
@@ -22,6 +26,7 @@ dependencies {
     implementation 'org.json:json:20190722'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.2.4.RELEASE'
     implementation 'org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.6'
+    implementation "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
     implementation 'com.jayway.jsonpath:json-path:2.4.0'
     implementation 'mysql:mysql-connector-java:8.0.20' 
     implementation 'com.zaxxer:HikariCP:3.4.5'
