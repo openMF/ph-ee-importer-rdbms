@@ -9,6 +9,8 @@ importer:
     aggreation-window-seconds: 2
 
 spring:
+  profiles:
+    active: "binx"
   jpa:
     show-sql: false
     properties:

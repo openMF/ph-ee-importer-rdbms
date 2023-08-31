@@ -10,7 +10,7 @@ importer:
 
 spring:
   profiles:
-    active: "binx,local"
+    active: "binx"
   jpa:
     show-sql: false
     properties:
