@@ -81,6 +81,7 @@ public class EventParser {
         if (transfer == null) {
             logger.debug("creating new Transfer for processInstanceKey: {}", processInstanceKey);
             transfer = new Transfer(processInstanceKey);
+            transfer.setStatus(TransferStatus.IN_PROGRESS);
             Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
             if (config.isPresent()) {
                 transfer.setDirection(config.get().getDirection());
@@ -104,33 +105,32 @@ public class EventParser {
         Long workflowKey = record.read("$.value.processDefinitionKey");
         Long workflowInstanceKey = record.read("$.value.processInstanceKey");
         Long timestamp = record.read("$.timestamp");
+        String bpmnElementType = record.read("$.value.bpmnElementType");
 
         List<Object> entities = switch (valueType) {
             case "DEPLOYMENT", "VARIABLE_DOCUMENT", "WORKFLOW_INSTANCE" -> List.of();
             case "PROCESS_INSTANCE" -> {
                 String recordType = record.read("$.recordType", String.class);
                 String intent = record.read("$.intent", String.class);
-                if ("EVENT".equals(recordType)) {
-                    switch (intent) {
-                        case "ELEMENT_ACTIVATED" -> {
-                            transfer.setStartedAt(new Date(timestamp));
+                if ("EVENT".equals(recordType) && "START_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
+                    transfer.setStartedAt(new Date(timestamp));
 
-                            List<TransferTransformerConfig.Transformer> constantTransformers = transferTransformerConfig.getFlows().stream()
-                                    .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
-                                    .flatMap(it -> it.getTransformers().stream())
-                                    .filter(it -> Strings.isNotBlank(it.getConstant()))
-                                    .toList();
+                    List<TransferTransformerConfig.Transformer> constantTransformers = transferTransformerConfig.getFlows().stream()
+                            .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
+                            .flatMap(it -> it.getTransformers().stream())
+                            .filter(it -> Strings.isNotBlank(it.getConstant()))
+                            .toList();
 
-                            logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
-                            constantTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
-                        }
-                        case "ELEMENT_COMPLETED" -> {
-                            logger.info("finishing transfer for processInstanceKey: {}", workflowInstanceKey);
-                            transfer.setCompletedAt(new Date(timestamp));
-                            transfer.setStatus(TransferStatus.COMPLETED);
-                        }
-                    }
+                    logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
+                    constantTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
                 }
+
+                if ("EVENT".equals(recordType) && "END_EVENT".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
+                    logger.info("finishing transfer for processInstanceKey: {}", workflowInstanceKey);
+                    transfer.setCompletedAt(new Date(timestamp));
+                    transfer.setStatus(TransferStatus.COMPLETED);
+                }
+
                 yield List.of();
             }
 
@@ -171,7 +171,9 @@ public class EventParser {
             }
 
             case "INCIDENT" -> {
-                logger.warn("TODO: not processing INCIDENT record for now");
+                logger.warn("failing Transfer based on incident event");
+                transfer.setStatus(TransferStatus.FAILED);
+                transfer.setCompletedAt(new Date(timestamp));
                 yield List.of();
             }
 
