@@ -106,6 +106,7 @@ public class EventParser {
         Long workflowInstanceKey = record.read("$.value.processInstanceKey");
         Long timestamp = record.read("$.timestamp");
         String bpmnElementType = record.read("$.value.bpmnElementType");
+        String elementId = record.read("$.value.elementId");
 
         List<Object> entities = switch (valueType) {
             case "DEPLOYMENT", "VARIABLE_DOCUMENT", "WORKFLOW_INSTANCE" -> List.of();
@@ -126,9 +127,13 @@ public class EventParser {
                 }
 
                 if ("EVENT".equals(recordType) && "END_EVENT".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
-                    logger.info("finishing transfer for processInstanceKey: {}", workflowInstanceKey);
+                    logger.info("finishing transfer for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
                     transfer.setCompletedAt(new Date(timestamp));
-                    transfer.setStatus(TransferStatus.COMPLETED);
+                    if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
+                        transfer.setStatus(TransferStatus.FAILED);
+                    } else {
+                        transfer.setStatus(TransferStatus.COMPLETED);
+                    }
                 }
 
                 yield List.of();
@@ -172,7 +177,7 @@ public class EventParser {
 
             case "INCIDENT" -> {
                 logger.warn("failing Transfer {} based on incident event", transfer.getTransactionId());
-                transfer.setStatus(TransferStatus.FAILED);
+                transfer.setStatus(TransferStatus.EXCEPTION);
                 transfer.setCompletedAt(new Date(timestamp));
                 yield List.of();
             }
