@@ -28,7 +28,7 @@ dependencies {
     api 'org.springframework.boot:spring-boot-starter:3.0.4'
     api 'org.springframework.boot:spring-boot-actuator:3.0.4'
     api 'org.apache.kafka:kafka-streams:3.3.2'
-    api 'org.springframework.kafka:spring-kafka:3.0.4'
+    api 'org.springframework.kafka:spring-kafka:3.0.8'
     api 'org.json:json:20230227'
     api 'com.amazonaws:aws-java-sdk:1.11.486'
     api 'io.javalin:javalin:5.2.0'
