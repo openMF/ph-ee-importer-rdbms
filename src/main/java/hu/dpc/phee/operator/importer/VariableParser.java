@@ -109,6 +109,7 @@ public class VariableParser {
         outboundMessageParsers.put("bridgeId",pair -> pair.getFirst().setBridgeId(Long.parseLong(pair.getSecond())));
     }
 
+
     public Map<String, Consumer<Pair<Transfer, String>>> getTransferParsers() {
         return transferParsers;
     }
