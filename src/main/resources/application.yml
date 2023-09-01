@@ -4,7 +4,7 @@ kafka:
 
 importer:
   kafka:
-    topic: "zeebe-export"
+    topic: "zeebe-export-test"
     reset: true
     aggreation-window-seconds: 2
 
