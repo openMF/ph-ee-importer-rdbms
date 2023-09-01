@@ -115,7 +115,7 @@ public class StreamsSetup {
 
             transactionTemplate.executeWithoutResult(status -> {
                 Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
-                MDC.put("transferId", transfer.getTransactionId());
+                MDC.put("transactionId", transfer.getTransactionId());
                 try {
                     logger.info("processing key: {}, records: {}", key, records);
                     for (String record : records) {
