@@ -14,6 +14,7 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
@@ -114,15 +115,20 @@ public class StreamsSetup {
 
             transactionTemplate.executeWithoutResult(status -> {
                 Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
-                logger.info("processing key: {}, records: {}", key, records);
-                for (String record : records) {
-                    try {
-                        eventParser.process(bpmn, tenantName, transfer, record);
-                    } catch (Exception e) {
-                        logger.error("failed to parse record: {}", record, e);
+                MDC.put("transferId", transfer.getTransactionId());
+                try {
+                    logger.info("processing key: {}, records: {}", key, records);
+                    for (String record : records) {
+                        try {
+                            eventParser.process(bpmn, tenantName, transfer, record);
+                        } catch (Exception e) {
+                            logger.error("failed to parse record: {}", record, e);
+                        }
                     }
+                    transferRepository.save(transfer);
+                } finally {
+                    MDC.clear();
                 }
-                transferRepository.save(transfer);
             });
 
         } catch (Exception e) {

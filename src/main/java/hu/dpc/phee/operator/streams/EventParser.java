@@ -171,7 +171,7 @@ public class EventParser {
             }
 
             case "INCIDENT" -> {
-                logger.warn("failing Transfer based on incident event");
+                logger.warn("failing Transfer {} based on incident event", transfer.getTransactionId());
                 transfer.setStatus(TransferStatus.FAILED);
                 transfer.setCompletedAt(new Date(timestamp));
                 yield List.of();
