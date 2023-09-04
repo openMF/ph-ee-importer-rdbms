@@ -44,8 +44,110 @@ cloud:
   aws:
     enabled: true
     credentials:
-      access-key: ${AWS_ACCESS_KEY:AKIAX32JM37TZOJ5AKFB}
-      secret-key: ${AWS_SECRET_KEY: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}
+      access-key: ${AWS_ACCESS_KEY:access_key_from_aws}
+      secret-key: ${AWS_SECRET_KEY:secret_key_from_aws}
     region:
       static: us-east-2
 
+bpmn:
+  transfer-type: "TRANSFER"
+  transaction-request-type: "TRANSACTION-REQUEST"
+  batch-type: "BATCH"
+  outbound-message-type: "OUTBOUND_MESSAGES"
+  incoming-direction: "INCOMING"
+  outgoing-direction: "OUTGOING"
+  processes:
+    - id: "PayeeQuoteTransfer"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "PayerTransactionRequest"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transaction-request-type}"
+    - id: "PayerFundTransfer"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "PayeeTransactionRequest"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transaction-request-type}"
+    - id: "transferProcess"
+      direction: "UNKNOWN"
+      type: "${bpmn.transfer-type}"
+    - id: "bulk_processor"
+      direction: "UNKNOWN"
+      type: "${bpmn.batch-type}"
+    - id: "international_remittance_payee_process"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "international_remittance_payer_process"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "mpesa_flow"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transaction-request-type}"
+    - id: "mpesa_flow_roster"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transaction-request-type}"
+    - id: "mpesa_flow_paygops"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transaction-request-type}"
+    - id: "mpesa_flow_tupande"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transaction-request-type}"
+    - id: "mpesa_flow_erply"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transaction-request-type}"
+    - id: "slcb"
+      direction: "UNKNOWN"
+      type: "${bpmn.batch-type}"
+    - id: "gsma_base_transaction"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "inbound_transfer_paygops"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "inbound_transfer_roster"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "inbound_transfer_mifos"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "inbound_transfer_tupande"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "inbound_transfer_erply"
+      direction: "${bpmn.incoming-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "mock_payment_transfer"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "mock_payer_fund_transfer"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "mock_payment_transfer_debit"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "bulk_connector_closedloop"
+      direction: "UNKNOWN"
+      type: "${bpmn.batch-type}"
+    - id: "minimal_mock_fund_transfer"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
+    - id: "notification"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.outbound-message-type}"
+
+logging:
+  level:
+    ROOT: INFO
+  pattern:
+    console: "%clr(%d{dd-MM-yyyy HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr([%35.35t]){faint} %clr(%-28.28logger{28}){cyan} %clr(:){faint}%X{BUSINESS-LOG} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      liveness:
+        enabled: true
+      readiness:
+        enabled: true
