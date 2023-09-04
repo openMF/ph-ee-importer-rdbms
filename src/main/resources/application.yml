@@ -128,6 +128,9 @@ bpmn:
     - id: "notification"
       direction: "${bpmn.outgoing-direction}"
       type: "${bpmn.outbound-message-type}"
+    - id: "minimal_mock_fund_transfer_account_lookup"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transfer-type}"
 
 logging:
   level:
