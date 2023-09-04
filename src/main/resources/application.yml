@@ -1,5 +1,5 @@
 kafka:
-  brokers: "kafka-client:9092"
+  brokers: "my-kafka:9092"
   consumer-group: cg1
 
 importer:
