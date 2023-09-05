@@ -2,15 +2,15 @@ version: 2.1
 executors:
   docker-executor:
     docker:
-      - image: circleci/openjdk:13.0-buster-node-browsers-legacy
+      - image: circleci/openjdk:17-buster-node-browsers-legacy
 
 jobs:
   build_and_push_tag_image:
     executor: docker-executor
     environment:
       JVM_OPTS: -Xmx512m
-      TERM: dumb  
-      GITHUB_TOKEN: ${GITHUB_TOKEN}  # Add the GitHub token as an environment variable
+      TERM: dumb
+      GITHUB_TOKEN: ${GITHUB_TOKEN} # Add the GitHub token as an environment variable
 
     steps:
       - checkout
@@ -20,24 +20,20 @@ jobs:
           name: Build and Push Docker tag Image
           command: |
             # Set environment variables
-            IMAGE_TAG=$CIRCLE_TAG
-
+            IMAGE_TAG=importer_rdbms_1
             # Check if the Docker image with the same tag already exists in Docker Hub
             if curl -s -f -u "$DOCKERHUB_USERNAME":"$DOCKERHUB_PASSWORD" "https://hub.docker.com/v2/repositories/openmf/ph-ee-importer-rdbms/tags/$IMAGE_TAG" > /dev/null; then
               echo "Skipping the build and push as the tag $IMAGE_TAG already exists in Docker Hub."
               exit 0
             fi
-
             # Build and tag the Docker image
             ./gradlew bootJar
             docker build -t "openmf/ph-ee-importer-rdbms:$IMAGE_TAG" .
-
             # Push the Docker image to Docker Hub
             docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
             docker push "openmf/ph-ee-importer-rdbms:$IMAGE_TAG"
-
           # when: always  # The job will be executed even if there's no match for the tag filter
-  
+
   build_and_push_latest_image:
     executor: docker-executor
     environment:
@@ -54,10 +50,9 @@ jobs:
       - run:
           name: Build Docker image
           command: |
-            IMAGE_TAG=$CIRCLE_TAG
+            IMAGE_TAG=importer_rdbms_1
             ./gradlew bootJar
-            docker build -t openmf/ph-ee-importer-rdbms:latest .
-
+            docker build -t openmf/ph-ee-importer-rdbms:importer_rdbms_1 .
       # Log in to DockerHub using environment variables
       - run:
           name: Login to DockerHub
@@ -66,7 +61,7 @@ jobs:
       # Push the Docker image to DockerHub
       - run:
           name: Push Docker image to DockerHub
-          command: docker push openmf/ph-ee-importer-rdbms:latest        
+          command: docker push openmf/ph-ee-importer-rdbms:importer_rdbms_1
 
 workflows:
   version: 2
@@ -75,10 +70,9 @@ workflows:
       - build_and_push_tag_image:
           filters:
             tags:
-              only: /^v\d+\.\d+\.\d+$/  # Match tags in the format v1.2.3
+              only: /^v\d+\.\d+\.\d+$/ # Match tags in the format v1.2.3
           context:
-              - DOCKER
+            - DOCKER
       - build_and_push_latest_image:
           context:
-              - DOCKER
-             
+            - DOCKER
