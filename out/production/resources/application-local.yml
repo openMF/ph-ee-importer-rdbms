@@ -1,0 +1,11 @@
+datasource:
+  core:
+    host: localhost
+    port: 5432
+    schema: tenants
+    username: postgres
+    password: password
+  common:
+    protocol: "jdbc"
+    subprotocol: postgresql
+    driverclass_name: org.postgresql.Driver
