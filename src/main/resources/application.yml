@@ -141,13 +141,3 @@ logging:
     ROOT: INFO
   pattern:
     console: "%clr(%d{dd-MM-yyyy HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr([%35.35t]){faint} %clr(%-28.28logger{28}){cyan} %clr(:){faint}%X{BUSINESS-LOG} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
-
-management:
-  endpoint:
-    health:
-      probes:
-        enabled: true
-      liveness:
-        enabled: true
-      readiness:
-        enabled: true
