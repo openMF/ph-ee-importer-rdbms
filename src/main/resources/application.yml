@@ -1,10 +1,10 @@
 kafka:
-  brokers: "kafka-new-controller:9092"
+  brokers: "kafka-new:9092"
   consumer-group: cg1
 
 importer:
   kafka:
-    topic: "zeebe-export-test-new"
+    topic: "zeebe-export-test"
     reset: true
     aggreation-window-seconds: 2
 
