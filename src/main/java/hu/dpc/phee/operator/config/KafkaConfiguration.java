@@ -39,6 +39,13 @@ public class KafkaConfiguration {
     @Value("kafka.consumer-group")
     private String consumerGroup;
 
+    @Value("kafka.username")
+    private String kafkaUserName;
+
+    @Value("kafka.password")
+    private String kafkaPassword;
+
+
     @Bean
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
@@ -56,6 +63,8 @@ public class KafkaConfiguration {
 
     @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)
     KafkaStreamsConfiguration kStreamsConfig() {
+        logger.info("kafka Brokers :{}",kafkaBrokers);
+        logger.info("consumer group :{}",consumerGroup);
         Map<String, Object> props = new HashMap<>();
         props.put(APPLICATION_ID_CONFIG, consumerGroup);
         props.put(BOOTSTRAP_SERVERS_CONFIG, kafkaBrokers);
@@ -74,6 +83,10 @@ public class KafkaConfiguration {
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, hostname);
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+//        properties.put("sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"admin\" password=\"admin\"");
+//        properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+//        properties.put("security.protocol", "SASL_PLAINTEXT");
+
         return properties;
     }
 

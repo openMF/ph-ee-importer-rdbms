@@ -1,0 +1,31 @@
+{
+  "partitionId": 3,
+  "value": {
+    "type": "transferToConversionAccountInAms",
+    "errorMessage": "",
+    "retries": 3,
+    "retryBackoff": 0,
+    "recurringTime": -1,
+    "processDefinitionVersion": 2,
+    "processDefinitionKey": 2251799816094393,
+    "elementInstanceKey": 6755399445221901,
+    "elementId": "Activity_TransferToCenversionAccountInAms",
+    "customHeaders": {},
+    "bpmnProcessId": "binx_ig2_credit_transfer_debtor_process-binx",
+    "variables": {},
+    "deadline": -1,
+    "processInstanceKey": 6755399445221857,
+    "worker": "",
+    "errorCode": ""
+  },
+  "key": 6755399445221909,
+  "timestamp": 1680776111668,
+  "valueType": "JOB",
+  "brokerVersion": "8.1.8",
+  "recordType": "EVENT",
+  "sourceRecordPosition": 8329782,
+  "intent": "CREATED",
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "position": 8329791
+}

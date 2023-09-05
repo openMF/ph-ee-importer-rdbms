@@ -90,7 +90,7 @@ public class EventParser {
             }
             transferRepository.save(transfer);
         } else {
-            logger.debug("found existing Transfer for processInstanceKey: {}", processInstanceKey);
+            logger.info("found existing Transfer for processInstanceKey: {}", processInstanceKey);
         }
         return transfer;
     }
@@ -100,7 +100,7 @@ public class EventParser {
         logger.info("from kafka: {}", record.jsonString());
 
         String valueType = record.read("$.valueType", String.class);
-        logger.debug("processing {} event", valueType);
+        logger.info("processing {} event", valueType);
 
         Long workflowKey = record.read("$.value.processDefinitionKey");
         Long workflowInstanceKey = record.read("$.value.processInstanceKey");
@@ -154,6 +154,7 @@ public class EventParser {
                 String variableName = record.read("$.value.name", String.class);
                 String variableValue = record.read("$.value.value", String.class);
                 String value = variableValue.startsWith("\"") && variableValue.endsWith("\"") ? StringEscapeUtils.unescapeJson(variableValue.substring(1, variableValue.length() - 1)) : variableValue;
+                logger.info("New Value:{}",value);
 
                 List<Object> results = List.of(
                         new Variable()

@@ -1,11 +1,50 @@
 datasource:
   core:
-    host: localhost
-    port: 5432
+    host: operationsmysql
+    port: 3306
     schema: tenants
-    username: postgres
+    username: mifos
     password: password
   common:
     protocol: "jdbc"
-    subprotocol: postgresql
-    driverclass_name: org.postgresql.Driver
+    subprotocol: mysql
+    driverclass_name: com.mysql.cj.jdbc.Driver
+
+# The transfer flows will be moved to env-template
+transfer:
+  flows:
+    - name: PayerFundTransfer
+      direction: OUTGOING
+      transformers:
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.amount.currency
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer.partyIdInfo.partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: transactionId
+          variableName: transactionId
+        - field: currency
+          variableName: currency
+        - field: batchId
+          variableName: batchId
+        - field: tenantId
+          variableName: tenantId
+        - field: errorInformation
+          variableName: errorInformation
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: subBatchId
+          variableName: subBatchId

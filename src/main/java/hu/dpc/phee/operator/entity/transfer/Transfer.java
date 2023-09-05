@@ -1,6 +1,7 @@
 package hu.dpc.phee.operator.entity.transfer;
 
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -90,6 +91,12 @@ public class Transfer {
 
     @Column(name = "PAYMENT_STATUS")
     private String paymentStatus;
+
+    @Column(name = "CLIENTCORRELATIONID")
+    private String clientCorrelationId;
+
+    @Column(name = "SUB_BATCH_ID")
+    private String subBatchId;
 
     public Transfer(Long workflowInstanceKey) {
         this.workflowInstanceKey = workflowInstanceKey;

@@ -27,7 +27,7 @@ jobs:
               exit 0
             fi
             # Build and tag the Docker image
-            ./gradlew bootJar
+            mvn clean package
             docker build -t "openmf/ph-ee-importer-rdbms:$IMAGE_TAG" .
             # Push the Docker image to Docker Hub
             docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
@@ -51,7 +51,7 @@ jobs:
           name: Build Docker image
           command: |
             IMAGE_TAG=importer_rdbms_1
-            ./gradlew bootJar
+            mvn clean package
             docker build -t openmf/ph-ee-importer-rdbms:importer_rdbms_1 .
       # Log in to DockerHub using environment variables
       - run:

@@ -1,14 +1,14 @@
 tenants:
   connections:
-    - name: binx
-      schema_server: localhost
-      schema_name: binx
-      schema_server_port: 5432
-      schema_username: postgres
+    - name: gorilla
+      schema_server: operationsmysql
+      schema_name: tenants
+      schema_server_port: 3306
+      schema_username: mifos
       schema_password: password
-      driver_class: "org.postgresql.Driver"
+      driver_class: "com.mysql.cj.jdbc.Driver"
       jdbcProtocol: "jdbc"
-      jdbcSubProtocol: postgresql
+      jdbcSubProtocol: mysql
       auto_update: true
       pool_initial_size: 5
       pool_validation_interval: 30000
