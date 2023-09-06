@@ -128,6 +128,9 @@ bpmn:
     - id: "notification"
       direction: "${bpmn.outgoing-direction}"
       type: "${bpmn.outbound-message-type}"
+    - id: "minimal_mock_transfer_request"
+      direction: "${bpmn.outgoing-direction}"
+      type: "${bpmn.transaction-request-type}"
 
 logging:
   level:
