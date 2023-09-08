@@ -55,7 +55,8 @@ jobs:
           name: Build Docker image
           command: |
             IMAGE_TAG=$CIRCLE_TAG
-            ./gradlew bootJar
+            ./gradlew checkstyleMain
+            ./gradlew clean bootJar
             docker build -t openmf/ph-ee-importer-rdbms:latest .
 
       # Log in to DockerHub using environment variables
