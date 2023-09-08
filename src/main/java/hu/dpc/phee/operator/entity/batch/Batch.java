@@ -1,15 +1,15 @@
 package hu.dpc.phee.operator.entity.batch;
 
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
+import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.eclipse.persistence.annotations.Index;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import java.util.Date;
 
 @Entity
 @Getter
@@ -56,7 +56,7 @@ public class Batch extends AbstractPersistableCustom<Long> {
     private Long completedAmount;
 
     @Column(name = "RESULT_FILE")
-    private String result_file;
+    private String resultFile;
 
     @Column(name = "RESULT_GENERATED_AT")
     private Date resultGeneratedAt;

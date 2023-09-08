@@ -1,14 +1,12 @@
 package hu.dpc.phee.operator.entity.variable;
 
-
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
-import org.eclipse.persistence.annotations.Index;
-
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import org.eclipse.persistence.annotations.Index;
 
 @Entity
 @Table(name = "variables")

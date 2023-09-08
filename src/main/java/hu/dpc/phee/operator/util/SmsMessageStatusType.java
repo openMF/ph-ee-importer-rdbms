@@ -22,11 +22,13 @@ package hu.dpc.phee.operator.util;
  * SMS message delivery status predefined enum constants
  **/
 public enum SmsMessageStatusType {
+
     INVALID(0, "smsMessageStatusType.invalid"), // unknown status type
     PENDING(100, "smsMessageStatusType.pending"), // message received
-    WAITING_FOR_REPORT(150, "smsMessageStatusType.pending"),
-    SENT(200, "smsMessageStatusType.sent"), // message sent to the SMS gateway
-    DELIVERED(300, "smsMessageStatusType.delivered"), // SMS gateway's attempt to deliver message to recipient's phone was successful
+    WAITING_FOR_REPORT(150, "smsMessageStatusType.pending"), SENT(200, "smsMessageStatusType.sent"), // message sent to
+                                                                                                     // the SMS gateway
+    DELIVERED(300, "smsMessageStatusType.delivered"), // SMS gateway's attempt to deliver message to recipient's phone
+                                                      // was successful
     FAILED(400, "smsMessageStatusType.failed"); // SMS gateway's attempt to deliver message to recipient's phone failed
 
     private final Integer value;
@@ -35,7 +37,8 @@ public enum SmsMessageStatusType {
     /**
      * get enum constant by value
      *
-     * @param statusValue the value of the enum constant
+     * @param statusValue
+     *            the value of the enum constant
      * @return enum constant
      **/
     public static SmsMessageStatusType fromInt(final Integer statusValue) {
@@ -45,21 +48,21 @@ public enum SmsMessageStatusType {
         switch (statusValue) {
             case 100:
                 enumeration = SmsMessageStatusType.PENDING;
-                break;
+            break;
 
             case 150:
                 enumeration = SmsMessageStatusType.WAITING_FOR_REPORT;
-                break;
+            break;
 
             case 200:
                 enumeration = SmsMessageStatusType.SENT;
-                break;
+            break;
             case 300:
                 enumeration = SmsMessageStatusType.DELIVERED;
-                break;
+            break;
             case 400:
                 enumeration = SmsMessageStatusType.FAILED;
-                break;
+            break;
         }
 
         return enumeration;
@@ -68,7 +71,7 @@ public enum SmsMessageStatusType {
     /**
      * SmsMessageStatusType constructor
      **/
-    private SmsMessageStatusType(final Integer value, final String code) {
+    SmsMessageStatusType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }

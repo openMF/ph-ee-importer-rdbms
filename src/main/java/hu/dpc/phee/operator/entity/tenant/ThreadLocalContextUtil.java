@@ -20,7 +20,9 @@ package hu.dpc.phee.operator.entity.tenant;
 
 import org.springframework.util.Assert;
 
-public class ThreadLocalContextUtil {
+public final class ThreadLocalContextUtil {
+
+    private ThreadLocalContextUtil() {}
 
     private static final ThreadLocal<TenantServerConnection> tenantcontext = new ThreadLocal<>();
 

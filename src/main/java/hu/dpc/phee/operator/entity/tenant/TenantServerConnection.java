@@ -18,10 +18,7 @@
  */
 package hu.dpc.phee.operator.entity.tenant;
 
-
-
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -50,14 +47,9 @@ public class TenantServerConnection extends AbstractPersistableCustom<Long> {
 
     @Override
     public String toString() {
-        return "TenantServerConnection{" +
-                "schemaServer='" + schemaServer + '\'' +
-                ", schemaName='" + schemaName + '\'' +
-                ", schemaServerPort='" + schemaServerPort + '\'' +
-                ", schemaUsername='" + schemaUsername + '\'' +
-                ", schemaPassword='" + schemaPassword + '\'' +
-                ", autoUpdateEnabled=" + autoUpdateEnabled +
-                '}';
+        return "TenantServerConnection{" + "schemaServer='" + schemaServer + '\'' + ", schemaName='" + schemaName + '\''
+                + ", schemaServerPort='" + schemaServerPort + '\'' + ", schemaUsername='" + schemaUsername + '\'' + ", schemaPassword='"
+                + schemaPassword + '\'' + ", autoUpdateEnabled=" + autoUpdateEnabled + '}';
     }
 
     public TenantServerConnection() {}

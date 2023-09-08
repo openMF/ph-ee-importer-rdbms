@@ -2,16 +2,14 @@ package hu.dpc.phee.operator.importer;
 
 import hu.dpc.phee.operator.entity.outboundmessages.OutboudMessages;
 import hu.dpc.phee.operator.entity.outboundmessages.OutboundMessagesRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class InflightOutboundMessageManager {
@@ -39,12 +37,13 @@ public class InflightOutboundMessageManager {
                 logger.error("failed to remove in-flight outbound message {}", workflowInstanceKey);
                 outboudMessages = outboundMessagesRepository.findByInternalId(workflowInstanceKey).orElse(null);
                 if (outboudMessages == null || outboudMessages.getDeliveredOnDate() != null) {
-                    logger.error("completed event arrived for non existent outbound messages {} or it was already finished!", workflowInstanceKey);
+                    logger.error("completed event arrived for non existent outbound messages {} or it was already finished!",
+                            workflowInstanceKey);
                     return;
                 }
             }
-            if(outboudMessages.getDeliveryStatus() == 300) {
-                Timestamp localTime=new Timestamp(new Date().getTime());
+            if (outboudMessages.getDeliveryStatus() == 300) {
+                Timestamp localTime = new Timestamp(new Date().getTime());
                 outboudMessages.setDeliveredOnDate(localTime);
             }
             outboundMessagesRepository.save(outboudMessages);
