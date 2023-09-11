@@ -1,6 +1,7 @@
 package hu.dpc.phee.operator.importer;
 
-import com.amazonaws.services.apigateway.model.Op;
+import static hu.dpc.phee.operator.OperatorUtils.strip;
+
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -23,20 +24,23 @@ import hu.dpc.phee.operator.entity.variable.Variable;
 import hu.dpc.phee.operator.entity.variable.VariableRepository;
 import hu.dpc.phee.operator.file.FileTransferService;
 import hu.dpc.phee.operator.util.BatchFormatToTransferMapper;
+import java.io.IOException;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
-
-import java.io.FileReader;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static hu.dpc.phee.operator.OperatorUtils.strip;
 
 @Component
 public class RecordParser {
@@ -135,9 +139,10 @@ public class RecordParser {
                 logger.debug("add variable to transactionRequest {} for workflow {}", name, workflowInstanceKey);
                 String value = newVariable.read("$.value.value");
 
-                TransactionRequest transactionRequest = inflightTransactionRequestManager.getOrCreateTransactionRequest(workflowInstanceKey);
+                TransactionRequest transactionRequest = inflightTransactionRequestManager
+                        .getOrCreateTransactionRequest(workflowInstanceKey);
                 variableParser.getTransactionRequestParsers().get(name).accept(Pair.of(transactionRequest, value));
-                if(transactionRequest.getDirection() == null) {
+                if (transactionRequest.getDirection() == null) {
                     transactionRequest.setDirection(bpmnProcess.getDirection());
                 }
                 transactionRequestRepository.save(transactionRequest);
@@ -163,7 +168,7 @@ public class RecordParser {
                     }
                 }
             }
-        }else if(outboundMessageType.equals(bpmnProcess.getType())){
+        } else if (outboundMessageType.equals(bpmnProcess.getType())) {
             if (variableParser.getOutboundMessageParsers().containsKey(name)) {
                 logger.debug("add variable {} to outbound messages for workflow {}", name, workflowInstanceKey);
                 String value = newVariable.read("$.value.value");
@@ -171,8 +176,7 @@ public class RecordParser {
                 variableParser.getOutboundMessageParsers().get(name).accept(Pair.of(outboudMessages, value));
                 outboundMessagesRepository.save(outboudMessages);
             }
-        }
-        else {
+        } else {
             logger.debug("Skip adding variable to {} and type is {}", bpmnProcessId, bpmnProcess.getType()); // xx
         }
     }
@@ -184,9 +188,11 @@ public class RecordParser {
         List<Variable> existingVariables = variableRepository.findByWorkflowInstanceKey(workflowInstanceKey);
         if (existingVariables != null && !existingVariables.isEmpty()) {
             if (existingVariables.stream().filter(existing -> {
-                return name.equals(existing.getName()) && newTimestamp <= existing.getTimestamp(); // variable already inserted before
+                return name.equals(existing.getName()) && newTimestamp <= existing.getTimestamp(); // variable already
+                                                                                                   // inserted before
             }).findFirst().orElse(null) != null) {
-                logger.debug("Variable {} already inserted at {} for instance {}, skip processing!", name, newTimestamp, workflowInstanceKey);
+                logger.debug("Variable {} already inserted at {} for instance {}, skip processing!", name, newTimestamp,
+                        workflowInstanceKey);
                 return null;
             }
         }
@@ -219,7 +225,8 @@ public class RecordParser {
         if (transferType.equals(bpmnProcess.getType())) {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 if (hasParent) {
-                    logger.debug("Sub process {} with key {} started from parent instance {}", bpmnProcessId, callActivityKey, parentWorkflowInstanceKey);
+                    logger.debug("Sub process {} with key {} started from parent instance {}", bpmnProcessId, callActivityKey,
+                            parentWorkflowInstanceKey);
                     inflightCallActivities.put(callActivityKey, (Long) parentWorkflowInstanceKey);
                     inflightTransferManager.transferStarted((Long) parentWorkflowInstanceKey, timestamp, outgoingDirection);
                 } else {
@@ -228,7 +235,8 @@ public class RecordParser {
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 if (inflightCallActivities.containsKey(workflowInstanceKey)) {
                     Long parentInstanceKey = inflightCallActivities.remove(workflowInstanceKey);
-                    logger.debug("Sub process {} with key {} ended from parent instance {}", bpmnProcessId, callActivityKey, parentInstanceKey);
+                    logger.debug("Sub process {} with key {} ended from parent instance {}", bpmnProcessId, callActivityKey,
+                            parentInstanceKey);
                     workflowInstanceKey = parentInstanceKey;
                 }
                 inflightTransferManager.transferEnded(workflowInstanceKey, timestamp);
@@ -249,16 +257,16 @@ public class RecordParser {
                 }
                 inflightBatchManager.batchEnded(workflowInstanceKey, timestamp);
             }
-        }else if(outboundMessageType.equals(bpmnProcess.getType())){
-            logger.info("---------------- ELEMENT_ACTIVATING ----------intent - {}, json - {} ",intent,json);
+        } else if (outboundMessageType.equals(bpmnProcess.getType())) {
+            logger.info("---------------- ELEMENT_ACTIVATING ----------intent - {}, json - {} ", intent, json);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 inflightOutboundMessageManager.outboundMessageStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 inflightOutboundMessageManager.outboundMessageEnded(workflowInstanceKey, timestamp);
             }
-        }else {
-            logger.error("Skip parsing bpmnProcess: {}, bpmnProcessId: {}, document: {} as bpmn isn't set",
-                    bpmnProcess, bpmnProcessId, json.jsonString());
+        } else {
+            logger.error("Skip parsing bpmnProcess: {}, bpmnProcessId: {}, document: {} as bpmn isn't set", bpmnProcess, bpmnProcessId,
+                    json.jsonString());
         }
     }
 
@@ -275,13 +283,16 @@ public class RecordParser {
         List<Task> existingTasks = taskRepository.findByWorkflowInstanceKey(workflowInstanceKey);
         if (existingTasks != null && !existingTasks.isEmpty()) {
             if (existingTasks.stream().filter(existing -> {
-                return newElementId.equals(existing.getElementId()) && newIntent.equals(existing.getIntent()); // task intent inserts happens for only once
+                return newElementId.equals(existing.getElementId()) && newIntent.equals(existing.getIntent()); // task
+                                                                                                               // intent
+                                                                                                               // inserts
+                                                                                                               // happens
+                                                                                                               // for
+                                                                                                               // only
+                                                                                                               // once
             }).findFirst().orElse(null) != null) {
-                logger.info("Task {} with intent {} already inserted at {} for instance {}, skip processing!",
-                        newElementId,
-                        newIntent,
-                        newTimestamp,
-                        workflowInstanceKey);
+                logger.info("Task {} with intent {} already inserted at {} for instance {}, skip processing!", newElementId, newIntent,
+                        newTimestamp, workflowInstanceKey);
                 return;
             }
         }
@@ -297,7 +308,6 @@ public class RecordParser {
         taskRepository.save(task);
     }
 
-
     private void checkWorkerIdAndUpdateTransferData(Long workflowInstanceKey, Long completeTimestamp) {
         updateTransferTableForBatch(workflowInstanceKey, completeTimestamp);
     }
@@ -312,13 +322,14 @@ public class RecordParser {
         filename = strip(filename);
         String localFilePath = fileTransferService.downloadFile(filename, bucketName);
         if (localFilePath == null) {
-            logger.error("Null localFilePath, Error updating transfer table for batch with instance key {} and batch filename {}", workflowInstanceKey, filename);
+            logger.error("Null localFilePath, Error updating transfer table for batch with instance key {} and batch filename {}",
+                    workflowInstanceKey, filename);
             return;
         }
         List<Transaction> transactionList;
         try {
             CsvSchema schema = CsvSchema.emptySchema().withHeader();
-            FileReader reader = new FileReader(filename);
+            Reader reader = Files.newBufferedReader(Paths.get(filename), Charset.defaultCharset());
             MappingIterator<Transaction> readValues = csvMapper.readerWithSchemaFor(Transaction.class).with(schema).readValues(reader);
             transactionList = new ArrayList<>();
             while (readValues.hasNext()) {
@@ -326,13 +337,14 @@ public class RecordParser {
                 transactionList.add(current);
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            logger.error("Error building TransactionList for batch with instance key {} and batch filename {}", workflowInstanceKey, filename);
+            logger.debug(e.getMessage());
+            logger.error("Error building TransactionList for batch with instance key {} and batch filename {}", workflowInstanceKey,
+                    filename);
             return;
         }
 
         Batch batch = batchRepository.findByWorkflowInstanceKey(workflowInstanceKey);
-        for (Transaction transaction: transactionList) {
+        for (Transaction transaction : transactionList) {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
 

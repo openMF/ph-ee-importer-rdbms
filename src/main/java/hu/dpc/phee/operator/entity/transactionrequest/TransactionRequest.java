@@ -1,17 +1,15 @@
 package hu.dpc.phee.operator.entity.transactionrequest;
 
+import static hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestState.IN_PROGRESS;
 
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
-
+import java.math.BigDecimal;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
-import java.math.BigDecimal;
-import java.util.Date;
-
-import static hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestState.IN_PROGRESS;
 
 @Entity
 @Table(name = "transaction_requests")
@@ -82,8 +80,7 @@ public class TransactionRequest extends AbstractPersistableCustom<Long> {
     @Column(name = "ERROR_INFORMATION")
     private String errorInformation;
 
-    public TransactionRequest() {
-    }
+    public TransactionRequest() {}
 
     public String getExternalId() {
         return externalId;

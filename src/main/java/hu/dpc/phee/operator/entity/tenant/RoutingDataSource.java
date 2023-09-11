@@ -18,13 +18,11 @@
  */
 package hu.dpc.phee.operator.entity.tenant;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.AbstractDataSource;
 import org.springframework.stereotype.Component;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-
 
 @Component
 public class RoutingDataSource extends AbstractDataSource {

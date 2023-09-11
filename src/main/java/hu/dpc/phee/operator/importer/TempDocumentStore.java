@@ -1,14 +1,13 @@
 package hu.dpc.phee.operator.importer;
 
 import com.jayway.jsonpath.DocumentContext;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Component;
 
 @Component
 public class TempDocumentStore {
@@ -43,7 +42,7 @@ public class TempDocumentStore {
         synchronized (tempVariableEvents) {
             tempVariableEvents.remove(workflowKey);
         }
-        synchronized (workflowkeyBpmnAccociations){
+        synchronized (workflowkeyBpmnAccociations) {
             workflowkeyBpmnAccociations.remove(workflowKey);
         }
     }
@@ -54,7 +53,6 @@ public class TempDocumentStore {
             return removedDocuments == null ? Collections.emptyList() : removedDocuments;
         }
     }
-
 
     public void storeBatchFileName(Long workflowKey, String filename) {
         synchronized (workflowKeyBatchFileNameAssociations) {

@@ -1,15 +1,13 @@
 package hu.dpc.phee.operator.entity.transfer;
 
-
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
-
+import java.math.BigDecimal;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
-import java.math.BigDecimal;
-import java.util.Date;
 
 @Entity
 @Table(name = "transfers")
@@ -76,9 +74,7 @@ public class Transfer extends AbstractPersistableCustom<Long> {
     @Column(name = "CLIENTCORRELATIONID")
     private String clientCorrelationId;
 
-
-    public Transfer() {
-    }
+    public Transfer() {}
 
     public Transfer(Long workflowInstanceKey) {
         this.workflowInstanceKey = workflowInstanceKey;

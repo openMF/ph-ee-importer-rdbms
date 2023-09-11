@@ -1,9 +1,6 @@
 package hu.dpc.phee.operator.entity.task;
 
-
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
-
-import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;

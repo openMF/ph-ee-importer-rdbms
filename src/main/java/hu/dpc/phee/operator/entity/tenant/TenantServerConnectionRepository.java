@@ -21,8 +21,8 @@ package hu.dpc.phee.operator.entity.tenant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-
-public interface TenantServerConnectionRepository extends JpaRepository<TenantServerConnection, Long>, JpaSpecificationExecutor<TenantServerConnection> {
+public interface TenantServerConnectionRepository
+        extends JpaRepository<TenantServerConnection, Long>, JpaSpecificationExecutor<TenantServerConnection> {
 
     TenantServerConnection findOneBySchemaName(String schemaName);
 }

@@ -20,16 +20,14 @@ package hu.dpc.phee.operator.entity.tenant;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.HashMap;
+import java.util.Map;
+import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
-
 
 @Service
 public class DataSourcePerTenantService implements DisposableBean {
@@ -115,17 +113,8 @@ public class DataSourcePerTenantService implements DisposableBean {
     }
 
     private String createJdbcUrl(String jdbcProtocol, String jdbcSubprotocol, String hostname, int port, String dbName) {
-        return new StringBuilder()
-                .append(jdbcProtocol)
-                .append(':')
-                .append(jdbcSubprotocol)
-                .append("://")
-                .append(hostname)
-                .append(':')
-                .append(port)
-                .append('/')
-                .append(dbName)
-                .toString();
+        return new StringBuilder().append(jdbcProtocol).append(':').append(jdbcSubprotocol).append("://").append(hostname).append(':')
+                .append(port).append('/').append(dbName).toString();
     }
 
     @Override

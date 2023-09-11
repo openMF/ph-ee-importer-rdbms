@@ -1,5 +1,7 @@
 package hu.dpc.phee.operator.importer;
 
+import static hu.dpc.phee.operator.OperatorUtils.strip;
+
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.OperatorUtils;
 import hu.dpc.phee.operator.entity.batch.Batch;
@@ -8,21 +10,17 @@ import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequest;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestState;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferStatus;
-import hu.dpc.phee.operator.util.SmsMessageStatusType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-
-import static hu.dpc.phee.operator.OperatorUtils.strip;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Component;
 
 @Component
 public class VariableParser {
@@ -52,23 +50,26 @@ public class VariableParser {
         transferParsers.put("partyLookupFspId", pair -> pair.getFirst().setPayeeDfspId(strip(pair.getSecond())));
         transferParsers.put("initiatorFspId", pair -> pair.getFirst().setPayerDfspId(strip(pair.getSecond())));
         transferParsers.put("channelRequest", pair -> parseChannelRequest(pair.getFirst(), pair.getSecond()));
-        transferParsers.put("errorInformation", pair -> {parseErrorInformation(pair.getFirst(), pair.getSecond());
-            parseTransferCreateFailed(pair.getFirst(), pair.getSecond());});
+        transferParsers.put("errorInformation", pair -> {
+            parseErrorInformation(pair.getFirst(), pair.getSecond());
+            parseTransferCreateFailed(pair.getFirst(), pair.getSecond());
+        });
         transferParsers.put("batchId", pair -> pair.getFirst().setBatchId(strip(pair.getSecond())));
         transferParsers.put("clientCorrelationId", pair -> parseClientCorrelationIdTransfers(pair.getFirst(), pair.getSecond()));
-
-
 
         transactionRequestParsers.put("authType", pair -> pair.getFirst().setAuthType(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionId", pair -> pair.getFirst().setTransactionId(strip(pair.getSecond())));
         transactionRequestParsers.put("partyLookupFspId", pair -> pair.getFirst().setPayerDfspId(strip(pair.getSecond())));
         transactionRequestParsers.put("initiatorFspId", pair -> parseInitiatorFspId(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("channelRequest", pair -> parseTransactionChannelRequest(pair.getFirst(), pair.getSecond()));
-        transactionRequestParsers.put("transactionRequestResponse", pair -> parseTransactionRequestResponse(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("transactionRequestResponse",
+                pair -> parseTransactionRequestResponse(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("transactionRequestFailed", pair -> parseTransactionRequestFailed(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("transactionRequest", pair -> parseTransactionRequest(pair.getFirst(), pair.getSecond()));
-        transactionRequestParsers.put("localQuoteResponse", pair -> parseTransactionRequestLocalQuoteResponse(pair.getFirst(), pair.getSecond()));
-        transactionRequestParsers.put("payeeQuoteResponse", pair -> parseTransactionRequestPayeeQuoteResponse(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("localQuoteResponse",
+                pair -> parseTransactionRequestLocalQuoteResponse(pair.getFirst(), pair.getSecond()));
+        transactionRequestParsers.put("payeeQuoteResponse",
+                pair -> parseTransactionRequestPayeeQuoteResponse(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("quoteId", pair -> pair.getFirst().setPayeeQuoteCode(strip(pair.getSecond())));
         transactionRequestParsers.put("transactionState", pair -> parseTransActionState(pair.getFirst(), pair.getSecond()));
         transactionRequestParsers.put("mpesaChannelRequest", pair -> parseTransactionMpesaRequest(pair.getFirst(), pair.getSecond()));
@@ -92,21 +93,21 @@ public class VariableParser {
         batchParsers.put("ongoingAmount", pair -> pair.getFirst().setOngoingAmount(Long.parseLong(pair.getSecond())));
         batchParsers.put("failedAmount", pair -> pair.getFirst().setFailedAmount(Long.parseLong(pair.getSecond())));
         batchParsers.put("completedAmount", pair -> pair.getFirst().setCompletedAmount(Long.parseLong(pair.getSecond())));
-        batchParsers.put("resultFile", pair -> pair.getFirst().setResult_file(strip(pair.getSecond())));
+        batchParsers.put("resultFile", pair -> pair.getFirst().setResultFile(strip(pair.getSecond())));
         batchParsers.put("paymentMode", pair -> pair.getFirst().setPaymentMode(strip(pair.getSecond())));
         batchParsers.put("registeringInstituteId", pair -> pair.getFirst().setRegisteringInstitutionId(pair.getSecond()));
         batchParsers.put("payerIdentifier", pair -> pair.getFirst().setPayerFsp(pair.getSecond()));
         batchParsers.put("clientCorrelationId", pair -> pair.getFirst().setCorrelationId(pair.getSecond()));
 
-        outboundMessageParsers.put("tenantId",pair -> pair.getFirst().setTenantId(Long.parseLong(pair.getSecond())));
-        outboundMessageParsers.put("externalId",pair -> pair.getFirst().setExternalId(strip(pair.getSecond())));
-        outboundMessageParsers.put("internalId",pair -> pair.getFirst().setInternalId(Long.parseLong(pair.getSecond())));
-        outboundMessageParsers.put("deliveryStatus",pair -> pair.getFirst().setDeliveryStatus(Integer.parseInt(pair.getSecond())));
-        outboundMessageParsers.put("deliveryErrorMessage",pair -> pair.getFirst().setDeliveryErrorMessage(strip(pair.getSecond())));
-        outboundMessageParsers.put("sourceAddress",pair -> pair.getFirst().setSourceAddress(strip(pair.getSecond())));
-        outboundMessageParsers.put("phoneNumber",pair -> pair.getFirst().setMobileNumber(strip(pair.getSecond())));
-        outboundMessageParsers.put("deliveryMessage",pair -> pair.getFirst().setMessage(strip(pair.getSecond())));
-        outboundMessageParsers.put("bridgeId",pair -> pair.getFirst().setBridgeId(Long.parseLong(pair.getSecond())));
+        outboundMessageParsers.put("tenantId", pair -> pair.getFirst().setTenantId(Long.parseLong(pair.getSecond())));
+        outboundMessageParsers.put("externalId", pair -> pair.getFirst().setExternalId(strip(pair.getSecond())));
+        outboundMessageParsers.put("internalId", pair -> pair.getFirst().setInternalId(Long.parseLong(pair.getSecond())));
+        outboundMessageParsers.put("deliveryStatus", pair -> pair.getFirst().setDeliveryStatus(Integer.parseInt(pair.getSecond())));
+        outboundMessageParsers.put("deliveryErrorMessage", pair -> pair.getFirst().setDeliveryErrorMessage(strip(pair.getSecond())));
+        outboundMessageParsers.put("sourceAddress", pair -> pair.getFirst().setSourceAddress(strip(pair.getSecond())));
+        outboundMessageParsers.put("phoneNumber", pair -> pair.getFirst().setMobileNumber(strip(pair.getSecond())));
+        outboundMessageParsers.put("deliveryMessage", pair -> pair.getFirst().setMessage(strip(pair.getSecond())));
+        outboundMessageParsers.put("bridgeId", pair -> pair.getFirst().setBridgeId(Long.parseLong(pair.getSecond())));
     }
 
     public Map<String, Consumer<Pair<Transfer, String>>> getTransferParsers() {
@@ -121,7 +122,7 @@ public class VariableParser {
         if (jsonString == null || jsonString.isEmpty()) {
             return;
         }
-        if(jsonString.equals("true")) {
+        if (jsonString.equals("true")) {
             request.setState(TransactionRequestState.FAILED);
         } else {
             request.setState(TransactionRequestState.ACCEPTED);
@@ -132,7 +133,7 @@ public class VariableParser {
         if (jsonString == null || jsonString.isEmpty()) {
             return;
         }
-        if(jsonString.equals("true")) {
+        if (jsonString.equals("true")) {
             request.setState(TransactionRequestState.FAILED);
         } else {
             request.setState(TransactionRequestState.IN_PROGRESS);
@@ -143,7 +144,7 @@ public class VariableParser {
         if (jsonString == null || jsonString.isEmpty()) {
             return;
         }
-        if(jsonString.equals("true")) {
+        if (jsonString.equals("true")) {
             request.setState(TransactionRequestState.FAILED);
         } else {
             request.setState(TransactionRequestState.RECEIVED);
@@ -153,6 +154,7 @@ public class VariableParser {
     public Map<String, Consumer<Pair<Batch, String>>> getBatchParsers() {
         return batchParsers;
     }
+
     public Map<String, Consumer<Pair<OutboudMessages, String>>> getOutboundMessageParsers() {
         return outboundMessageParsers;
     }
@@ -203,7 +205,8 @@ public class VariableParser {
         }
     }
 
-    private void parseTransferCreateFailed(Transfer transfer, String value) { // Handles error only based on book funds failure
+    private void parseTransferCreateFailed(Transfer transfer, String value) { // Handles error only based on book funds
+                                                                              // failure
         transfer.setStatus("false".equals(value) ? TransferStatus.COMPLETED : TransferStatus.FAILED);
     }
 
@@ -250,10 +253,10 @@ public class VariableParser {
         transactionRequest.setAmount(json.read("$.amount.amount", BigDecimal.class));
         transactionRequest.setCurrency(json.read("$.amount.currency"));
 
-        if(transactionRequest.getInitiatorType() == null ) {
+        if (transactionRequest.getInitiatorType() == null) {
             transactionRequest.setInitiatorType(json.read("$.transactionType.initiatorType"));
         }
-        if(transactionRequest.getScenario() == null) {
+        if (transactionRequest.getScenario() == null) {
             transactionRequest.setScenario(json.read("$.transactionType.scenario"));
         }
     }
@@ -271,6 +274,7 @@ public class VariableParser {
     private void parseClientCorrelationId(TransactionRequest transactionRequest, String clientCorrelationId) {
         transactionRequest.setClientCorrelationId(clientCorrelationId);
     }
+
     private void parseClientCorrelationIdTransfers(Transfer transfer, String clientCorrelationId) {
         transfer.setClientCorrelationId(clientCorrelationId);
     }
@@ -319,16 +323,15 @@ public class VariableParser {
     }
 
     private void parseInitiatorFspId(TransactionRequest transactionRequest, String jsonString) {
-        if(outgoingDirection.equals(transactionRequest.getDirection())) {
+        if (outgoingDirection.equals(transactionRequest.getDirection())) {
             transactionRequest.setPayeeDfspId(strip(jsonString));
         }
     }
 
     private void parseTransActionState(TransactionRequest transactionRequest, String jsonString) {
-        if(incomingDirection.equals(transactionRequest.getDirection())) {
+        if (incomingDirection.equals(transactionRequest.getDirection())) {
             transactionRequest.setState(TransactionRequestState.valueOf(strip(jsonString)));
         }
     }
-
 
 }

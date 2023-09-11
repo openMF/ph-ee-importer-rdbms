@@ -2,10 +2,11 @@ package hu.dpc.phee.operator.config;
 
 public class BpmnProcess {
 
-    private String id, direction, type;
+    private String id;
+    private String direction;
+    private String type;
 
-    public BpmnProcess() {
-    }
+    public BpmnProcess() {}
 
     public BpmnProcess(String type) {
         this.type = type;
