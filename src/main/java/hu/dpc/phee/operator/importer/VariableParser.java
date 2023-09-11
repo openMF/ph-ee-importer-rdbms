@@ -55,6 +55,7 @@ public class VariableParser {
             parseTransferCreateFailed(pair.getFirst(), pair.getSecond());
         });
         transferParsers.put("batchId", pair -> pair.getFirst().setBatchId(strip(pair.getSecond())));
+        transferParsers.put("subBatchId", pair -> pair.getFirst().setSubBatchId(strip(pair.getSecond())));
         transferParsers.put("clientCorrelationId", pair -> parseClientCorrelationIdTransfers(pair.getFirst(), pair.getSecond()));
 
         transactionRequestParsers.put("authType", pair -> pair.getFirst().setAuthType(strip(pair.getSecond())));
