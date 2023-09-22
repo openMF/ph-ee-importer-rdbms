@@ -135,6 +135,16 @@ bpmn:
       direction: "${bpmn.outgoing-direction}"
       type: "${bpmn.transfer-type}"
 
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      liveness:
+        enabled: true
+      readiness:
+        enabled: true
+
 logging:
   level:
     ROOT: INFO
