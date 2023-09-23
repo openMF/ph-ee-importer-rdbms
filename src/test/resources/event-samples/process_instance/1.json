@@ -1,0 +1,24 @@
+{
+  "partitionId": 2,
+  "value": {
+    "version": 2,
+    "processDefinitionKey": 2251799816094393,
+    "elementId": "Flow_1uam7ja",
+    "bpmnProcessId": "binx_ig2_credit_transfer_debtor_process-binx",
+    "flowScopeKey": 4503599631529096,
+    "bpmnElementType": "SEQUENCE_FLOW",
+    "parentProcessInstanceKey": -1,
+    "parentElementInstanceKey": -1,
+    "processInstanceKey": 4503599631529096
+  },
+  "key": 4503599631529139,
+  "timestamp": 1680776111962,
+  "valueType": "PROCESS_INSTANCE",
+  "brokerVersion": "8.1.8",
+  "recordType": "EVENT",
+  "sourceRecordPosition": 8315094,
+  "intent": "SEQUENCE_FLOW_TAKEN",
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "position": 8315115
+}

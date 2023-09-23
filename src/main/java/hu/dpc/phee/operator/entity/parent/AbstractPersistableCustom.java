@@ -19,12 +19,9 @@
 package hu.dpc.phee.operator.entity.parent;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import org.springframework.data.domain.Persistable;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 
@@ -32,6 +29,7 @@ import java.io.Serializable;
 public abstract class AbstractPersistableCustom<PK extends Serializable> implements Persistable<Long> {
 
     @Id
+    @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -41,7 +39,6 @@ public abstract class AbstractPersistableCustom<PK extends Serializable> impleme
     }
 
     public void setId(final Long id) {
-
         this.id = id;
     }
 

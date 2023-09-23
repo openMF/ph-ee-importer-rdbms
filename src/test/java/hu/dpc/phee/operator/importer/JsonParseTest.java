@@ -1,17 +1,13 @@
 package hu.dpc.phee.operator.importer;
 
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
-import com.jayway.jsonpath.ParseContext;
+import com.jayway.jsonpath.*;
 import hu.dpc.phee.operator.entity.task.Task;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -137,7 +133,7 @@ public class JsonParseTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testSendKafkaMessage() {
         Map<String, Object> kafkaProperties = new HashMap<>();
 
