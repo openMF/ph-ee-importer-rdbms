@@ -76,7 +76,7 @@ public class EventParser {
 
     public Transfer retrieveOrCreateTransfer(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
-
+        // This code block should also process transaction/batch/outboundMsg Type
         Transfer transfer = transferRepository.findByWorkflowInstanceKey(processInstanceKey);
         if (transfer == null) {
             logger.debug("creating new Transfer for processInstanceKey: {}", processInstanceKey);
@@ -108,6 +108,7 @@ public class EventParser {
         String bpmnElementType = record.read("$.value.bpmnElementType");
         String elementId = record.read("$.value.elementId");
 
+        // this switch case should process events for transaction/batch/outboundMsg Type.
         List<Object> entities = switch (valueType) {
             case "DEPLOYMENT", "VARIABLE_DOCUMENT", "WORKFLOW_INSTANCE" -> List.of();
             case "PROCESS_INSTANCE" -> {
@@ -201,6 +202,7 @@ public class EventParser {
         }
     }
 
+    // this function should apply transformer for transaction/batch/outboundMsg Type also.
     private void applyTransformer(Transfer transfer, String variableName, String variableValue, TransferTransformerConfig.Transformer transformer) {
         logger.debug("applying transformer for field: {}", transformer.getField());
         try {

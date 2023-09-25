@@ -112,14 +112,14 @@ public class StreamsSetup {
                 logger.warn("skip saving flow information, no configured flow found for bpmn: {}", bpmn);
                 return;
             }
-
+            // MOve to a separate function and create transfer/transaction/batch/outboundMsg Type
             transactionTemplate.executeWithoutResult(status -> {
                 Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
                 MDC.put("transactionId", transfer.getTransactionId());
                 try {
                     logger.info("processing key: {}, records: {}", key, records);
                     for (String record : records) {
-                        try {
+                        try { // This process block should pass transfer/transaction/batch/outboundMsg Type
                             eventParser.process(bpmn, tenantName, transfer, record);
                         } catch (Exception e) {
                             logger.error("failed to parse record: {}", record, e);
