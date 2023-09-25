@@ -48,3 +48,30 @@ transfer:
           variableName: clientCorrelationId
         - field: subBatchId
           variableName: subBatchId
+    - name: inbound_transfer_mifos
+      direction: INCOMING
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: partyIdIdentifier
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: partyIdIdentifier
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
+
+
