@@ -2,8 +2,11 @@ package hu.dpc.phee.operator.streams;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;
+import hu.dpc.phee.operator.entity.batch.BatchRepository;
+import hu.dpc.phee.operator.entity.outboundmessages.OutboundMessagesRepository;
 import hu.dpc.phee.operator.entity.task.Task;
 import hu.dpc.phee.operator.entity.task.TaskRepository;
+import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestRepository;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferRepository;
 import hu.dpc.phee.operator.entity.transfer.TransferStatus;
@@ -44,6 +47,15 @@ public class EventParser {
     TransferRepository transferRepository;
 
     @Autowired
+    TransactionRequestRepository transactionRequestRepository;
+
+    @Autowired
+    OutboundMessagesRepository outboundMessagesRepository;
+
+    @Autowired
+    BatchRepository batchRepository;
+
+    @Autowired
     TransferTransformerConfig transferTransformerConfig;
 
     private DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -76,13 +88,14 @@ public class EventParser {
 
     public Transfer retrieveOrCreateTransfer(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
+        Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
         // This code block should also process transaction/batch/outboundMsg Type
         Transfer transfer = transferRepository.findByWorkflowInstanceKey(processInstanceKey);
         if (transfer == null) {
             logger.debug("creating new Transfer for processInstanceKey: {}", processInstanceKey);
             transfer = new Transfer(processInstanceKey);
             transfer.setStatus(TransferStatus.IN_PROGRESS);
-            Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
+
             if (config.isPresent()) {
                 transfer.setDirection(config.get().getDirection());
             } else {
@@ -155,7 +168,6 @@ public class EventParser {
                 String variableName = record.read("$.value.name", String.class);
                 String variableValue = record.read("$.value.value", String.class);
                 String value = variableValue.startsWith("\"") && variableValue.endsWith("\"") ? StringEscapeUtils.unescapeJson(variableValue.substring(1, variableValue.length() - 1)) : variableValue;
-                logger.info("New Value:{}",value);
 
                 List<Object> results = List.of(
                         new Variable()

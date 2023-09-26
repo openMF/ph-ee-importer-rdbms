@@ -2,7 +2,10 @@ package hu.dpc.phee.operator.streams;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;
+import hu.dpc.phee.operator.entity.batch.Batch;
+import hu.dpc.phee.operator.entity.outboundmessages.OutboudMessages;
 import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
+import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequest;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferRepository;
 import hu.dpc.phee.operator.importer.JsonPathReader;
@@ -26,6 +29,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -94,6 +98,7 @@ public class StreamsSetup {
         String bpmn;
         String tenantName;
         String first = records.get(0);
+
         DocumentContext sample = JsonPathReader.parse(first);
         try {
             Pair<String, String> bpmnAndTenant = eventParser.retrieveTenant(sample);
@@ -112,22 +117,28 @@ public class StreamsSetup {
                 logger.warn("skip saving flow information, no configured flow found for bpmn: {}", bpmn);
                 return;
             }
-            // MOve to a separate function and create transfer/transaction/batch/outboundMsg Type
+            // Move to a separate function and create transfer/transaction/batch/outboundMsg Type
+            Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
+            String flowType = getTypeForFlow(config);
+
             transactionTemplate.executeWithoutResult(status -> {
-                Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
-                MDC.put("transactionId", transfer.getTransactionId());
-                try {
-                    logger.info("processing key: {}, records: {}", key, records);
-                    for (String record : records) {
-                        try { // This process block should pass transfer/transaction/batch/outboundMsg Type
-                            eventParser.process(bpmn, tenantName, transfer, record);
-                        } catch (Exception e) {
-                            logger.error("failed to parse record: {}", record, e);
-                        }
-                    }
-                    transferRepository.save(transfer);
-                } finally {
-                    MDC.clear();
+                switch (flowType){
+                    case "TRANSFER":
+                        Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
+                        MDC.put("transactionId", transfer.getTransactionId());
+                        break;
+                    case "TRANSACTION-REQUEST":
+                        TransactionRequest transactionRequest=eventParser.retrieveOrCreateTransaction(bpmn,sample);
+                        MDC.put("transactionId",transactionRequest.getTransactionId());
+                        break;
+                    case "BATCH":
+                        Batch batch=eventParser.retrieveOrCreateBatch(bpmn,sample);
+                        break;;
+                    case "OUTBOUND_MESSAGES":
+                        OutboudMessages outboudMessages=eventParser.retrieveOrCreateOutboundMessage(bpmn,sample);
+                        break;
+                    default:
+                        logger.error("No matching type for the given flow");
                 }
             });
 
@@ -136,6 +147,26 @@ public class StreamsSetup {
 
         } finally {
             ThreadLocalContextUtil.clear();
+        }
+    }
+
+    private String getTypeForFlow(Optional<TransferTransformerConfig.Flow> config) {
+        return config.map(TransferTransformerConfig.Flow::getType).orElse(null);
+    }
+
+    public void processRequest(Windowed<String> key,List<String> records,String bpmn,String tenantName,Transfer transfer){
+        try {
+            logger.info("processing key: {}, records: {}", key, records);
+            for (String record : records) {
+                try { // This process block should pass transfer/transaction/batch/outboundMsg Type
+                    eventParser.process(bpmn, tenantName, transfer, record);
+                } catch (Exception e) {
+                    logger.error("failed to parse record: {}", record, e);
+                }
+            }
+            transferRepository.save(transfer);
+        } finally {
+            MDC.clear();
         }
     }
 }
