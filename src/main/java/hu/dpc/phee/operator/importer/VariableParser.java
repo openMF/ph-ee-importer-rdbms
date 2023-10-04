@@ -99,6 +99,8 @@ public class VariableParser {
         batchParsers.put("registeringInstituteId", pair -> pair.getFirst().setRegisteringInstitutionId(pair.getSecond()));
         batchParsers.put("payerIdentifier", pair -> pair.getFirst().setPayerFsp(pair.getSecond()));
         batchParsers.put("clientCorrelationId", pair -> pair.getFirst().setCorrelationId(pair.getSecond()));
+        batchParsers.put("totalApprovedAmount", pair -> pair.getFirst().setApprovedAmount(Long.parseLong(pair.getSecond())));
+        batchParsers.put("totalApprovedCount", pair -> pair.getFirst().setApprovedCount(Long.parseLong(pair.getSecond())));
 
         outboundMessageParsers.put("tenantId", pair -> pair.getFirst().setTenantId(Long.parseLong(pair.getSecond())));
         outboundMessageParsers.put("externalId", pair -> pair.getFirst().setExternalId(strip(pair.getSecond())));
