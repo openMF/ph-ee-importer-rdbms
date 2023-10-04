@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -37,8 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
-public class EventParser {
+public class EventParserNew {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -88,28 +86,6 @@ public class EventParser {
         }
         logger.debug("resolved bpmnProcessIdWithTenant: {}", bpmnProcessIdWithTenant);
         return bpmnProcessIdWithTenant;
-    }
-
-    public Transfer retrieveOrCreateTransfer(String bpmn, DocumentContext record) {
-        Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
-        Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
-        // This code block should also process transaction/batch/outboundMsg Type
-        Transfer transfer = transferRepository.findByWorkflowInstanceKey(processInstanceKey);
-        if (transfer == null) {
-            logger.debug("creating new Transfer for processInstanceKey: {}", processInstanceKey);
-            transfer = new Transfer(processInstanceKey);
-            transfer.setStatus(TransferStatus.IN_PROGRESS);
-
-            if (config.isPresent()) {
-                transfer.setDirection(config.get().getDirection());
-            } else {
-                logger.error("No config found for bpmn: {}", bpmn);
-            }
-            transferRepository.save(transfer);
-        } else {
-            logger.info("found existing Transfer for processInstanceKey: {}", processInstanceKey);
-        }
-        return transfer;
     }
 
     public void process(String bpmn, String tenantName, Transfer transfer, String rawData) {
