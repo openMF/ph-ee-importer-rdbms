@@ -2,25 +2,29 @@ package hu.dpc.phee.operator.streams;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;
-import hu.dpc.phee.operator.entity.batch.Batch;
 import hu.dpc.phee.operator.entity.batch.BatchRepository;
-import hu.dpc.phee.operator.entity.outboundmessages.OutboudMessages;
 import hu.dpc.phee.operator.entity.outboundmessages.OutboundMessagesRepository;
+import hu.dpc.phee.operator.entity.task.Task;
+import hu.dpc.phee.operator.entity.task.TaskRepository;
 import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
-import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequest;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestRepository;
-import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferRepository;
+import hu.dpc.phee.operator.entity.variable.Variable;
+import hu.dpc.phee.operator.entity.variable.VariableRepository;
 import hu.dpc.phee.operator.importer.JsonPathReader;
 import hu.dpc.phee.operator.tenants.TenantsService;
 import jakarta.annotation.PostConstruct;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.kstream.Aggregator;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Merger;
+import org.apache.kafka.streams.kstream.SessionWindows;
+import org.apache.kafka.streams.kstream.Windowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
@@ -76,6 +80,15 @@ public class StreamsSetup {
     @Autowired
     TenantsService tenantsService;
 
+    @Autowired
+    RecordParser recordParser;
+
+    @Autowired
+    VariableRepository variableRepository;
+
+    @Autowired
+    TaskRepository taskRepository;
+
 
     @PostConstruct
     public void setup() {
@@ -129,32 +142,61 @@ public class StreamsSetup {
                 logger.warn("skip saving flow information, no configured flow found for bpmn: {}", bpmn);
                 return;
             }
-            // Move to a separate function and create transfer/transaction/batch/outboundMsg Type
             Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
             String flowType = getTypeForFlow(config);
 
+            logger.info("processing key: {}, records: {}", key, records);
+
             transactionTemplate.executeWithoutResult(status -> {
-                switch (flowType) {
-                    case "TRANSFER":
-                        Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
-                        MDC.put("transactionId", transfer.getTransactionId());
-                        processRequest(key, records, bpmn, tenantName, transfer);
-                        break;
-                    case "TRANSACTION-REQUEST":
-                        TransactionRequest transactionRequest = eventParser.retrieveOrCreateTransaction(bpmn, sample);
-                        MDC.put("transactionId", transactionRequest.getTransactionId());
-//                        processRequest();
-                        break;
-                    case "BATCH":
-                        Batch batch = eventParser.retrieveOrCreateBatch(bpmn, sample);
-                        MDC.put("batchId", batch.getBatchId());
-                        break;
-                    case "OUTBOUND_MESSAGES":
-                        OutboudMessages outboudMessages = eventParser.retrieveOrCreateOutboundMessage(bpmn, sample);
-                        MDC.put("internalId", String.valueOf(outboudMessages.getInternalId()));
-                        break;
-                    default:
-                        logger.error("No matching type for the given flow");
+                for (String record : records) {
+                    try {
+                        DocumentContext recordDocument = JsonPathReader.parse(record);
+                        logger.info("from kafka: {}", recordDocument.jsonString());
+
+                        String valueType = recordDocument.read("$.valueType", String.class);
+                        logger.info("processing {} event", valueType);
+
+                        Long workflowKey = recordDocument.read("$.value.processDefinitionKey");
+                        Long workflowInstanceKey = recordDocument.read("$.value.processInstanceKey");
+                        Long timestamp = recordDocument.read("$.timestamp");
+                        String bpmnElementType = recordDocument.read("$.value.bpmnElementType");
+                        String elementId = recordDocument.read("$.value.elementId");
+
+                        List<Object> entities = switch (valueType) {
+                            case "DEPLOYMENT", "VARIABLE_DOCUMENT", "WORKFLOW_INSTANCE" -> List.of();
+                            case "PROCESS_INSTANCE" -> {
+                                yield recordParser.processWorkflowInstance(recordDocument, bpmn, workflowInstanceKey, timestamp, bpmnElementType, elementId, flowType,sample);
+                            }
+
+                            case "JOB" -> {
+                                yield recordParser.processTask(recordDocument, workflowInstanceKey, valueType, workflowKey, timestamp);
+                            }
+
+                            case "VARIABLE" -> {
+                                yield recordParser.processVariable(recordDocument, bpmn, workflowInstanceKey, workflowKey, timestamp, flowType, sample);
+                            }
+
+                            case "INCIDENT" -> {
+                                yield recordParser.processIncident(timestamp, flowType, bpmn, sample, workflowInstanceKey);
+                            }
+
+                            default -> throw new IllegalStateException("Unexpected event type: " + valueType);
+                        };
+                        if (entities.size() != 0) {
+                            logger.info("Saving {} entities", entities.size());
+                            entities.forEach(entity -> {
+                                if (entity instanceof Variable) {
+                                    variableRepository.save((Variable) entity);
+                                } else if (entity instanceof Task) {
+                                    taskRepository.save((Task) entity);
+                                } else {
+                                    throw new IllegalStateException("Unexpected entity type: " + entity.getClass());
+                                }
+                            });
+                        }
+                    } catch (Exception e) {
+                        logger.error("failed to parse record: {}", record, e);
+                    }
                 }
             });
         } catch (Exception e) {
@@ -167,21 +209,5 @@ public class StreamsSetup {
 
     private String getTypeForFlow(Optional<TransferTransformerConfig.Flow> config) {
         return config.map(TransferTransformerConfig.Flow::getType).orElse(null);
-    }
-
-    public void processRequest(Windowed<String> key, List<String> records, String bpmn, String tenantName, Transfer transfer) {
-        try {
-            logger.info("processing key: {}, records: {}", key, records);
-            for (String record : records) {
-                try { // This process block should pass transfer/transaction/batch/outboundMsg Type
-                    eventParser.process(bpmn, tenantName, transfer, record);
-                } catch (Exception e) {
-                    logger.error("failed to parse record: {}", record, e);
-                }
-            }
-            transferRepository.save(transfer);
-        } finally {
-            MDC.clear();
-        }
     }
 }

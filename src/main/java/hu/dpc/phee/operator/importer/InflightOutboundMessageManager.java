@@ -1,5 +1,7 @@
 package hu.dpc.phee.operator.importer;
 
+import com.jayway.jsonpath.DocumentContext;
+import hu.dpc.phee.operator.config.TransferTransformerConfig;
 import hu.dpc.phee.operator.entity.outboundmessages.OutboudMessages;
 import hu.dpc.phee.operator.entity.outboundmessages.OutboundMessagesRepository;
 import org.slf4j.Logger;
@@ -7,62 +9,32 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Component
 public class InflightOutboundMessageManager {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Map<Long, OutboudMessages> inflightOutboundMessage = new HashMap<>();
 
     @Autowired
     private OutboundMessagesRepository outboundMessagesRepository;
 
-    public void outboundMessageStarted(Long workflowInstanceKey, Long timestamp, String direction) {
-        OutboudMessages outboudMessages = getOrCreateOutboundMessage(workflowInstanceKey);
-        if (outboudMessages.getSubmittedOnDate() == null) {
-            outboudMessages.setSubmittedOnDate(new Date(timestamp));
-            outboundMessagesRepository.save(outboudMessages);
+    @Autowired
+    TransferTransformerConfig transferTransformerConfig;
+
+    public Optional<OutboudMessages> retrieveOrCreateOutboundMessage(String bpmn, DocumentContext record) {
+        Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
+        Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
+        Optional<OutboudMessages> outboudMessages = outboundMessagesRepository.findByInternalId(processInstanceKey);
+
+        if (!outboudMessages.isPresent()) {
+            logger.debug("creating new OutboudMessages for processInstanceKey: {}", processInstanceKey);
+            OutboudMessages newOutboudMessages = new OutboudMessages(processInstanceKey);
+            outboudMessages = Optional.ofNullable(outboundMessagesRepository.save(newOutboudMessages));
         } else {
-            logger.debug("outboudMessages {} already started at {}", workflowInstanceKey, outboudMessages.getSubmittedOnDate());
+            logger.info("found existing OutboudMessages for processInstanceKey: {}", processInstanceKey);
         }
-    }
 
-    public void outboundMessageEnded(Long workflowInstanceKey, Long timestamp) {
-        synchronized (inflightOutboundMessage) {
-            OutboudMessages outboudMessages = inflightOutboundMessage.remove(workflowInstanceKey);
-            if (outboudMessages == null) {
-                logger.error("failed to remove in-flight outbound message {}", workflowInstanceKey);
-                outboudMessages = outboundMessagesRepository.findByInternalId(workflowInstanceKey).orElse(null);
-                if (outboudMessages == null || outboudMessages.getDeliveredOnDate() != null) {
-                    logger.error("completed event arrived for non existent outbound messages {} or it was already finished!", workflowInstanceKey);
-                    return;
-                }
-            }
-            if(outboudMessages.getDeliveryStatus() == 300) {
-                Timestamp localTime=new Timestamp(new Date().getTime());
-                outboudMessages.setDeliveredOnDate(localTime);
-            }
-            outboundMessagesRepository.save(outboudMessages);
-            logger.debug("outbound messages finished {}", outboudMessages.getInternalId());
-        }
-    }
-
-    public OutboudMessages getOrCreateOutboundMessage(Long workflowInstanceKey) {
-        synchronized (inflightOutboundMessage) {
-            OutboudMessages outboudMessages = inflightOutboundMessage.get(workflowInstanceKey);
-            if (outboudMessages == null) {
-                outboudMessages = outboundMessagesRepository.findByInternalId(workflowInstanceKey).orElse(null);
-                if (outboudMessages == null) {
-                    outboudMessages = new OutboudMessages(workflowInstanceKey); // Sets status to ONGOING
-                }
-                inflightOutboundMessage.put(workflowInstanceKey, outboudMessages);
-            }
-            return outboudMessages;
-        }
+        return outboudMessages;
     }
 }

@@ -23,17 +23,10 @@ public class InflightBatchManager {
     public Batch retrieveOrCreateBatch(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
-        // This code block should also process transaction/batch/outboundMsg Type
         Batch batch = batchRepository.findByWorkflowInstanceKey(processInstanceKey);
         if (batch == null) {
             logger.debug("creating new Batch for processInstanceKey: {}", processInstanceKey);
             batch = new Batch(processInstanceKey);
-
-            if (config.isPresent()) {
-//                batch.setDirection(config.get().getDirection());
-            } else {
-                logger.error("No config found for bpmn: {}", bpmn);
-            }
             batchRepository.save(batch);
         } else {
             logger.info("found existing Batch for processInstanceKey: {}", processInstanceKey);

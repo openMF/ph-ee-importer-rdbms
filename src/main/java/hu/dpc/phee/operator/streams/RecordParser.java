@@ -27,6 +27,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class RecordParser {
@@ -53,37 +54,77 @@ public class RecordParser {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
-    public List<Object> processWorkflowInstance(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long timestamp, String bpmnElementType, String elementId, String flowType) {
+    public List<Object> processWorkflowInstance(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long timestamp, String bpmnElementType, String elementId, String flowType, DocumentContext sample) {
         String recordType = recordDocument.read("$.recordType", String.class);
         String intent = recordDocument.read("$.intent", String.class);
 
-        if ("EVENT".equals(recordType) && "START_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
-            transfer.setStartedAt(new Date(timestamp));
+        List<TransferTransformerConfig.Transformer> constantTransformers = transferTransformerConfig.getFlows().stream()
+                .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
+                .flatMap(it -> it.getTransformers().stream())
+                .filter(it -> Strings.isNotBlank(it.getConstant()))
+                .toList();
 
-            List<TransferTransformerConfig.Transformer> constantTransformers = transferTransformerConfig.getFlows().stream()
-                    .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
-                    .flatMap(it -> it.getTransformers().stream())
-                    .filter(it -> Strings.isNotBlank(it.getConstant()))
-                    .toList();
-
-            logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
-            constantTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
-        }
-
-        if ("EVENT".equals(recordType) && "END_EVENT".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
-            logger.info("finishing transfer for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
-            transfer.setCompletedAt(new Date(timestamp));
-            if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
-                transfer.setStatus(TransferStatus.FAILED);
-            } else {
-                transfer.setStatus(TransferStatus.COMPLETED);
+        if ("TRANSFER".equalsIgnoreCase(flowType)) {
+            Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
+            if ("EVENT".equals(recordType) && "START_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
+                transfer.setStartedAt(new Date(timestamp));
+                logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
+                constantTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
             }
-        }
 
+            if ("EVENT".equals(recordType) && "END_EVENT".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
+                logger.info("finishing transfer for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
+                transfer.setCompletedAt(new Date(timestamp));
+                if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
+                    transfer.setStatus(TransferStatus.FAILED);
+                } else {
+                    transfer.setStatus(TransferStatus.COMPLETED);
+                }
+            }
+        } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
+            TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
+            if ("ELEMENT_ACTIVATING".equals(intent)) {
+                transactionRequest.setStartedAt(new Date(timestamp));
+                logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
+                constantTransformers.forEach(it -> applyTransformer(transactionRequest, null, null, it));
+            } else if ("ELEMENT_COMPLETED".equals(intent)) {
+                logger.info("finishing transaction for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
+                transactionRequest.setCompletedAt(new Date(timestamp));
+                if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
+                    transactionRequest.setState(TransactionRequestState.FAILED);
+                } else {
+                    transactionRequest.setState(TransactionRequestState.ACCEPTED);
+                }
+            }
+
+        } else if ("BATCH".equalsIgnoreCase(flowType)) {
+            Batch batch = inflightBatchManager.retrieveOrCreateBatch(bpmn, sample);
+            if ("ELEMENT_ACTIVATING".equals(intent)) {
+                batch.setStartedAt(new Date(timestamp));
+                logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
+                constantTransformers.forEach(it -> applyTransformer(batch, null, null, it));
+            } else if ("ELEMENT_COMPLETED".equals(intent)) {
+                batch.setCompletedAt(new Date(timestamp));
+                if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
+                    batch.setState(TransactionRequestState.FAILED);
+                } else {
+                    batch.setState(TransactionRequestState.ACCEPTED);
+                }
+            }
+        } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
+            Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn,recordDocument);
+            if ("ELEMENT_ACTIVATING".equals(intent)) {
+
+            } else if ("ELEMENT_COMPLETED".equals(intent)) {
+
+            }
+        } else {
+            logger.error("No matching flow types for the given request");
+        }
         return List.of();
     }
 
-    public List<Object> processVariable(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long workflowKey, Long timestamp, String flowType) {
+    public List<Object> processVariable(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long workflowKey, Long timestamp, String flowType, DocumentContext sample) {
         String variableName = recordDocument.read("$.value.name", String.class);
         String variableValue = recordDocument.read("$.value.value", String.class);
         String value = variableValue.startsWith("\"") && variableValue.endsWith("\"") ? StringEscapeUtils.unescapeJson(variableValue.substring(1, variableValue.length() - 1)) : variableValue;
@@ -103,9 +144,27 @@ public class RecordParser {
                 .filter(it -> variableName.equalsIgnoreCase(it.getVariableName()))
                 .toList();
 
-        matchingTransformers.forEach(transformer -> applyTransformer(transfer, variableName, value, transformer));
+        matchTransformerForFlowType(flowType,bpmn,sample,matchingTransformers,variableName,value,workflowInstanceKey);
 
         return results;
+    }
+
+    private void matchTransformerForFlowType(String flowType, String bpmn, DocumentContext sample, List<TransferTransformerConfig.Transformer> matchingTransformers, String variableName, String value, Long workflowInstanceKey) {
+        if ("TRANSFER".equalsIgnoreCase(flowType)) {
+            Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
+            matchingTransformers.forEach(transformer -> applyTransformer(transfer, variableName, value, transformer));
+        } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
+            TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
+            matchingTransformers.forEach(transformer -> applyTransformer(transactionRequest, variableName, value, transformer));
+        } else if ("BATCH".equalsIgnoreCase(flowType)) {
+            Batch batch = inflightBatchManager.retrieveOrCreateBatch(bpmn, sample);
+            matchingTransformers.forEach(transformer -> applyTransformer(batch, variableName, value, transformer));
+        } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
+            Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn,sample);
+            matchingTransformers.forEach(transformer -> applyTransformer(outboudMessages, variableName, value, transformer));
+        } else {
+            logger.error("No matching flow types for the given request");
+        }
     }
 
     public List<Object> processTask(DocumentContext recordDocument, Long workflowInstanceKey, String valueType, Long workflowKey, Long timestamp) {
@@ -121,7 +180,7 @@ public class RecordParser {
         );
     }
 
-    public List<Object> processIncident(Long timestamp, String flowType, String bpmn, DocumentContext sample) {
+    public List<Object> processIncident(Long timestamp, String flowType, String bpmn, DocumentContext sample, Long workflowInstanceKey) {
         if ("TRANSFER".equalsIgnoreCase(flowType)) {
             Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
             logger.warn("failing Transfer {} based on incident event", transfer.getTransactionId());
@@ -138,8 +197,8 @@ public class RecordParser {
             batch.setNote("Failed Batch Request");
             batch.setCompletedAt(new Date(timestamp));
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
-            OutboudMessages outboudMessages = inflightOutboundMessageManager.getOrCreateOutboundMessage();
-            logger.warn("failing Outbound Message Request {} based on incident event", batch.getBatchId());
+            Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn,sample);
+            logger.warn("failing Outbound Message Request {} based on incident event", outboudMessages.getExternalId());
             outboudMessages.setDeliveryErrorMessage("Failed Message Request");
             outboudMessages.setDeliveredOnDate(new Date(timestamp));
         } else {
@@ -148,13 +207,13 @@ public class RecordParser {
         return List.of();
     }
 
-    private void applyTransformer(Transfer transfer, String variableName, String variableValue, TransferTransformerConfig.Transformer transformer) {
+    private void applyTransformer(Object object, String variableName, String variableValue, TransferTransformerConfig.Transformer transformer) {
         logger.debug("applying transformer for field: {}", transformer.getField());
         try {
             String fieldName = transformer.getField();
             if (Strings.isNotBlank(transformer.getConstant())) {
                 logger.debug("setting constant value: {}", transformer.getConstant());
-                PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, transformer.getConstant());
+                PropertyAccessorFactory.forBeanPropertyAccess(object).setPropertyValue(fieldName, transformer.getConstant());
                 return;
             }
 
@@ -174,7 +233,7 @@ public class RecordParser {
                     } else {
                         value = result.toString();
                     }
-                    PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, value);
+                    PropertyAccessorFactory.forBeanPropertyAccess(object).setPropertyValue(fieldName, value);
                 }
 
                 if (StringUtils.isBlank(value)) {
@@ -189,7 +248,7 @@ public class RecordParser {
                 String result = xPathFactory.newXPath().compile(transformer.getXpath()).evaluate(document);
                 logger.debug("xpath result: {} for variable {}", result, variableName);
                 if (StringUtils.isNotBlank(result)) {
-                    PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, result);
+                    PropertyAccessorFactory.forBeanPropertyAccess(object).setPropertyValue(fieldName, result);
                 } else {
                     logger.error("null result when setting field {} from variable {}. Xpath: {}, variable value: {}", fieldName, variableName, transformer.getXpath(), variableValue);
                 }
@@ -197,7 +256,7 @@ public class RecordParser {
             }
 
             logger.debug("setting simple variable value: {} for variable {}", variableValue, variableName);
-            PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, variableValue);
+            PropertyAccessorFactory.forBeanPropertyAccess(object).setPropertyValue(fieldName, variableValue);
 
         } catch (Exception e) {
             logger.error("failed to apply transformer {} to variable {}", transformer, variableName, e);
