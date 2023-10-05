@@ -1,0 +1,21 @@
+{
+  "partitionId": 2,
+  "value": {
+    "name": "currency",
+    "value": "\"HUF\"",
+    "processDefinitionKey": 2251799816094393,
+    "bpmnProcessId": "binx_ig2_credit_transfer_debtor_process-binx",
+    "scopeKey": 4503599631529114,
+    "processInstanceKey": 4503599631529096
+  },
+  "key": 4503599631529126,
+  "timestamp": 1680776111962,
+  "valueType": "VARIABLE",
+  "brokerVersion": "8.1.8",
+  "recordType": "EVENT",
+  "sourceRecordPosition": 8315094,
+  "intent": "CREATED",
+  "rejectionType": "NULL_VAL",
+  "rejectionReason": "",
+  "position": 8315101
+}

@@ -20,16 +20,18 @@ package hu.dpc.phee.operator.entity.tenant;
 
 import org.springframework.util.Assert;
 
+import javax.sql.DataSource;
+
 public class ThreadLocalContextUtil {
 
-    private static final ThreadLocal<TenantServerConnection> tenantcontext = new ThreadLocal<>();
+    private static final ThreadLocal<DataSource> tenantcontext = new ThreadLocal<>();
 
-    public static void setTenant(final TenantServerConnection tenant) {
-        Assert.notNull(tenant, "tenant cannot be null");
-        tenantcontext.set(tenant);
+    public static void setTenant(final DataSource dataSource) {
+        Assert.notNull(dataSource, "tenant dataSource cannot be null");
+        tenantcontext.set(dataSource);
     }
 
-    public static TenantServerConnection getTenant() {
+    public static DataSource getTenant() {
         return tenantcontext.get();
     }
 

@@ -18,12 +18,12 @@
  */
 package hu.dpc.phee.operator.entity.tenant;
 
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import hu.dpc.phee.operator.tenants.TenantsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
@@ -33,99 +33,16 @@ import java.util.Map;
 
 @Service
 public class DataSourcePerTenantService implements DisposableBean {
-
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final Map<Long, DataSource> tenantToDataSourceMap = new HashMap<>();
 
-    @Value("${datasource.core.port}")
-    private int defaultPort;
+    @Autowired
+    TenantsService tenantsService;
 
-    @Value("${datasource.core.host}")
-    private String defaultHostname;
-
-    @Value("${datasource.core.schema}")
-    private String defaultSchema;
-
-    @Value("${datasource.core.username}")
-    private String defaultUsername;
-
-    @Value("${datasource.core.password}")
-    private String defaultPassword;
-
-    @Value("${datasource.common.protocol}")
-    private String jdbcProtocol;
-
-    @Value("${datasource.common.subprotocol}")
-    private String jdbcSubprotocol;
-
-    @Value("${datasource.common.driverclass_name}")
-    private String driverClass;
 
     public DataSource retrieveDataSource() {
-        DataSource tenantDataSource;
-
-        final TenantServerConnection tenant = ThreadLocalContextUtil.getTenant();
-        if (tenant != null) {
-            synchronized (this.tenantToDataSourceMap) {
-                if (this.tenantToDataSourceMap.containsKey(tenant.getId())) {
-                    tenantDataSource = this.tenantToDataSourceMap.get(tenant.getId());
-                } else {
-                    tenantDataSource = createNewDataSourceFor(tenant);
-                    this.tenantToDataSourceMap.put(tenant.getId(), tenantDataSource);
-                }
-            }
-        } else {
-            synchronized (this.tenantToDataSourceMap) {
-                long defaultConnectionKey = 0;
-                if (this.tenantToDataSourceMap.containsKey(defaultConnectionKey)) {
-                    tenantDataSource = this.tenantToDataSourceMap.get(defaultConnectionKey);
-                } else {
-                    TenantServerConnection defaultConnection = new TenantServerConnection();
-                    defaultConnection.setSchemaServer(defaultHostname);
-                    defaultConnection.setSchemaServerPort(String.valueOf(defaultPort));
-                    defaultConnection.setSchemaName(defaultSchema);
-                    defaultConnection.setSchemaUsername(defaultUsername);
-                    defaultConnection.setSchemaPassword(defaultPassword);
-                    tenantDataSource = createNewDataSourceFor(defaultConnection);
-                    this.tenantToDataSourceMap.put(defaultConnectionKey, tenantDataSource);
-                }
-            }
-        }
-
-        return tenantDataSource;
-    }
-
-    private DataSource createNewDataSourceFor(TenantServerConnection tenant) {
-        HikariConfig config = new HikariConfig();
-        config.setUsername(tenant.getSchemaUsername());
-        config.setPassword(tenant.getSchemaPassword());
-        config.setJdbcUrl(createJdbcUrl(jdbcProtocol, jdbcSubprotocol, tenant.getSchemaServer(),
-                Integer.parseInt(tenant.getSchemaServerPort()), tenant.getSchemaName()));
-        config.setAutoCommit(false);
-        config.setConnectionInitSql("SELECT 1");
-        config.setValidationTimeout(30000);
-        config.setConnectionTestQuery("SELECT 1");
-        config.setConnectionTimeout(30000);
-        config.setDriverClassName(driverClass);
-        config.setIdleTimeout(600000);
-        config.setMaximumPoolSize(20);
-        config.setMinimumIdle(5);
-        config.setPoolName(tenant.getSchemaName() + "Pool");
-        return new HikariDataSource(config);
-    }
-
-    private String createJdbcUrl(String jdbcProtocol, String jdbcSubprotocol, String hostname, int port, String dbName) {
-        return new StringBuilder()
-                .append(jdbcProtocol)
-                .append(':')
-                .append(jdbcSubprotocol)
-                .append("://")
-                .append(hostname)
-                .append(':')
-                .append(port)
-                .append('/')
-                .append(dbName)
-                .toString();
+        DataSource threadLocalDatasource = ThreadLocalContextUtil.getTenant();
+        return threadLocalDatasource != null ? threadLocalDatasource : tenantsService.getAnyDataSource();
     }
 
     @Override

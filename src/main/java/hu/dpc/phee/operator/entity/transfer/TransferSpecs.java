@@ -1,8 +1,8 @@
 package hu.dpc.phee.operator.entity.transfer;
 
+import jakarta.persistence.metamodel.SingularAttribute;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.metamodel.SingularAttribute;
 import java.util.Date;
 
 public class TransferSpecs {
