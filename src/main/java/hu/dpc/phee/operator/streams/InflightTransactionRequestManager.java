@@ -19,7 +19,7 @@ public class InflightTransactionRequestManager {
     @Autowired
     TransferTransformerConfig transferTransformerConfig;
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public TransactionRequest retrieveOrCreateTransaction(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);

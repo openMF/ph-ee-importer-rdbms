@@ -1,4 +1,4 @@
-package hu.dpc.phee.operator.importer;
+package hu.dpc.phee.operator.streams;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;

@@ -3,14 +3,17 @@ package hu.dpc.phee.operator.streams;
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;
 import hu.dpc.phee.operator.entity.batch.Batch;
+import hu.dpc.phee.operator.entity.batch.BatchRepository;
 import hu.dpc.phee.operator.entity.outboundmessages.OutboudMessages;
+import hu.dpc.phee.operator.entity.outboundmessages.OutboundMessagesRepository;
 import hu.dpc.phee.operator.entity.task.Task;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequest;
+import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestRepository;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestState;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
+import hu.dpc.phee.operator.entity.transfer.TransferRepository;
 import hu.dpc.phee.operator.entity.transfer.TransferStatus;
 import hu.dpc.phee.operator.entity.variable.Variable;
-import hu.dpc.phee.operator.importer.InflightOutboundMessageManager;
 import hu.dpc.phee.operator.importer.JsonPathReader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -45,13 +48,25 @@ public class RecordParser {
     private InflightOutboundMessageManager inflightOutboundMessageManager;
 
     @Autowired
+    TransferRepository transferRepository;
+
+    @Autowired
+    TransactionRequestRepository transactionRequestRepository;
+
+    @Autowired
+    BatchRepository batchRepository;
+
+    @Autowired
+    OutboundMessagesRepository outboundMessagesRepository;
+
+    @Autowired
     TransferTransformerConfig transferTransformerConfig;
 
-    private DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+    private final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 
-    private XPathFactory xPathFactory = XPathFactory.newInstance();
+    private final XPathFactory xPathFactory = XPathFactory.newInstance();
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
     public List<Object> processWorkflowInstance(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long timestamp, String bpmnElementType, String elementId, String flowType, DocumentContext sample) {
@@ -81,6 +96,7 @@ public class RecordParser {
                     transfer.setStatus(TransferStatus.COMPLETED);
                 }
             }
+            transferRepository.save(transfer);
         } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
             TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
@@ -96,7 +112,7 @@ public class RecordParser {
                     transactionRequest.setState(TransactionRequestState.ACCEPTED);
                 }
             }
-
+            transactionRequestRepository.save(transactionRequest);
         } else if ("BATCH".equalsIgnoreCase(flowType)) {
             Batch batch = inflightBatchManager.retrieveOrCreateBatch(bpmn, sample);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
@@ -105,18 +121,20 @@ public class RecordParser {
                 constantTransformers.forEach(it -> applyTransformer(batch, null, null, it));
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 batch.setCompletedAt(new Date(timestamp));
-                if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
-                    batch.setState(TransactionRequestState.FAILED);
-                } else {
-                    batch.setState(TransactionRequestState.ACCEPTED);
-                }
             }
+            batchRepository.save(batch);
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
-            Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn,recordDocument);
+            Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, recordDocument);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
-
+                outboudMessages.ifPresent(messages -> {
+                    messages.setSubmittedOnDate(new Date(timestamp));
+                    outboundMessagesRepository.save(messages);
+                });
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
-
+                outboudMessages.ifPresent(messages -> {
+                    messages.setDeliveredOnDate(new Date(timestamp));
+                    outboundMessagesRepository.save(messages);
+                });
             }
         } else {
             logger.error("No matching flow types for the given request");
@@ -144,7 +162,7 @@ public class RecordParser {
                 .filter(it -> variableName.equalsIgnoreCase(it.getVariableName()))
                 .toList();
 
-        matchTransformerForFlowType(flowType,bpmn,sample,matchingTransformers,variableName,value,workflowInstanceKey);
+        matchTransformerForFlowType(flowType, bpmn, sample, matchingTransformers, variableName, value, workflowInstanceKey);
 
         return results;
     }
@@ -153,15 +171,21 @@ public class RecordParser {
         if ("TRANSFER".equalsIgnoreCase(flowType)) {
             Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
             matchingTransformers.forEach(transformer -> applyTransformer(transfer, variableName, value, transformer));
+            transferRepository.save(transfer);
         } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
             TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
             matchingTransformers.forEach(transformer -> applyTransformer(transactionRequest, variableName, value, transformer));
+            transactionRequestRepository.save(transactionRequest);
         } else if ("BATCH".equalsIgnoreCase(flowType)) {
             Batch batch = inflightBatchManager.retrieveOrCreateBatch(bpmn, sample);
             matchingTransformers.forEach(transformer -> applyTransformer(batch, variableName, value, transformer));
+            batchRepository.save(batch);
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
-            Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn,sample);
+            Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, sample);
             matchingTransformers.forEach(transformer -> applyTransformer(outboudMessages, variableName, value, transformer));
+            outboudMessages.ifPresent(messages -> {
+                outboundMessagesRepository.save(messages);
+            });
         } else {
             logger.error("No matching flow types for the given request");
         }
@@ -186,21 +210,27 @@ public class RecordParser {
             logger.warn("failing Transfer {} based on incident event", transfer.getTransactionId());
             transfer.setStatus(TransferStatus.EXCEPTION);
             transfer.setCompletedAt(new Date(timestamp));
+            transferRepository.save(transfer);
         } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
             TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
             logger.warn("failing Transaction {} based on incident event", transactionRequest.getTransactionId());
             transactionRequest.setState(TransactionRequestState.FAILED);
             transactionRequest.setCompletedAt(new Date(timestamp));
+            transactionRequestRepository.save(transactionRequest);
         } else if ("BATCH".equalsIgnoreCase(flowType)) {
             Batch batch = inflightBatchManager.retrieveOrCreateBatch(bpmn, sample);
             logger.warn("failing Batch {} based on incident event", batch.getBatchId());
             batch.setNote("Failed Batch Request");
             batch.setCompletedAt(new Date(timestamp));
+            batchRepository.save(batch);
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
-            Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn,sample);
-            logger.warn("failing Outbound Message Request {} based on incident event", outboudMessages.getExternalId());
-            outboudMessages.setDeliveryErrorMessage("Failed Message Request");
-            outboudMessages.setDeliveredOnDate(new Date(timestamp));
+            Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, sample);
+            logger.warn("failing Outbound Message Request {} based on incident event", outboudMessages.get().getExternalId());
+            outboudMessages.ifPresent(messages -> {
+                messages.setDeliveredOnDate(new Date(timestamp));
+                messages.setDeliveryErrorMessage("Failed Message Request");
+                outboundMessagesRepository.save(messages);
+            });
         } else {
             logger.error("No flow type for the incident event");
         }

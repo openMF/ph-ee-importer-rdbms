@@ -8,7 +8,7 @@ import org.springframework.data.util.Pair;
 import java.util.List;
 
 public class EventParser {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public Pair<String, String> retrieveTenant(DocumentContext record) {
         String bpmnProcessIdWithTenant = findBpmnProcessId(record);

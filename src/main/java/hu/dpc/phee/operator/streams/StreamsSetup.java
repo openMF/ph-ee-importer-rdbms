@@ -44,7 +44,7 @@ import static org.apache.kafka.common.serialization.Serdes.ListSerde;
 
 @Service
 public class StreamsSetup {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final Serde<String> STRING_SERDE = Serdes.String();
 
     @Value("${importer.kafka.topic}")
@@ -165,7 +165,7 @@ public class StreamsSetup {
                         List<Object> entities = switch (valueType) {
                             case "DEPLOYMENT", "VARIABLE_DOCUMENT", "WORKFLOW_INSTANCE" -> List.of();
                             case "PROCESS_INSTANCE" -> {
-                                yield recordParser.processWorkflowInstance(recordDocument, bpmn, workflowInstanceKey, timestamp, bpmnElementType, elementId, flowType,sample);
+                                yield recordParser.processWorkflowInstance(recordDocument, bpmn, workflowInstanceKey, timestamp, bpmnElementType, elementId, flowType, sample);
                             }
 
                             case "JOB" -> {
