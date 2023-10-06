@@ -57,9 +57,6 @@ public class StreamsSetup {
     private StreamsBuilder streamsBuilder;
 
     @Autowired
-    private EventParser eventParser;
-
-    @Autowired
     private TransactionTemplate transactionTemplate;
 
     @Autowired
@@ -126,7 +123,7 @@ public class StreamsSetup {
 
         DocumentContext sample = JsonPathReader.parse(first);
         try {
-            Pair<String, String> bpmnAndTenant = eventParser.retrieveTenant(sample);
+            Pair<String, String> bpmnAndTenant = retrieveTenant(sample);
             bpmn = bpmnAndTenant.getFirst();
             tenantName = bpmnAndTenant.getSecond();
             logger.trace("resolving tenant server connection for tenant: {}", tenantName);
@@ -209,5 +206,29 @@ public class StreamsSetup {
 
     private String getTypeForFlow(Optional<TransferTransformerConfig.Flow> config) {
         return config.map(TransferTransformerConfig.Flow::getType).orElse(null);
+    }
+
+    public Pair<String, String> retrieveTenant(DocumentContext record) {
+        String bpmnProcessIdWithTenant = findBpmnProcessId(record);
+
+        String[] split = bpmnProcessIdWithTenant.split("-");
+        if (split.length < 2) {
+            throw new RuntimeException("Invalid bpmnProcessId, has no tenant information: '" + bpmnProcessIdWithTenant + "'");
+        }
+        return Pair.of(split[0], split[1]);
+    }
+
+    private String findBpmnProcessId(DocumentContext record) {
+        String bpmnProcessIdWithTenant = record.read("$.value.bpmnProcessId", String.class);
+        if (bpmnProcessIdWithTenant == null) {
+            logger.warn("can't find bpmnProcessId in record: {}, trying alternative ways..", record.jsonString());
+            List<String> ids = record.read("$.value..bpmnProcessId", List.class);
+            if (ids.size() > 1) {
+                throw new RuntimeException("Invalid bpmnProcessIdWithTenant, has more than one bpmnProcessIds: '" + ids + "'");
+            }
+            bpmnProcessIdWithTenant = ids.get(0);
+        }
+        logger.debug("resolved bpmnProcessIdWithTenant: {}", bpmnProcessIdWithTenant);
+        return bpmnProcessIdWithTenant;
     }
 }
