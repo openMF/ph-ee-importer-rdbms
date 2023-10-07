@@ -125,7 +125,7 @@ public class RecordParser {
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 if (!config.get().getName().equalsIgnoreCase("bulk_processor")) {
                     logger.info("Inside if condition PROCESS_INSTANCE, json {}", recordType);
-                    inflightBatchManager.checkWorkerIdAndUpdateTransferData(batch,workflowInstanceKey, timestamp);
+//                    inflightBatchManager.checkWorkerIdAndUpdateTransferData(batch,workflowInstanceKey, timestamp);
                 }
                 batch.setCompletedAt(new Date(timestamp));
             }
