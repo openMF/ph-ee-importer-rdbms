@@ -26,7 +26,6 @@ public class InFlightTransferManager {
     public Transfer retrieveOrCreateTransfer(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
-        // This code block should also process transaction/batch/outboundMsg Type
         Transfer transfer = transferRepository.findByWorkflowInstanceKey(processInstanceKey);
         if (transfer == null) {
             logger.debug("creating new Transfer for processInstanceKey: {}", processInstanceKey);

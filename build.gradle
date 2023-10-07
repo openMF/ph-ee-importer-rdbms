@@ -42,6 +42,7 @@ dependencies {
     api 'org.postgresql:postgresql:42.5.1'
     api 'com.zaxxer:HikariCP:5.0.1'
     api 'org.apache.commons:commons-text:1.10.0'
+    implementation 'com.amazonaws:aws-java-sdk:1.11.486'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
     implementation 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'

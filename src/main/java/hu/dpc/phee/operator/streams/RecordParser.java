@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -70,10 +71,11 @@ public class RecordParser {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-
+    @Transactional
     public List<Object> processWorkflowInstance(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long timestamp, String bpmnElementType, String elementId, String flowType, DocumentContext sample) {
         String recordType = recordDocument.read("$.recordType", String.class);
         String intent = recordDocument.read("$.intent", String.class);
+        Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
 
         List<TransferTransformerConfig.Transformer> constantTransformers = transferTransformerConfig.getFlows().stream()
                 .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
@@ -85,11 +87,9 @@ public class RecordParser {
             Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
             if ("EVENT".equals(recordType) && "START_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
                 transfer.setStartedAt(new Date(timestamp));
+                transfer.setDirection(config.get().getDirection());
                 logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
-                constantTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
-            }
-
-            if ("EVENT".equals(recordType) && "END_EVENT".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
+            }else if ("EVENT".equals(recordType) && "END_EVENT".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
                 logger.info("finishing transfer for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
                 transfer.setCompletedAt(new Date(timestamp));
                 if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
@@ -98,13 +98,14 @@ public class RecordParser {
                     transfer.setStatus(TransferStatus.COMPLETED);
                 }
             }
+            constantTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
             transferRepository.save(transfer);
         } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
             TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 transactionRequest.setStartedAt(new Date(timestamp));
+                transactionRequest.setDirection(config.get().getDirection());
                 logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
-                constantTransformers.forEach(it -> applyTransformer(transactionRequest, null, null, it));
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 logger.info("finishing transaction for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
                 transactionRequest.setCompletedAt(new Date(timestamp));
@@ -114,16 +115,21 @@ public class RecordParser {
                     transactionRequest.setState(TransactionRequestState.ACCEPTED);
                 }
             }
+            constantTransformers.forEach(it -> applyTransformer(transactionRequest, null, null, it));
             transactionRequestRepository.save(transactionRequest);
         } else if ("BATCH".equalsIgnoreCase(flowType)) {
             Batch batch = inflightBatchManager.retrieveOrCreateBatch(bpmn, sample);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 batch.setStartedAt(new Date(timestamp));
                 logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
-                constantTransformers.forEach(it -> applyTransformer(batch, null, null, it));
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
+                if (!config.get().getName().equalsIgnoreCase("bulk_processor")) {
+                    logger.info("Inside if condition PROCESS_INSTANCE, json {}", recordType);
+                    inflightBatchManager.checkWorkerIdAndUpdateTransferData(batch,workflowInstanceKey, timestamp);
+                }
                 batch.setCompletedAt(new Date(timestamp));
             }
+            constantTransformers.forEach(it -> applyTransformer(batch, null, null, it));
             batchRepository.save(batch);
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
             Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, recordDocument);
@@ -138,6 +144,7 @@ public class RecordParser {
                     outboundMessagesRepository.save(messages);
                 });
             }
+            constantTransformers.forEach(it -> applyTransformer(outboudMessages, null, null, it));
         } else {
             logger.error("No matching flow types for the given request");
         }
@@ -169,6 +176,7 @@ public class RecordParser {
         return results;
     }
 
+    @Transactional
     private void matchTransformerForFlowType(String flowType, String bpmn, DocumentContext sample, List<TransferTransformerConfig.Transformer> matchingTransformers, String variableName, String value, Long workflowInstanceKey) {
         if ("TRANSFER".equalsIgnoreCase(flowType)) {
             Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
@@ -206,6 +214,7 @@ public class RecordParser {
         );
     }
 
+    @Transactional
     public List<Object> processIncident(Long timestamp, String flowType, String bpmn, DocumentContext sample, Long workflowInstanceKey) {
         if ("TRANSFER".equalsIgnoreCase(flowType)) {
             Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
