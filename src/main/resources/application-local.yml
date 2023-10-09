@@ -693,7 +693,7 @@ transfer:
           variableName: subBatchId
     - name: inbound_transfer_mifos
       direction: INCOMING
-      type: TRANSFER
+      type: TRANSACTION-REQUEST
       transformers:
         - field: amount
           variableName: channelRequest
