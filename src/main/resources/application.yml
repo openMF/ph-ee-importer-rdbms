@@ -1,8 +1,12 @@
 kafka:
-  msk: true
-  brokers: "b-2.baasflowdev.6555wo.c8.kafka.eu-central-1.amazonaws.com:9098,b-1.baasflowdev.6555wo.c8.kafka.eu-central-1.amazonaws.com:9098,b-3.baasflowdev.6555wo.c8.kafka.eu-central-1.amazonaws.com:9098"
+  msk: false
+  brokers: "localhost:9092"
   consumer-group: ch1
   commit-interval-ms: 1000
+  listener:
+    concurrency: 3
+    poll-timeout-ms: 3000
+    max-poll-records: 100
 
 importer:
   kafka:

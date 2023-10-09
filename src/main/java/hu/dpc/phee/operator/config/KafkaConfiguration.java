@@ -48,15 +48,21 @@ public class KafkaConfiguration {
     @Value("${kafka.commit-interval-ms}")
     private int commitIntervalMs;
 
-//
-//    @Bean
-//    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
-//        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-//        factory.setConsumerFactory(consumerFactory());
-//        factory.setConcurrency(3);  // TODO externalize
-//        factory.getContainerProperties().setPollTimeout(3000); // TODO externalize
-//        return factory;
-//    }
+    @Value("${kafka.listener.concurrency}")
+    private int listenerConcurrency;
+
+    @Value("${kafka.listener.poll-timeout-ms}")
+    private int listenerPollTimeoutMs;
+
+
+    @Bean
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        factory.setConcurrency(listenerConcurrency);
+        factory.getContainerProperties().setPollTimeout(listenerPollTimeoutMs);
+        return factory;
+    }
 
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
