@@ -13,6 +13,32 @@ datasource:
 # The transfer flows will be moved to env-template
 transfer:
   flows:
+    - name: inbound_transfer_mifos
+      direction: INCOMING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
     - name: PayerTransactionRequest
       direction: INCOMING
       type: TRANSACTION-REQUEST
@@ -710,32 +736,6 @@ transfer:
           variableName: clientCorrelationId
         - field: subBatchId
           variableName: subBatchId
-    - name: inbound_transfer_mifos
-      direction: INCOMING
-      type: TRANSACTION-REQUEST
-      transformers:
-        - field: transactionId
-          variableName: transactionId
-        - field: clientCorrelationId
-          variableName: clientCorrelationId
-        - field: amount
-          variableName: channelRequest
-          jsonPath: $.amount
-        - field: currency
-          variableName: channelRequest
-          jsonPath: $.currency
-        - field: payerPartyIdType
-          variableName: channelRequest
-          jsonPath: $.payer[0].partyIdType
-        - field: payerPartyId
-          variableName: channelRequest
-          jsonPath: $.payer[0].partyIdIdentifier
-        - field: payeePartyIdType
-          variableName: channelRequest
-          jsonPath: $.payee[0].partyIdType
-        - field: payeePartyId
-          variableName: channelRequest
-          jsonPath: $.payee[0].partyIdIdentifier
     - name: inbound_transfer_tupande
       direction: INCOMING
       type: TRANSFER
