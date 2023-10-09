@@ -695,38 +695,25 @@ transfer:
       direction: INCOMING
       type: TRANSACTION-REQUEST
       transformers:
-        - field: amount
-          variableName: channelRequest
-          jsonPath: $.amount.amount
-        - field: currency
-          variableName: channelRequest
-          jsonPath: $.amount.currency
-        - field: payeePartyIdType
-          variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdType
-        - field: payeePartyId
-          variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
-        - field: payerPartyIdType
-          variableName: channelRequest
-          jsonPath: $.payer.partyIdInfo.partyIdType
-        - field: payerPartyId
-          variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
-        - field: currency
-          variableName: currency
-        - field: batchId
-          variableName: batchId
-        - field: tenantId
-          variableName: tenantId
-        - field: errorInformation
-          variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: partyIdIdentifier
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
     - name: inbound_transfer_tupande
       direction: INCOMING
       type: TRANSFER
