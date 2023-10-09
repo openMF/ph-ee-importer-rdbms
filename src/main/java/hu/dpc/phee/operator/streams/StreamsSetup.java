@@ -158,6 +158,7 @@ public class StreamsSetup {
                         Long timestamp = recordDocument.read("$.timestamp");
                         String bpmnElementType = recordDocument.read("$.value.bpmnElementType");
                         String elementId = recordDocument.read("$.value.elementId");
+                        logger.info("Processing document of type {}", valueType);
 
                         List<Object> entities = switch (valueType) {
                             case "DEPLOYMENT", "VARIABLE_DOCUMENT", "WORKFLOW_INSTANCE" -> List.of();

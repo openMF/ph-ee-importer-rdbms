@@ -73,6 +73,7 @@ public class RecordParser {
 
     @Transactional
     public List<Object> processWorkflowInstance(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long timestamp, String bpmnElementType, String elementId, String flowType, DocumentContext sample) {
+        logger.info("Processing workflow instance");
         String recordType = recordDocument.read("$.recordType", String.class);
         String intent = recordDocument.read("$.intent", String.class);
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
@@ -84,6 +85,7 @@ public class RecordParser {
                 .toList();
 
         if ("TRANSFER".equalsIgnoreCase(flowType)) {
+            logger.info("Processing flow of type TRANSFER");
             Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
             if ("EVENT".equals(recordType) && "START_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
                 transfer.setStartedAt(new Date(timestamp));
@@ -101,6 +103,7 @@ public class RecordParser {
             constantTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
             transferRepository.save(transfer);
         } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
+            logger.info("Processing flow of type TRANSACTION");
             TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 transactionRequest.setStartedAt(new Date(timestamp));
@@ -118,6 +121,7 @@ public class RecordParser {
             constantTransformers.forEach(it -> applyTransformer(transactionRequest, null, null, it));
             transactionRequestRepository.save(transactionRequest);
         } else if ("BATCH".equalsIgnoreCase(flowType)) {
+            logger.info("Processing flow of type BATCH");
             Batch batch = inflightBatchManager.retrieveOrCreateBatch(bpmn, sample);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 batch.setStartedAt(new Date(timestamp));
@@ -132,6 +136,7 @@ public class RecordParser {
             constantTransformers.forEach(it -> applyTransformer(batch, null, null, it));
             batchRepository.save(batch);
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
+            logger.info("Processing flow of type OUTBOUND MESSAGES");
             Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, recordDocument);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 outboudMessages.ifPresent(messages -> {
@@ -152,6 +157,7 @@ public class RecordParser {
     }
 
     public List<Object> processVariable(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long workflowKey, Long timestamp, String flowType, DocumentContext sample) {
+        logger.info("Processing variable instance");
         String variableName = recordDocument.read("$.value.name", String.class);
         String variableValue = recordDocument.read("$.value.value", String.class);
         String value = variableValue.startsWith("\"") && variableValue.endsWith("\"") ? StringEscapeUtils.unescapeJson(variableValue.substring(1, variableValue.length() - 1)) : variableValue;
@@ -202,6 +208,7 @@ public class RecordParser {
     }
 
     public List<Object> processTask(DocumentContext recordDocument, Long workflowInstanceKey, String valueType, Long workflowKey, Long timestamp) {
+        logger.info("Processing task instance");
         return List.of(
                 new Task()
                         .withWorkflowInstanceKey(workflowInstanceKey)
@@ -216,6 +223,7 @@ public class RecordParser {
 
     @Transactional
     public List<Object> processIncident(Long timestamp, String flowType, String bpmn, DocumentContext sample, Long workflowInstanceKey) {
+        logger.info("Processing incident instance");
         if ("TRANSFER".equalsIgnoreCase(flowType)) {
             Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
             logger.warn("failing Transfer {} based on incident event", transfer.getTransactionId());
