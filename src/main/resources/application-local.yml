@@ -708,12 +708,15 @@ transfer:
         - field: payerPartyIdType
           variableName: channelRequest
           jsonPath: $.payer[0].partyIdType
-        - field: partyIdIdentifier
+        - field: payerPartyId
           variableName: channelRequest
           jsonPath: $.payer[0].partyIdIdentifier
         - field: payeePartyIdType
           variableName: channelRequest
           jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
     - name: inbound_transfer_tupande
       direction: INCOMING
       type: TRANSFER
