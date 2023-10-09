@@ -1,6 +1,8 @@
 kafka:
-  brokers: "kafka:9092"
+  msk: true
+  brokers: "b-2.baasflowdev.6555wo.c8.kafka.eu-central-1.amazonaws.com:9098,b-1.baasflowdev.6555wo.c8.kafka.eu-central-1.amazonaws.com:9098,b-3.baasflowdev.6555wo.c8.kafka.eu-central-1.amazonaws.com:9098"
   consumer-group: ch1
+  commit-interval-ms: 1000
 
 importer:
   kafka:
