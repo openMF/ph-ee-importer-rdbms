@@ -12,6 +12,8 @@ importer:
     aggreation-window-seconds: 2
 
 spring:
+  profiles:
+    active: "local,tenants"
   jpa:
     show-sql: false
     properties:
