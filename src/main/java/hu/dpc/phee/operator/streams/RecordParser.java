@@ -139,18 +139,13 @@ public class RecordParser {
             batchRepository.save(batch);
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
             logger.info("Processing flow of type OUTBOUND MESSAGES");
-            Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, recordDocument);
+            OutboudMessages outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, recordDocument);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
-                outboudMessages.ifPresent(messages -> {
-                    messages.setSubmittedOnDate(new Date(timestamp));
-                    outboundMessagesRepository.save(messages);
-                });
+                outboudMessages.setSubmittedOnDate(new Date(timestamp));
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
-                outboudMessages.ifPresent(messages -> {
-                    messages.setDeliveredOnDate(new Date(timestamp));
-                    outboundMessagesRepository.save(messages);
-                });
+                outboudMessages.setDeliveredOnDate(new Date(timestamp));
             }
+            outboundMessagesRepository.save(outboudMessages);
             constantTransformers.forEach(it -> applyTransformer(outboudMessages, null, null, it));
         } else {
             logger.error("No matching flow types for the given request");
@@ -211,11 +206,9 @@ public class RecordParser {
                 }
             }
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
-            Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, sample);
+            OutboudMessages outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, sample);
             matchingTransformers.forEach(transformer -> applyTransformer(outboudMessages, variableName, value, transformer));
-            outboudMessages.ifPresent(messages -> {
-                outboundMessagesRepository.save(messages);
-            });
+            outboundMessagesRepository.save(outboudMessages);
         } else {
             logger.error("No matching flow types for the given request");
         }
@@ -257,13 +250,11 @@ public class RecordParser {
             batch.setCompletedAt(new Date(timestamp));
             batchRepository.save(batch);
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
-            Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, sample);
-            logger.warn("failing Outbound Message Request {} based on incident event", outboudMessages.get().getExternalId());
-            outboudMessages.ifPresent(messages -> {
-                messages.setDeliveredOnDate(new Date(timestamp));
-                messages.setDeliveryErrorMessage("Failed Message Request");
-                outboundMessagesRepository.save(messages);
-            });
+            OutboudMessages outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, sample);
+            logger.warn("failing Outbound Message Request {} based on incident event", outboudMessages.getInternalId());
+            outboudMessages.setDeliveredOnDate(new Date(timestamp));
+            outboudMessages.setDeliveryErrorMessage("Failed Message Request");
+            outboundMessagesRepository.save(outboudMessages);
         } else {
             logger.error("No flow type for the incident event");
         }

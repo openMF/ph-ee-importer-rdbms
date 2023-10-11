@@ -22,15 +22,15 @@ public class InflightOutboundMessageManager {
     @Autowired
     TransferTransformerConfig transferTransformerConfig;
 
-    public Optional<OutboudMessages> retrieveOrCreateOutboundMessage(String bpmn, DocumentContext record) {
+    public OutboudMessages retrieveOrCreateOutboundMessage(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
-        Optional<OutboudMessages> outboudMessages = outboundMessagesRepository.findByInternalId(processInstanceKey);
+        OutboudMessages outboudMessages = outboundMessagesRepository.findByInternalId(processInstanceKey);
 
-        if (!outboudMessages.isPresent()) {
+        if (outboudMessages!=null) {
             logger.debug("creating new OutboudMessages for processInstanceKey: {}", processInstanceKey);
             OutboudMessages newOutboudMessages = new OutboudMessages(processInstanceKey);
-            outboudMessages = Optional.ofNullable(outboundMessagesRepository.save(newOutboudMessages));
+            outboudMessages = outboundMessagesRepository.save(newOutboudMessages);
         } else {
             logger.info("found existing OutboudMessages for processInstanceKey: {}", processInstanceKey);
         }
