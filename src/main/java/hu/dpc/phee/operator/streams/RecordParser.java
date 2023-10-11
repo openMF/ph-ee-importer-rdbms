@@ -93,7 +93,7 @@ public class RecordParser {
                 transfer.setStartedAt(new Date(timestamp));
                 transfer.setDirection(config.get().getDirection());
                 logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
-            }else if ("EVENT".equals(recordType) && "END_EVENT".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
+            } else if ("EVENT".equals(recordType) && "END_EVENT".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
                 logger.info("finishing transfer for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
                 transfer.setCompletedAt(new Date(timestamp));
                 if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
@@ -131,7 +131,7 @@ public class RecordParser {
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 if (!config.get().getName().equalsIgnoreCase("bulk_processor")) {
                     logger.info("Inside if condition PROCESS_INSTANCE, json {}", recordType);
-                    inflightBatchManager.checkWorkerIdAndUpdateTransferData(batch,workflowInstanceKey, timestamp);
+                    inflightBatchManager.checkWorkerIdAndUpdateTransferData(batch, workflowInstanceKey, timestamp);
                 }
                 batch.setCompletedAt(new Date(timestamp));
             }

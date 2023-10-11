@@ -27,7 +27,7 @@ public class InflightOutboundMessageManager {
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
         OutboudMessages outboudMessages = outboundMessagesRepository.findByInternalId(processInstanceKey);
 
-        if (outboudMessages!=null) {
+        if (outboudMessages != null) {
             logger.debug("creating new OutboudMessages for processInstanceKey: {}", processInstanceKey);
             OutboudMessages newOutboudMessages = new OutboudMessages(processInstanceKey);
             outboudMessages = outboundMessagesRepository.save(newOutboudMessages);

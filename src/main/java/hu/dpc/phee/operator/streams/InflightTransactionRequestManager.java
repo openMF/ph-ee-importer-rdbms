@@ -26,7 +26,6 @@ public class InflightTransactionRequestManager {
     public TransactionRequest retrieveOrCreateTransaction(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
-        // This code block should also process transaction/batch/outboundMsg Type
         TransactionRequest transactionRequest = transactionRequestRepository.findByWorkflowInstanceKey(processInstanceKey);
         if (transactionRequest == null) {
             logger.debug("creating new Transaction for processInstanceKey: {}", processInstanceKey);

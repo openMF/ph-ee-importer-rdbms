@@ -76,9 +76,10 @@ public class InflightBatchManager {
     }
 
     public void checkWorkerIdAndUpdateTransferData(Batch batch, Long workflowInstanceKey, Long timestamp) {
-        updateTransferTableForBatch(batch,workflowInstanceKey, timestamp);
+        updateTransferTableForBatch(batch, workflowInstanceKey, timestamp);
 
     }
+
     private void updateTransferTableForBatch(Batch batch, Long workflowInstanceKey, Long completeTimestamp) {
         String filename = getBatchFileName(workflowInstanceKey);
         logger.info("Filename {}", filename);
@@ -131,6 +132,7 @@ public class InflightBatchManager {
         }
 
     }
+
     public String getBatchFileName(Long workflowKey) {
         synchronized (workflowKeyBatchFileNameAssociations) {
             return workflowKeyBatchFileNameAssociations.get(workflowKey);
