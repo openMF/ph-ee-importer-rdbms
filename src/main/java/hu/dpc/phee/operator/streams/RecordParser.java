@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static hu.dpc.phee.operator.util.OperatorUtils.strip;
+
 @Component
 public class RecordParser {
 
@@ -129,7 +131,7 @@ public class RecordParser {
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 if (!config.get().getName().equalsIgnoreCase("bulk_processor")) {
                     logger.info("Inside if condition PROCESS_INSTANCE, json {}", recordType);
-//                    inflightBatchManager.checkWorkerIdAndUpdateTransferData(batch,workflowInstanceKey, timestamp);
+                    inflightBatchManager.checkWorkerIdAndUpdateTransferData(batch,workflowInstanceKey, timestamp);
                 }
                 batch.setCompletedAt(new Date(timestamp));
             }
@@ -184,6 +186,7 @@ public class RecordParser {
 
     @Transactional
     private void matchTransformerForFlowType(String flowType, String bpmn, DocumentContext sample, List<TransferTransformerConfig.Transformer> matchingTransformers, String variableName, String value, Long workflowInstanceKey) {
+        Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
         if ("TRANSFER".equalsIgnoreCase(flowType)) {
             Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
             matchingTransformers.forEach(transformer -> applyTransformer(transfer, variableName, value, transformer));
@@ -196,6 +199,17 @@ public class RecordParser {
             Batch batch = inflightBatchManager.retrieveOrCreateBatch(bpmn, sample);
             matchingTransformers.forEach(transformer -> applyTransformer(batch, variableName, value, transformer));
             batchRepository.save(batch);
+            if (!config.get().getName().equalsIgnoreCase("bulk_processor")) {
+                logger.info("Inside if condition {}", variableName);
+                if (variableName.equals("filename")) {
+                    logger.info("store filename {} in tempDocStore for instance {}", strip(value), workflowInstanceKey);
+                    inflightBatchManager.storeBatchFileName(workflowInstanceKey, value);
+                }
+                if (variableName.equals("batchId")) {
+                    logger.info("store batchid {} in tempDocStore for instance {}", strip(value), workflowInstanceKey);
+                    inflightBatchManager.storeBatchId(workflowInstanceKey, value);
+                }
+            }
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
             Optional<OutboudMessages> outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, sample);
             matchingTransformers.forEach(transformer -> applyTransformer(outboudMessages, variableName, value, transformer));

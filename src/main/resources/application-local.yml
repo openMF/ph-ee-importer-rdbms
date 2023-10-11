@@ -10,7 +10,7 @@ datasource:
     subprotocol: mysql
     driverclass_name: com.mysql.cj.jdbc.Driver
 
-# The transfer flows will be moved to env-template
+# The transfer flows will be moved to env-labs
 transfer:
   flows:
     - name: inbound_transfer_mifos

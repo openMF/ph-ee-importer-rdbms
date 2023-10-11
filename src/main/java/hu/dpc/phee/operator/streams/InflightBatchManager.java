@@ -27,7 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static hu.dpc.phee.operator.util.OperatorUtils.strip;
@@ -41,8 +43,8 @@ public class InflightBatchManager {
     @Autowired
     TransferTransformerConfig transferTransformerConfig;
 
-//    @Autowired
-//    private FileTransferService fileTransferService;
+    @Autowired
+    private FileTransferService fileTransferService;
 
     @Autowired
     private CsvMapper csvMapper;
@@ -52,6 +54,10 @@ public class InflightBatchManager {
 
     @Autowired
     TransferRepository transferRepository;
+
+    private final Map<Long, String> workflowKeyBatchFileNameAssociations = new HashMap<>();
+
+    private final Map<Long, String> workflowKeyBatchIdAssociations = new HashMap<>();
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -70,60 +76,82 @@ public class InflightBatchManager {
     }
 
     public void checkWorkerIdAndUpdateTransferData(Batch batch, Long workflowInstanceKey, Long timestamp) {
-        return;
-//        updateTransferTableForBatch(batch,workflowInstanceKey, timestamp);
+        updateTransferTableForBatch(batch,workflowInstanceKey, timestamp);
 
     }
-//    private void updateTransferTableForBatch(Batch batch, Long workflowInstanceKey, Long completeTimestamp) {
-//        String filename = "tempDocumentStore.getBatchFileName(workflowInstanceKey)";
-//        logger.info("Filename {}", filename);
-//        if (filename == null) {
-//            return;
-//        }
-//        filename = strip(filename);
-//        String localFilePath = fileTransferService.downloadFile(filename, bucketName);
-//        if (localFilePath == null) {
-//            logger.error("Null localFilePath, Error updating transfer table for batch with instance key {} and batch filename {}",
-//                    workflowInstanceKey, filename);
-//            return;
-//        }
-//        List<Transaction> transactionList;
-//        try {
-//            CsvSchema schema = CsvSchema.emptySchema().withHeader();
-//            Reader reader = Files.newBufferedReader(Paths.get(filename), Charset.defaultCharset());
-//            MappingIterator<Transaction> readValues = csvMapper.readerWithSchemaFor(Transaction.class).with(schema).readValues(reader);
-//            transactionList = new ArrayList<>();
-//            while (readValues.hasNext()) {
-//                Transaction current = readValues.next();
-//                transactionList.add(current);
-//            }
-//        } catch (IOException e) {
-//            logger.debug(e.getMessage());
-//            logger.error("Error building TransactionList for batch with instance key {} and batch filename {}", workflowInstanceKey,
-//                    filename);
-//            return;
-//        }
-//
-//        for (Transaction transaction : transactionList) {
-//            Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
-//            transfer.setWorkflowInstanceKey(workflowInstanceKey);
-//
-//            String batchId = "tempDocumentStore.getBatchId(workflowInstanceKey)";
-//            transfer.setBatchId(strip(batchId));
-//            transfer.setCompletedAt(new Date(completeTimestamp));
-//            transfer.setTransactionId(transaction.getRequestId());
-//
-//            transfer.setPayeeDfspId(batch.getPaymentMode());
-////            transfer.setPayerDfspId(ThreadLocalContextUtil.getTenant().getSchemaName());
-//
-//            transfer.setPayeeFeeCurrency(transaction.getCurrency());
-//            transfer.setPayeeFee(BigDecimal.ZERO);
-//            transfer.setPayerFeeCurrency(transaction.getCurrency());
-//            transfer.setPayerFee(BigDecimal.ZERO);
-//
-//            BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
-//            transferRepository.save(transfer);
-//        }
-//
-//    }
+    private void updateTransferTableForBatch(Batch batch, Long workflowInstanceKey, Long completeTimestamp) {
+        String filename = getBatchFileName(workflowInstanceKey);
+        logger.info("Filename {}", filename);
+        if (filename == null) {
+            return;
+        }
+        filename = strip(filename);
+        String localFilePath = fileTransferService.downloadFile(filename, bucketName);
+        if (localFilePath == null) {
+            logger.error("Null localFilePath, Error updating transfer table for batch with instance key {} and batch filename {}",
+                    workflowInstanceKey, filename);
+            return;
+        }
+        List<Transaction> transactionList;
+        try {
+            CsvSchema schema = CsvSchema.emptySchema().withHeader();
+            Reader reader = Files.newBufferedReader(Paths.get(filename), Charset.defaultCharset());
+            MappingIterator<Transaction> readValues = csvMapper.readerWithSchemaFor(Transaction.class).with(schema).readValues(reader);
+            transactionList = new ArrayList<>();
+            while (readValues.hasNext()) {
+                Transaction current = readValues.next();
+                transactionList.add(current);
+            }
+        } catch (IOException e) {
+            logger.debug(e.getMessage());
+            logger.error("Error building TransactionList for batch with instance key {} and batch filename {}", workflowInstanceKey,
+                    filename);
+            return;
+        }
+
+        for (Transaction transaction : transactionList) {
+            Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
+            transfer.setWorkflowInstanceKey(workflowInstanceKey);
+
+            String batchId = getBatchId(workflowInstanceKey);
+            transfer.setBatchId(strip(batchId));
+            transfer.setCompletedAt(new Date(completeTimestamp));
+            transfer.setTransactionId(transaction.getRequestId());
+
+            transfer.setPayeeDfspId(batch.getPaymentMode());
+            transfer.setPayerDfspId(ThreadLocalContextUtil.getTenant().toString());
+
+            transfer.setPayeeFeeCurrency(transaction.getCurrency());
+            transfer.setPayeeFee(BigDecimal.ZERO);
+            transfer.setPayerFeeCurrency(transaction.getCurrency());
+            transfer.setPayerFee(BigDecimal.ZERO);
+
+            BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
+            transferRepository.save(transfer);
+        }
+
+    }
+    public String getBatchFileName(Long workflowKey) {
+        synchronized (workflowKeyBatchFileNameAssociations) {
+            return workflowKeyBatchFileNameAssociations.get(workflowKey);
+        }
+    }
+
+    public void storeBatchId(Long workflowKey, String batchId) {
+        synchronized (workflowKeyBatchFileNameAssociations) {
+            workflowKeyBatchIdAssociations.put(workflowKey, batchId);
+        }
+    }
+
+    public String getBatchId(Long workflowKey) {
+        synchronized (workflowKeyBatchFileNameAssociations) {
+            return workflowKeyBatchIdAssociations.get(workflowKey);
+        }
+    }
+
+    public void storeBatchFileName(Long workflowKey, String filename) {
+        synchronized (workflowKeyBatchFileNameAssociations) {
+            workflowKeyBatchFileNameAssociations.put(workflowKey, filename);
+        }
+    }
 }
