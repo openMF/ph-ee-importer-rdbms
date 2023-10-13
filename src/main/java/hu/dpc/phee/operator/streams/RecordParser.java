@@ -1,6 +1,9 @@
 package hu.dpc.phee.operator.streams;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;
 import hu.dpc.phee.operator.entity.batch.Batch;
 import hu.dpc.phee.operator.entity.batch.BatchRepository;
@@ -14,7 +17,6 @@ import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferRepository;
 import hu.dpc.phee.operator.entity.transfer.TransferStatus;
 import hu.dpc.phee.operator.entity.variable.Variable;
-import hu.dpc.phee.operator.importer.JsonPathReader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -29,6 +31,7 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathFactory;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.Date;
 import java.util.List;
@@ -272,26 +275,22 @@ public class RecordParser {
             }
 
             if (Strings.isNotBlank(transformer.getJsonPath())) {
-                logger.debug("applying jsonpath for variable {}", variableName);
-                DocumentContext json = JsonPathReader.parse(variableValue);
-                Object result = json.read(transformer.getJsonPath());
-                logger.debug("jsonpath result: {} for variable {}", result, variableName);
-
-                String value = null;
-                if (result != null) {
-                    if (result instanceof String) {
-                        value = (String) result;
-                    }
-                    if (result instanceof List) {
-                        value = ((List<?>) result).stream().map(Object::toString).collect(Collectors.joining(" "));
+                try {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    JsonNode jsonNode = objectMapper.readTree(variableValue);
+                    if (jsonNode.isArray()) {
+                        // It's a JSON array
+                        for (JsonNode jsonObject : jsonNode) {
+                            processJsonObject(jsonObject,transformer,object,fieldName,variableName,variableValue);
+                        }
+                    } else if (jsonNode.isObject()) {
+                        // It's a JSON object
+                        processJsonObject(jsonNode,transformer,object,fieldName,variableName,variableValue);
                     } else {
-                        value = result.toString();
+                        System.err.println("Invalid JSON input.");
                     }
-                    PropertyAccessorFactory.forBeanPropertyAccess(object).setPropertyValue(fieldName, value);
-                }
-
-                if (StringUtils.isBlank(value)) {
-                    logger.error("null result when setting field {} from variable {}. Jsonpath: {}, variable value: {}", fieldName, variableName, transformer.getJsonPath(), variableValue);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
                 return;
             }
@@ -314,6 +313,29 @@ public class RecordParser {
 
         } catch (Exception e) {
             logger.error("failed to apply transformer {} to variable {}", transformer, variableName, e);
+        }
+    }
+
+    private void processJsonObject(JsonNode jsonNode, TransferTransformerConfig.Transformer transformer, Object object, String fieldName, String variableName, String variableValue) {
+        DocumentContext document = JsonPath.parse(jsonNode.toString());
+        Object result = document.read(transformer.getJsonPath());
+        logger.info("Results:{}",result);
+
+        String value = null;
+        if (result != null) {
+            if (result instanceof String) {
+                value = (String) result;
+            }
+            if (result instanceof List) {
+                value = ((List<?>) result).stream().map(Object::toString).collect(Collectors.joining(" "));
+            } else {
+                value = result.toString();
+            }
+            PropertyAccessorFactory.forBeanPropertyAccess(object).setPropertyValue(fieldName, value);
+        }
+
+        if (StringUtils.isBlank(value)) {
+            logger.error("null result when setting field {} from variable {}. Jsonpath: {}, variable value: {}", fieldName, variableName, transformer.getJsonPath(), variableValue);
         }
     }
 }

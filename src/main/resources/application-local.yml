@@ -33,48 +33,69 @@ transfer:
       transformers:
         - field: batchId
           variableName: batchId
-        - field: requestId
-          variableName: requestId
+        - field: payerFsp
+          variableName: tenantId
         - field: requestFile
           variableName: filename
         - field: registeringInstitutionId
           variableName: registeringInstituteId
-        - field: note
-          variableName: note
         - field: correlationId
           variableName: clientCorrelationId
+        - field: requestId
+          variableName: transactionList
+          jsonPath: $.request_id
+        - field: note
+          variableName: transactionList
+          jsonPath: $.note
+        - field: paymentMode
+          variableName: transactionList
+          jsonPath: $.payment_mode
     - name: slcb
       direction: UNKNOWN
       type: BATCH
       transformers:
         - field: batchId
           variableName: batchId
-        - field: requestId
-          variableName: requestId
+        - field: payerFsp
+          variableName: tenantId
         - field: requestFile
           variableName: filename
         - field: registeringInstitutionId
           variableName: registeringInstituteId
-        - field: note
-          variableName: note
         - field: correlationId
           variableName: clientCorrelationId
+        - field: requestId
+          variableName: transactionList
+          jsonPath: $.request_id
+        - field: note
+          variableName: transactionList
+          jsonPath: $.note
+        - field: paymentMode
+          variableName: transactionList
+          jsonPath: $.payment_mode
     - name: bulk_connector_closedloop
       direction: UNKNOWN
       type: BATCH
       transformers:
         - field: batchId
           variableName: batchId
-        - field: requestId
-          variableName: requestId
+        - field: payerFsp
+          variableName: tenantId
         - field: requestFile
           variableName: filename
         - field: registeringInstitutionId
           variableName: registeringInstituteId
-        - field: note
-          variableName: note
         - field: correlationId
           variableName: clientCorrelationId
+        - field: requestId
+          variableName: transactionList
+          jsonPath: $.request_id
+        - field: note
+          variableName: transactionList
+          jsonPath: $.note
+        - field: paymentMode
+          variableName: transactionList
+          jsonPath: $.payment_mode
     - name: inbound_transfer_mifos
       direction: INCOMING
       type: TRANSACTION-REQUEST
