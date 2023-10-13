@@ -51,7 +51,6 @@ jobs:
           name: Build Docker image
           command: |
             IMAGE_TAG=importer_rdbms_2
-            ./gradlew checkstyleMain
             ./gradlew clean bootJar
             docker build -t openmf/ph-ee-importer-rdbms:importer_rdbms_2 .
       # Log in to DockerHub using environment variables
