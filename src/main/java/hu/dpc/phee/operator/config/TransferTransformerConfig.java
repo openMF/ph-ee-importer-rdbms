@@ -32,6 +32,7 @@ public class TransferTransformerConfig {
     public static class Flow {
         private String name;
         private String direction;
+        private String type;
         private List<Transformer> transformers;
 
     }

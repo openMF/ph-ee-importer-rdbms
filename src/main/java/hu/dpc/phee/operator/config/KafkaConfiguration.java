@@ -83,6 +83,8 @@ public class KafkaConfiguration {
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, hostname);
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+
+        // These should be added when kafka auth is enabled
 //        properties.put("sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"admin\" password=\"admin\"");
 //        properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 //        properties.put("security.protocol", "SASL_PLAINTEXT");

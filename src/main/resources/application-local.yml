@@ -10,11 +10,382 @@ datasource:
     subprotocol: mysql
     driverclass_name: com.mysql.cj.jdbc.Driver
 
-# The transfer flows will be moved to env-template
+# The transfer flows will be moved to env-labs
 transfer:
   flows:
+    - name: notification
+      direction: OUTGOING
+      type: OUTBOUND_MESSAGES
+      transformers:
+        - field: internalId
+          variableName: internalId
+        - field: response
+          variableName: deliveryMessage
+        - field: message
+          variableName: messageType
+        - field: externalId
+          variableName: transactionId
+        - field: mobileNumber
+          variableName: phoneNumber
+    - name: bulk_processor
+      direction: UNKNOWN
+      type: BATCH
+      transformers:
+        - field: batchId
+          variableName: batchId
+        - field: payerFsp
+          variableName: tenantId
+        - field: requestFile
+          variableName: filename
+        - field: registeringInstitutionId
+          variableName: registeringInstituteId
+        - field: correlationId
+          variableName: clientCorrelationId
+        - field: requestId
+          variableName: transactionList
+          jsonPath: $.request_id
+        - field: note
+          variableName: transactionList
+          jsonPath: $.note
+        - field: paymentMode
+          variableName: transactionList
+          jsonPath: $.payment_mode
+    - name: slcb
+      direction: UNKNOWN
+      type: BATCH
+      transformers:
+        - field: batchId
+          variableName: batchId
+        - field: payerFsp
+          variableName: tenantId
+        - field: requestFile
+          variableName: filename
+        - field: registeringInstitutionId
+          variableName: registeringInstituteId
+        - field: correlationId
+          variableName: clientCorrelationId
+        - field: requestId
+          variableName: transactionList
+          jsonPath: $.request_id
+        - field: note
+          variableName: transactionList
+          jsonPath: $.note
+        - field: paymentMode
+          variableName: transactionList
+          jsonPath: $.payment_mode
+    - name: bulk_connector_closedloop
+      direction: UNKNOWN
+      type: BATCH
+      transformers:
+        - field: batchId
+          variableName: batchId
+        - field: payerFsp
+          variableName: tenantId
+        - field: requestFile
+          variableName: filename
+        - field: registeringInstitutionId
+          variableName: registeringInstituteId
+        - field: correlationId
+          variableName: clientCorrelationId
+        - field: requestId
+          variableName: transactionList
+          jsonPath: $.request_id
+        - field: note
+          variableName: transactionList
+          jsonPath: $.note
+        - field: paymentMode
+          variableName: transactionList
+          jsonPath: $.payment_mode
+    - name: inbound_transfer_mifos
+      direction: INCOMING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
+    - name: inbound_transfer_paygops
+      direction: INCOMING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
+    - name: inbound_transfer_roster
+      direction: INCOMING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
+    - name: inbound_transfer_tupande
+      direction: INCOMING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
+    - name: inbound_transfer_erply
+      direction: INCOMING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
+    - name: PayerTransactionRequest
+      direction: INCOMING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
+    - name: PayeeTransactionRequest
+      direction: OUTGOING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
+    - name: mpesa_flow
+      direction: INCOMING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
+    - name: mpesa_flow_roster
+      direction: INCOMING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
+    - name: mpesa_flow_paygops
+      direction: INCOMING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
+    - name: minimal_mock_transfer_request
+      direction: OUTGOING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.currency
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payer[0].partyIdIdentifier
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee[0].partyIdIdentifier
     - name: PayerFundTransfer
       direction: OUTGOING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -50,6 +421,7 @@ transfer:
           variableName: subBatchId
     - name: PayeeQuoteTransfer
       direction: INCOMING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -85,6 +457,7 @@ transfer:
           variableName: subBatchId
     - name: transferProcess
       direction: UNKNOWN
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -120,6 +493,7 @@ transfer:
           variableName: subBatchId
     - name: international_remittance_payee_process
       direction: OUTGOING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -155,6 +529,7 @@ transfer:
           variableName: subBatchId
     - name: international_remittance_payer_process
       direction: OUTGOING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -190,6 +565,7 @@ transfer:
           variableName: subBatchId
     - name: gsma_base_transaction
       direction: OUTGOING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -225,6 +601,7 @@ transfer:
           variableName: subBatchId
     - name: inbound_transfer_paygops
       direction: INCOMING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -260,6 +637,7 @@ transfer:
           variableName: subBatchId
     - name: inbound_transfer_roster
       direction: INCOMING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -293,8 +671,9 @@ transfer:
           variableName: clientCorrelationId
         - field: subBatchId
           variableName: subBatchId
-    - name: inbound_transfer_mifos
+    - name: PayeeQuoteTransfer
       direction: INCOMING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -328,8 +707,9 @@ transfer:
           variableName: clientCorrelationId
         - field: subBatchId
           variableName: subBatchId
-    - name: inbound_transfer_tupande
-      direction: INCOMING
+    - name: transferProcess
+      direction: UNKNOWN
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -363,8 +743,81 @@ transfer:
           variableName: clientCorrelationId
         - field: subBatchId
           variableName: subBatchId
-    - name: inbound_transfer_erply
-      direction: INCOMING
+    - name: international_remittance_payee_process
+      direction: OUTGOING
+      type: TRANSFER
+      transformers:
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.amount.currency
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer.partyIdInfo.partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: transactionId
+          variableName: transactionId
+        - field: currency
+          variableName: currency
+        - field: batchId
+          variableName: batchId
+        - field: tenantId
+          variableName: tenantId
+        - field: errorInformation
+          variableName: errorInformation
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: subBatchId
+          variableName: subBatchId
+    - name: international_remittance_payer_process
+      direction: OUTGOING
+      type: TRANSFER
+      transformers:
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.amount.currency
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer.partyIdInfo.partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: transactionId
+          variableName: transactionId
+        - field: currency
+          variableName: currency
+        - field: batchId
+          variableName: batchId
+        - field: tenantId
+          variableName: tenantId
+        - field: errorInformation
+          variableName: errorInformation
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: subBatchId
+          variableName: subBatchId
+    - name: gsma_base_transaction
+      direction: OUTGOING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -400,6 +853,7 @@ transfer:
           variableName: subBatchId
     - name: mock_payment_transfer
       direction: OUTGOING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -435,6 +889,7 @@ transfer:
           variableName: subBatchId
     - name: mock_payer_fund_transfer
       direction: OUTGOING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -470,6 +925,7 @@ transfer:
           variableName: subBatchId
     - name: mock_payment_transfer_debit
       direction: OUTGOING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -505,6 +961,7 @@ transfer:
           variableName: subBatchId
     - name: minimal_mock_fund_transfer
       direction: OUTGOING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest
@@ -540,6 +997,259 @@ transfer:
           variableName: subBatchId
     - name: minimal_mock_fund_transfer_account_lookup
       direction: OUTGOING
+      type: TRANSFER
+      transformers:
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.amount.currency
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer.partyIdInfo.partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: transactionId
+          variableName: transactionId
+        - field: currency
+          variableName: currency
+        - field: batchId
+          variableName: batchId
+        - field: tenantId
+          variableName: tenantId
+        - field: errorInformation
+          variableName: errorInformation
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: subBatchId
+          variableName: subBatchId
+    - name: inbound_transfer_tupande
+      direction: INCOMING
+      type: TRANSFER
+      transformers:
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.amount.currency
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer.partyIdInfo.partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: transactionId
+          variableName: transactionId
+        - field: currency
+          variableName: currency
+        - field: batchId
+          variableName: batchId
+        - field: tenantId
+          variableName: tenantId
+        - field: errorInformation
+          variableName: errorInformation
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: subBatchId
+          variableName: subBatchId
+    - name: inbound_transfer_erply
+      direction: INCOMING
+      type: TRANSFER
+      transformers:
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.amount.currency
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer.partyIdInfo.partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: transactionId
+          variableName: transactionId
+        - field: currency
+          variableName: currency
+        - field: batchId
+          variableName: batchId
+        - field: tenantId
+          variableName: tenantId
+        - field: errorInformation
+          variableName: errorInformation
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: subBatchId
+          variableName: subBatchId
+    - name: mock_payment_transfer
+      direction: OUTGOING
+      type: TRANSFER
+      transformers:
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.amount.currency
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer.partyIdInfo.partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: transactionId
+          variableName: transactionId
+        - field: currency
+          variableName: currency
+        - field: batchId
+          variableName: batchId
+        - field: tenantId
+          variableName: tenantId
+        - field: errorInformation
+          variableName: errorInformation
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: subBatchId
+          variableName: subBatchId
+    - name: mock_payer_fund_transfer
+      direction: OUTGOING
+      type: TRANSFER
+      transformers:
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.amount.currency
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer.partyIdInfo.partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: transactionId
+          variableName: transactionId
+        - field: currency
+          variableName: currency
+        - field: batchId
+          variableName: batchId
+        - field: tenantId
+          variableName: tenantId
+        - field: errorInformation
+          variableName: errorInformation
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: subBatchId
+          variableName: subBatchId
+    - name: mock_payment_transfer_debit
+      direction: OUTGOING
+      type: TRANSFER
+      transformers:
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.amount.currency
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer.partyIdInfo.partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: transactionId
+          variableName: transactionId
+        - field: currency
+          variableName: currency
+        - field: batchId
+          variableName: batchId
+        - field: tenantId
+          variableName: tenantId
+        - field: errorInformation
+          variableName: errorInformation
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: subBatchId
+          variableName: subBatchId
+    - name: minimal_mock_fund_transfer
+      direction: OUTGOING
+      type: TRANSFER
+      transformers:
+        - field: amount
+          variableName: channelRequest
+          jsonPath: $.amount.amount
+        - field: currency
+          variableName: channelRequest
+          jsonPath: $.amount.currency
+        - field: payeePartyIdType
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdType
+        - field: payeePartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: payerPartyIdType
+          variableName: channelRequest
+          jsonPath: $.payer.partyIdInfo.partyIdType
+        - field: payerPartyId
+          variableName: channelRequest
+          jsonPath: $.payee.partyIdInfo.partyIdentifier
+        - field: transactionId
+          variableName: transactionId
+        - field: currency
+          variableName: currency
+        - field: batchId
+          variableName: batchId
+        - field: tenantId
+          variableName: tenantId
+        - field: errorInformation
+          variableName: errorInformation
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+        - field: subBatchId
+          variableName: subBatchId
+    - name: minimal_mock_fund_transfer_account_lookup
+      direction: OUTGOING
+      type: TRANSFER
       transformers:
         - field: amount
           variableName: channelRequest

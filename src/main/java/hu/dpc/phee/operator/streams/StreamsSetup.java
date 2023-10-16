@@ -2,19 +2,29 @@ package hu.dpc.phee.operator.streams;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;
+import hu.dpc.phee.operator.entity.batch.BatchRepository;
+import hu.dpc.phee.operator.entity.outboundmessages.OutboundMessagesRepository;
+import hu.dpc.phee.operator.entity.task.Task;
+import hu.dpc.phee.operator.entity.task.TaskRepository;
 import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
-import hu.dpc.phee.operator.entity.transfer.Transfer;
+import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestRepository;
 import hu.dpc.phee.operator.entity.transfer.TransferRepository;
+import hu.dpc.phee.operator.entity.variable.Variable;
+import hu.dpc.phee.operator.entity.variable.VariableRepository;
 import hu.dpc.phee.operator.importer.JsonPathReader;
 import hu.dpc.phee.operator.tenants.TenantsService;
 import jakarta.annotation.PostConstruct;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.kstream.Aggregator;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Merger;
+import org.apache.kafka.streams.kstream.SessionWindows;
+import org.apache.kafka.streams.kstream.Windowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
@@ -26,6 +36,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,7 +44,7 @@ import static org.apache.kafka.common.serialization.Serdes.ListSerde;
 
 @Service
 public class StreamsSetup {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final Serde<String> STRING_SERDE = Serdes.String();
 
     @Value("${importer.kafka.topic}")
@@ -46,9 +57,6 @@ public class StreamsSetup {
     private StreamsBuilder streamsBuilder;
 
     @Autowired
-    private EventParser eventParser;
-
-    @Autowired
     private TransactionTemplate transactionTemplate;
 
     @Autowired
@@ -58,7 +66,25 @@ public class StreamsSetup {
     TransferRepository transferRepository;
 
     @Autowired
+    TransactionRequestRepository transactionRequestRepository;
+
+    @Autowired
+    BatchRepository batchRepository;
+
+    @Autowired
+    OutboundMessagesRepository outboundMessagesRepository;
+
+    @Autowired
     TenantsService tenantsService;
+
+    @Autowired
+    RecordParser recordParser;
+
+    @Autowired
+    VariableRepository variableRepository;
+
+    @Autowired
+    TaskRepository taskRepository;
 
 
     @PostConstruct
@@ -94,9 +120,10 @@ public class StreamsSetup {
         String bpmn;
         String tenantName;
         String first = records.get(0);
+
         DocumentContext sample = JsonPathReader.parse(first);
         try {
-            Pair<String, String> bpmnAndTenant = eventParser.retrieveTenant(sample);
+            Pair<String, String> bpmnAndTenant = retrieveTenant(sample);
             bpmn = bpmnAndTenant.getFirst();
             tenantName = bpmnAndTenant.getSecond();
             logger.trace("resolving tenant server connection for tenant: {}", tenantName);
@@ -112,30 +139,97 @@ public class StreamsSetup {
                 logger.warn("skip saving flow information, no configured flow found for bpmn: {}", bpmn);
                 return;
             }
+            Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
+            String flowType = getTypeForFlow(config);
+
+            logger.info("processing key: {}, records: {}", key, records);
 
             transactionTemplate.executeWithoutResult(status -> {
-                Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
-                MDC.put("transactionId", transfer.getTransactionId());
-                try {
-                    logger.info("processing key: {}, records: {}", key, records);
-                    for (String record : records) {
-                        try {
-                            eventParser.process(bpmn, tenantName, transfer, record);
-                        } catch (Exception e) {
-                            logger.error("failed to parse record: {}", record, e);
+                for (String record : records) {
+                    try {
+                        DocumentContext recordDocument = JsonPathReader.parse(record);
+                        logger.info("from kafka: {}", recordDocument.jsonString());
+
+                        String valueType = recordDocument.read("$.valueType", String.class);
+                        logger.info("processing {} event", valueType);
+
+                        Long workflowKey = recordDocument.read("$.value.processDefinitionKey");
+                        Long workflowInstanceKey = recordDocument.read("$.value.processInstanceKey");
+                        Long timestamp = recordDocument.read("$.timestamp");
+                        String bpmnElementType = recordDocument.read("$.value.bpmnElementType");
+                        String elementId = recordDocument.read("$.value.elementId");
+                        logger.info("Processing document of type {}", valueType);
+
+                        List<Object> entities = switch (valueType) {
+                            case "DEPLOYMENT", "VARIABLE_DOCUMENT", "WORKFLOW_INSTANCE" -> List.of();
+                            case "PROCESS_INSTANCE" -> {
+                                yield recordParser.processWorkflowInstance(recordDocument, bpmn, workflowInstanceKey, timestamp, bpmnElementType, elementId, flowType, sample);
+                            }
+
+                            case "JOB" -> {
+                                yield recordParser.processTask(recordDocument, workflowInstanceKey, valueType, workflowKey, timestamp);
+                            }
+
+                            case "VARIABLE" -> {
+                                yield recordParser.processVariable(recordDocument, bpmn, workflowInstanceKey, workflowKey, timestamp, flowType, sample);
+                            }
+
+                            case "INCIDENT" -> {
+                                yield recordParser.processIncident(timestamp, flowType, bpmn, sample, workflowInstanceKey);
+                            }
+
+                            default -> throw new IllegalStateException("Unexpected event type: " + valueType);
+                        };
+                        if (entities.size() != 0) {
+                            logger.info("Saving {} entities", entities.size());
+                            entities.forEach(entity -> {
+                                if (entity instanceof Variable) {
+                                    variableRepository.save((Variable) entity);
+                                } else if (entity instanceof Task) {
+                                    taskRepository.save((Task) entity);
+                                } else {
+                                    throw new IllegalStateException("Unexpected entity type: " + entity.getClass());
+                                }
+                            });
                         }
+                    } catch (Exception e) {
+                        logger.error("failed to parse record: {}", record, e);
                     }
-                    transferRepository.save(transfer);
-                } finally {
-                    MDC.clear();
                 }
             });
-
         } catch (Exception e) {
             logger.error("failed to process batch", e);
 
         } finally {
             ThreadLocalContextUtil.clear();
         }
+    }
+
+    private String getTypeForFlow(Optional<TransferTransformerConfig.Flow> config) {
+        return config.map(TransferTransformerConfig.Flow::getType).orElse(null);
+    }
+
+    public Pair<String, String> retrieveTenant(DocumentContext record) {
+        String bpmnProcessIdWithTenant = findBpmnProcessId(record);
+
+        String[] split = bpmnProcessIdWithTenant.split("-");
+        if (split.length < 2) {
+            throw new RuntimeException("Invalid bpmnProcessId, has no tenant information: '" + bpmnProcessIdWithTenant + "'");
+        }
+        return Pair.of(split[0], split[1]);
+    }
+
+    private String findBpmnProcessId(DocumentContext record) {
+        String bpmnProcessIdWithTenant = record.read("$.value.bpmnProcessId", String.class);
+        if (bpmnProcessIdWithTenant == null) {
+            logger.warn("can't find bpmnProcessId in record: {}, trying alternative ways..", record.jsonString());
+            List<String> ids = record.read("$.value..bpmnProcessId", List.class);
+            if (ids.size() > 1) {
+                throw new RuntimeException("Invalid bpmnProcessIdWithTenant, has more than one bpmnProcessIds: '" + ids + "'");
+            }
+            bpmnProcessIdWithTenant = ids.get(0);
+        }
+        logger.debug("resolved bpmnProcessIdWithTenant: {}", bpmnProcessIdWithTenant);
+        return bpmnProcessIdWithTenant;
     }
 }
