@@ -1,5 +1,5 @@
 kafka:
-  brokers: "kafka:9092"
+  brokers: "kafkanew:9092"
   consumer-group: ch1
 #  To be used when auth is enabled in kafka
 #  username: "admin"
@@ -7,7 +7,7 @@ kafka:
 
 importer:
   kafka:
-    topic: "zeebe-export"
+    topic: "zeebe-export-test"
     reset: true
     aggreation-window-seconds: 2
 
