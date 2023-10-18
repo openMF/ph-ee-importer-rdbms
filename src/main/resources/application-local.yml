@@ -45,10 +45,14 @@ transfer:
           variableName: tenantId
         - field: requestFile
           variableName: filename
+        - field: resultFile
+          variableName: filename
         - field: registeringInstitutionId
           variableName: registeringInstituteId
         - field: correlationId
           variableName: clientCorrelationId
+        - field: requestId
+          variableName: requestId
         - field: requestId
           variableName: transactionList
           jsonPath: $.request_id
@@ -68,10 +72,14 @@ transfer:
           variableName: tenantId
         - field: requestFile
           variableName: filename
+        - field: resultFile
+          variableName: filename
         - field: registeringInstitutionId
           variableName: registeringInstituteId
         - field: correlationId
           variableName: clientCorrelationId
+        - field: requestId
+          variableName: requestId
         - field: requestId
           variableName: transactionList
           jsonPath: $.request_id
@@ -91,10 +99,14 @@ transfer:
           variableName: tenantId
         - field: requestFile
           variableName: filename
+        - field: resultFile
+          variableName: filename
         - field: registeringInstitutionId
           variableName: registeringInstituteId
         - field: correlationId
           variableName: clientCorrelationId
+        - field: requestId
+          variableName: requestId
         - field: requestId
           variableName: transactionList
           jsonPath: $.request_id
