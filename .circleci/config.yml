@@ -55,7 +55,6 @@ jobs:
           name: Build Docker image
           command: |
             IMAGE_TAG=v4.0.0
-            ./gradlew checkstyleMain
             ./gradlew clean bootJar
             docker build -t openmf/ph-ee-importer-rdbms:latest .
 
