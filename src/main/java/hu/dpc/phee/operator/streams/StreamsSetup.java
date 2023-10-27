@@ -181,7 +181,7 @@ public class StreamsSetup {
                             default -> throw new IllegalStateException("Unexpected event type: " + valueType);
                         };
                         if (entities.size() != 0) {
-                            logger.info("Saving {} entities", entities.size());
+                            logger.debug("Saving {} entities", entities.size());
                             entities.forEach(entity -> {
                                 if (entity instanceof Variable) {
                                     variableRepository.save((Variable) entity);
@@ -198,7 +198,7 @@ public class StreamsSetup {
                 }
             });
         } catch (Exception e) {
-            logger.error("failed to process batch", e);
+            logger.error("failed to process entity", e);
 
         } finally {
             ThreadLocalContextUtil.clear();
