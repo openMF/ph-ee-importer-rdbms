@@ -63,7 +63,6 @@ public class InflightBatchManager {
 
     public Batch retrieveOrCreateBatch(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
-        Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
         Batch batch = batchRepository.findByWorkflowInstanceKey(processInstanceKey);
         if (batch == null) {
             logger.debug("creating new Batch for processInstanceKey: {}", processInstanceKey);

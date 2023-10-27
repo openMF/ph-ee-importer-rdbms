@@ -19,14 +19,22 @@ transfer:
       transformers:
         - field: internalId
           variableName: internalId
+        - field: tenantId
+          variableName: tenantId
         - field: response
           variableName: deliveryMessage
         - field: message
           variableName: messageType
         - field: externalId
-          variableName: transactionId
+          variableName: externalId
         - field: mobileNumber
           variableName: phoneNumber
+        - field: deliveryStatus
+          variableName: deliveryStatus
+        - field: message
+          variableName: deliveryMessage
+        - field: bridgeId
+          variableName: bridgeId
     - name: bulk_processor
       direction: UNKNOWN
       type: BATCH
@@ -37,10 +45,14 @@ transfer:
           variableName: tenantId
         - field: requestFile
           variableName: filename
+        - field: resultFile
+          variableName: filename
         - field: registeringInstitutionId
           variableName: registeringInstituteId
         - field: correlationId
           variableName: clientCorrelationId
+        - field: requestId
+          variableName: requestId
         - field: requestId
           variableName: transactionList
           jsonPath: $.request_id
@@ -60,10 +72,14 @@ transfer:
           variableName: tenantId
         - field: requestFile
           variableName: filename
+        - field: resultFile
+          variableName: filename
         - field: registeringInstitutionId
           variableName: registeringInstituteId
         - field: correlationId
           variableName: clientCorrelationId
+        - field: requestId
+          variableName: requestId
         - field: requestId
           variableName: transactionList
           jsonPath: $.request_id
@@ -83,10 +99,14 @@ transfer:
           variableName: tenantId
         - field: requestFile
           variableName: filename
+        - field: resultFile
+          variableName: filename
         - field: registeringInstitutionId
           variableName: registeringInstituteId
         - field: correlationId
           variableName: clientCorrelationId
+        - field: requestId
+          variableName: requestId
         - field: requestId
           variableName: transactionList
           jsonPath: $.request_id
