@@ -59,7 +59,6 @@ public class TenantsService implements DisposableBean {
 
         this.tenantConnectionProperties = tenantConnectionList.getConnections().stream()
                 .collect(Collectors.toMap(TenantConnectionProperties::getName, it -> it));
-        logger.info("loaded {} tenant config properties: {}", tenantConnectionProperties.size(), tenantConnectionProperties);
 
         tenantConnectionProperties.forEach((name, properties) -> {
             logger.info("Creating datasource for tenant {}", name);
@@ -110,7 +109,6 @@ public class TenantsService implements DisposableBean {
         config.setMaximumPoolSize(20);
         config.setMinimumIdle(5);
         config.setPoolName(tenant.getSchemaName() + "Pool");
-        logger.info("Hikari pool created for tenant: {}", tenant);
         return new HikariDataSource(config);
     }
 
