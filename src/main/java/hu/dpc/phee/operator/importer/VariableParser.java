@@ -2,9 +2,12 @@ package hu.dpc.phee.operator.importer;
 
 import static hu.dpc.phee.operator.OperatorUtils.strip;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.OperatorUtils;
 import hu.dpc.phee.operator.entity.batch.Batch;
+import hu.dpc.phee.operator.entity.batch.BatchRepository;
 import hu.dpc.phee.operator.entity.outboundmessages.OutboudMessages;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequest;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestState;
@@ -13,11 +16,14 @@ import hu.dpc.phee.operator.entity.transfer.TransferStatus;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
@@ -30,7 +36,8 @@ public class VariableParser {
 
     @Value("${bpmn.outgoing-direction}")
     private String outgoingDirection;
-
+    @Autowired
+    private BatchRepository batchRepository;
     private final Logger logger = LoggerFactory.getLogger(VariableParser.class);
     private final Map<String, Consumer<Pair<Transfer, String>>> transferParsers = new HashMap<>();
     private final Map<String, Consumer<Pair<TransactionRequest, String>>> transactionRequestParsers = new HashMap<>();
@@ -99,6 +106,13 @@ public class VariableParser {
         batchParsers.put("registeringInstituteId", pair -> pair.getFirst().setRegisteringInstitutionId(pair.getSecond()));
         batchParsers.put("payerIdentifier", pair -> pair.getFirst().setPayerFsp(pair.getSecond()));
         batchParsers.put("clientCorrelationId", pair -> pair.getFirst().setCorrelationId(pair.getSecond()));
+        batchParsers.put("subBatchDetails", pair -> {
+            try {
+                parseSubBatchDetails(pair.getSecond());
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         outboundMessageParsers.put("tenantId", pair -> pair.getFirst().setTenantId(Long.parseLong(pair.getSecond())));
         outboundMessageParsers.put("externalId", pair -> pair.getFirst().setExternalId(strip(pair.getSecond())));
@@ -109,6 +123,13 @@ public class VariableParser {
         outboundMessageParsers.put("phoneNumber", pair -> pair.getFirst().setMobileNumber(strip(pair.getSecond())));
         outboundMessageParsers.put("deliveryMessage", pair -> pair.getFirst().setMessage(strip(pair.getSecond())));
         outboundMessageParsers.put("bridgeId", pair -> pair.getFirst().setBridgeId(Long.parseLong(pair.getSecond())));
+    }
+    public void parseSubBatchDetails(String jsonString) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Batch> batches = Arrays.asList(objectMapper.readValue(jsonString,Batch[].class));
+        for(Batch bt: batches){
+            batchRepository.save(bt);
+        }
     }
 
     public Map<String, Consumer<Pair<Transfer, String>>> getTransferParsers() {
