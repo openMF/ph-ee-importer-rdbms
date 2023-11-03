@@ -124,10 +124,11 @@ public class VariableParser {
         outboundMessageParsers.put("deliveryMessage", pair -> pair.getFirst().setMessage(strip(pair.getSecond())));
         outboundMessageParsers.put("bridgeId", pair -> pair.getFirst().setBridgeId(Long.parseLong(pair.getSecond())));
     }
+
     public void parseSubBatchDetails(String jsonString) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        List<Batch> batches = Arrays.asList(objectMapper.readValue(jsonString,Batch[].class));
-        for(Batch bt: batches){
+        List<Batch> batches = Arrays.asList(objectMapper.readValue(jsonString, Batch[].class));
+        for (Batch bt : batches) {
             batchRepository.save(bt);
         }
     }
