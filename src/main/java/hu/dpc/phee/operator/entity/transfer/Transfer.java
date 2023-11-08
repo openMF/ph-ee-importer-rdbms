@@ -1,15 +1,17 @@
 package hu.dpc.phee.operator.entity.transfer;
 
-
-import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
+import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
+import java.math.BigDecimal;
+import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
-
-import java.math.BigDecimal;
-import java.util.Date;
 
 @Entity
 @Table(name = "transfers")
@@ -91,12 +93,15 @@ public class Transfer {
 
     @Column(name = "PAYMENT_STATUS")
     private String paymentStatus;
+    @Column(name = "SUB_BATCH_ID")
+    private String subBatchId;
 
     @Column(name = "CLIENTCORRELATIONID")
     private String clientCorrelationId;
 
     @Column(name = "SUB_BATCH_ID")
     private String subBatchId;
+    public Transfer() {}
 
     public Transfer(Long workflowInstanceKey) {
         this.workflowInstanceKey = workflowInstanceKey;

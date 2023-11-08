@@ -20,16 +20,14 @@ package hu.dpc.phee.operator.entity.tenant;
 
 import com.zaxxer.hikari.HikariDataSource;
 import hu.dpc.phee.operator.tenants.TenantsService;
+import java.util.HashMap;
+import java.util.Map;
+import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
-
 
 @Service
 public class DataSourcePerTenantService implements DisposableBean {

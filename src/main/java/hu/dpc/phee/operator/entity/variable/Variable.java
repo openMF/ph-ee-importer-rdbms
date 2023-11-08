@@ -1,8 +1,11 @@
 package hu.dpc.phee.operator.entity.variable;
 
-
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
-import jakarta.persistence.*;
+import javax.persistence.Cacheable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Lob;
+import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,9 +1,9 @@
 package hu.dpc.phee.operator.entity.businesskey;
 
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import org.eclipse.persistence.annotations.Index;
 
 @Entity

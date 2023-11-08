@@ -1,14 +1,13 @@
 package hu.dpc.phee.operator.config;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.persistence.logging.AbstractSessionLog;
 import org.eclipse.persistence.logging.SessionLog;
 import org.eclipse.persistence.logging.SessionLogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This is a wrapper class for SLF4J. It is used when messages need to be logged through SLF4J.
@@ -24,7 +23,6 @@ public class EclipselinkLogger extends AbstractSessionLog {
     private Map<String, Logger> categoryLoggers = new HashMap<>();
 
     public EclipselinkLogger() {
-        super();
         createCategoryLoggers();
         initMapLevels();
     }
@@ -46,21 +44,21 @@ public class EclipselinkLogger extends AbstractSessionLog {
         switch (logLevel) {
             case TRACE:
                 logger.trace(finalMesssage);
-                break;
+            break;
             case DEBUG:
                 logger.debug(finalMesssage);
-                break;
+            break;
             case INFO:
                 logger.info(finalMesssage);
-                break;
+            break;
             case WARN:
                 logger.warn(finalMesssage);
-                break;
+            break;
             case ERROR:
                 logger.error(finalMesssage);
-                break;
+            break;
             default:
-                break;
+            break;
         }
     }
 
@@ -73,21 +71,21 @@ public class EclipselinkLogger extends AbstractSessionLog {
         switch (logLevel) {
             case TRACE:
                 resp = logger.isTraceEnabled();
-                break;
+            break;
             case DEBUG:
                 resp = logger.isDebugEnabled();
-                break;
+            break;
             case INFO:
                 resp = logger.isInfoEnabled();
-                break;
+            break;
             case WARN:
                 resp = logger.isWarnEnabled();
-                break;
+            break;
             case ERROR:
                 resp = logger.isErrorEnabled();
-                break;
+            break;
             default:
-                break;
+            break;
         }
         return resp;
     }
@@ -123,8 +121,7 @@ public class EclipselinkLogger extends AbstractSessionLog {
      * INTERNAL: Add Logger to the categoryLoggers.
      */
     private void addLogger(String loggerCategory, String loggerNameSpace) {
-        categoryLoggers.put(loggerCategory,
-                LoggerFactory.getLogger(loggerNameSpace));
+        categoryLoggers.put(loggerCategory, LoggerFactory.getLogger(loggerNameSpace));
     }
 
     /**

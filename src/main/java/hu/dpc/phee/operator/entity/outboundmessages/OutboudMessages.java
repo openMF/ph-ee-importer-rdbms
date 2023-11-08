@@ -12,10 +12,16 @@ import jakarta.persistence.TemporalType;
 import lombok.Data;
 
 import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "m_outbound_messages")
 public class OutboudMessages extends AbstractPersistableCustom<Long> {
+
     @com.fasterxml.jackson.annotation.JsonIgnore
     @Column(name = "tenant_id", nullable = false)
     private Long tenantId;
@@ -52,8 +58,7 @@ public class OutboudMessages extends AbstractPersistableCustom<Long> {
     @Column(name = "sms_bridge_id", nullable = false)
     private Long bridgeId;
 
-    public OutboudMessages() {
-    }
+    public OutboudMessages() {}
 
     public OutboudMessages(Long workflowInstanceKey) {
         this.internalId = workflowInstanceKey;

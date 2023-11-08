@@ -10,7 +10,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx512m
       TERM: dumb
-      GITHUB_TOKEN: ${GITHUB_TOKEN} # Add the GitHub token as an environment variable
+      GITHUB_TOKEN: ${GITHUB_TOKEN}  # Add the GitHub token as an environment variable
 
     steps:
       - checkout
@@ -50,9 +50,11 @@ jobs:
       - run:
           name: Build Docker image
           command: |
-            IMAGE_TAG=importer_rdbms_2
+            IMAGE_TAG=$CIRCLE_TAG
+            ./gradlew checkstyleMain
             ./gradlew clean bootJar
-            docker build -t openmf/ph-ee-importer-rdbms:importer_rdbms_2 .
+            docker build -t openmf/ph-ee-importer-rdbms:latest .
+
       # Log in to DockerHub using environment variables
       - run:
           name: Login to DockerHub
@@ -61,7 +63,7 @@ jobs:
       # Push the Docker image to DockerHub
       - run:
           name: Push Docker image to DockerHub
-          command: docker push openmf/ph-ee-importer-rdbms:importer_rdbms_2
+          command: docker push openmf/ph-ee-importer-rdbms:latest
 
 workflows:
   version: 2
@@ -75,4 +77,4 @@ workflows:
             - DOCKER
       - build_and_push_latest_image:
           context:
-            - DOCKER
+              - DOCKER

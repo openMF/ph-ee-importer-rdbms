@@ -4,7 +4,6 @@ import hu.dpc.phee.operator.entity.batch.Batch;
 import hu.dpc.phee.operator.entity.batch.Transaction;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferStatus;
-
 import java.math.BigDecimal;
 import java.util.Objects;
 

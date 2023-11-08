@@ -2,11 +2,10 @@ package hu.dpc.phee.operator.entity.transfer;
 
 import hu.dpc.phee.operator.entity.task.Task;
 import hu.dpc.phee.operator.entity.variable.Variable;
-
 import java.util.List;
 
-
 public class TransferDetail {
+
     private Transfer transfer;
     private List<Task> tasks;
     private List<Variable> variables;

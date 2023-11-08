@@ -1,16 +1,15 @@
 package hu.dpc.phee.operator.entity.transactionrequest;
 
-import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import static hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestState.IN_PROGRESS;
 
+import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
 import java.math.BigDecimal;
 import java.util.Date;
-
-import static hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestState.IN_PROGRESS;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "transaction_requests")

@@ -20,9 +20,9 @@ package hu.dpc.phee.operator.entity.tenant;
 
 import org.springframework.util.Assert;
 
-import javax.sql.DataSource;
+public final class ThreadLocalContextUtil {
 
-public class ThreadLocalContextUtil {
+    private ThreadLocalContextUtil() {}
 
     private static final ThreadLocal<DataSource> tenantcontext = new ThreadLocal<>();
 

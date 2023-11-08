@@ -1,5 +1,10 @@
 package hu.dpc.phee.operator.config;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -50,7 +55,7 @@ public class KafkaConfiguration {
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
-        factory.setConcurrency(3);  // TODO externalize
+        factory.setConcurrency(3); // TODO externalize
         factory.getContainerProperties().setPollTimeout(3000); // TODO externalize
 
         return factory;

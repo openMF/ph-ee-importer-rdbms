@@ -19,14 +19,15 @@
 package hu.dpc.phee.operator.entity.parent;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import java.io.Serializable;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import org.springframework.data.domain.Persistable;
 
-import java.io.Serializable;
-
-
 @MappedSuperclass
-public abstract class AbstractPersistableCustom<PK extends Serializable> implements Persistable<Long> {
+public abstract class AbstractPersistableCustom<K extends Serializable> implements Persistable<Long> {
 
     @Id
     @Column(name = "ID")
