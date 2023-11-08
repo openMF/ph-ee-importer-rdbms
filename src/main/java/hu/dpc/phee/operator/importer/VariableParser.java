@@ -21,14 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
-
-import javax.transaction.Transactional;
 
 @Component
 public class VariableParser {
@@ -126,6 +125,7 @@ public class VariableParser {
         outboundMessageParsers.put("deliveryMessage", pair -> pair.getFirst().setMessage(strip(pair.getSecond())));
         outboundMessageParsers.put("bridgeId", pair -> pair.getFirst().setBridgeId(Long.parseLong(pair.getSecond())));
     }
+
     @Transactional
     public void parseSubBatchDetails(String jsonString) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
