@@ -1,5 +1,8 @@
 package hu.dpc.phee.operator.streams;
 
+import com.baasflow.commons.events.EventService;
+import com.baasflow.commons.events.EventStatus;
+import com.baasflow.commons.events.EventType;
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;
 import hu.dpc.phee.operator.entity.task.Task;
@@ -27,6 +30,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -45,6 +49,9 @@ public class EventParser {
 
     @Autowired
     TransferTransformerConfig transferTransformerConfig;
+
+    @Autowired
+    EventService eventService;
 
     private DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
     private XPathFactory xPathFactory = XPathFactory.newInstance();
@@ -179,6 +186,18 @@ public class EventParser {
                 logger.warn("failing Transfer {} based on incident event", transfer.getTransactionId());
                 transfer.setStatus(TransferStatus.EXCEPTION);
                 transfer.setCompletedAt(new Date(timestamp));
+
+                eventService.sendEvent(event -> event
+                        .setEventType(EventType.audit)
+                        .setEvent("Incident event received for flow")
+                        .setEventStatus(EventStatus.failure)
+                        .setCorrelationIds(Map.of(
+                                "internalCorrelationId", transfer.getTransactionId(),
+                                "processInstanceId", transfer.getWorkflowInstanceKey().toString()
+                        ))
+                        .setPayload(rawData)
+                        .setPayloadType("string")
+                );
                 yield List.of();
             }
 

@@ -55,3 +55,6 @@ cloud:
     region:
       static: us-east-2
 
+baasflow:
+  events:
+    disabled: "true"

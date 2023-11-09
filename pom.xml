@@ -36,6 +36,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.baasflow.events</groupId>
+            <artifactId>baasflow-events-spring-boot-starter</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.26</version>
