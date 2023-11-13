@@ -113,6 +113,7 @@ public class EventParser {
         Long workflowInstanceKey = record.read("$.value.processInstanceKey");
         Long timestamp = record.read("$.timestamp");
         String bpmnElementType = record.read("$.value.bpmnElementType");
+        String bpmnEventType = record.read("$.value.bpmnEventType");
         String elementId = record.read("$.value.elementId");
 
         List<Object> entities = switch (valueType) {
@@ -131,6 +132,15 @@ public class EventParser {
 
                     logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
                     constantTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
+                    yield List.of(new Task()
+                            .withWorkflowInstanceKey(workflowInstanceKey)
+                            .withWorkflowKey(workflowKey)
+                            .withTimestamp(timestamp)
+                            .withIntent(intent)
+                            .withRecordType(recordType)
+                            .withType("START_FLOW")
+                            .withElementId(elementId)
+                    );
                 }
 
                 if ("EVENT".equals(recordType) && "END_EVENT".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
@@ -141,6 +151,55 @@ public class EventParser {
                     } else {
                         transfer.setStatus(TransferStatus.COMPLETED);
                     }
+
+                    yield List.of(new Task()
+                            .withWorkflowInstanceKey(workflowInstanceKey)
+                            .withWorkflowKey(workflowKey)
+                            .withTimestamp(timestamp)
+                            .withIntent(intent)
+                            .withRecordType(recordType)
+                            .withType("END_FLOW")
+                            .withElementId(elementId)
+                    );
+                }
+
+                if ("EVENT".equals(recordType) && "EXCLUSIVE_GATEWAY".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
+                    logger.info("exclusive gateway completed for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
+                    yield List.of(new Task()
+                            .withWorkflowInstanceKey(workflowInstanceKey)
+                            .withWorkflowKey(workflowKey)
+                            .withTimestamp(timestamp)
+                            .withIntent(intent)
+                            .withRecordType(recordType)
+                            .withType("EXCLUSIVE_GATEWAY")
+                            .withElementId(elementId)
+                    );
+                }
+
+                if ("EVENT".equals(recordType) && "TIMER".equals(bpmnEventType) && "ELEMENT_ACTIVATED".equals(intent)) {
+                    logger.info("timer event for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
+                    yield List.of(new Task()
+                            .withWorkflowInstanceKey(workflowInstanceKey)
+                            .withWorkflowKey(workflowKey)
+                            .withTimestamp(timestamp)
+                            .withIntent(intent)
+                            .withRecordType(recordType)
+                            .withType("TIMER")
+                            .withElementId(elementId)
+                    );
+                }
+
+                if ("EVENT".equals(recordType) && "MESSAGE".equals(bpmnEventType) && "ELEMENT_ACTIVATED".equals(intent)) {
+                    logger.info("message event for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
+                    yield List.of(new Task()
+                            .withWorkflowInstanceKey(workflowInstanceKey)
+                            .withWorkflowKey(workflowKey)
+                            .withTimestamp(timestamp)
+                            .withIntent(intent)
+                            .withRecordType(recordType)
+                            .withType("MESSAGE")
+                            .withElementId(elementId)
+                    );
                 }
 
                 yield List.of();
@@ -154,21 +213,13 @@ public class EventParser {
                             .withIntent(record.read("$.intent", String.class))
                             .withRecordType(valueType)
                             .withType(record.read("$.value.type", String.class))
-                            .withElementId(record.read("$.value.elementId", String.class))
+                            .withElementId(elementId)
             );
 
             case "VARIABLE" -> {
                 String variableName = record.read("$.value.name", String.class);
                 String variableValue = record.read("$.value.value", String.class);
                 String value = variableValue.startsWith("\"") && variableValue.endsWith("\"") ? StringEscapeUtils.unescapeJson(variableValue.substring(1, variableValue.length() - 1)) : variableValue;
-
-                List<Object> results = List.of(
-                        new Variable()
-                                .withWorkflowInstanceKey(workflowInstanceKey)
-                                .withName(variableName)
-                                .withWorkflowKey(workflowKey)
-                                .withTimestamp(timestamp)
-                                .withValue(value));
 
                 logger.debug("finding transformers for bpmn: {} and variable: {}", bpmn, variableName);
                 List<TransferTransformerConfig.Transformer> matchingTransformers = transferTransformerConfig.getFlows().stream()
@@ -179,7 +230,13 @@ public class EventParser {
 
                 matchingTransformers.forEach(transformer -> applyTransformer(transfer, variableName, value, transformer));
 
-                yield results;
+                yield List.of(
+                        new Variable()
+                                .withWorkflowInstanceKey(workflowInstanceKey)
+                                .withName(variableName)
+                                .withWorkflowKey(workflowKey)
+                                .withTimestamp(timestamp)
+                                .withValue(value));
             }
 
             case "INCIDENT" -> {
@@ -187,17 +244,7 @@ public class EventParser {
                 transfer.setStatus(TransferStatus.EXCEPTION);
                 transfer.setCompletedAt(new Date(timestamp));
 
-                eventService.sendEvent(event -> event
-                        .setEventType(EventType.audit)
-                        .setEvent("Incident event received for flow")
-                        .setEventStatus(EventStatus.failure)
-                        .setCorrelationIds(Map.of(
-                                "internalCorrelationId", transfer.getTransactionId(),
-                                "processInstanceId", transfer.getWorkflowInstanceKey().toString()
-                        ))
-                        .setPayload(rawData)
-                        .setPayloadType("string")
-                );
+                sendIncidentAuditlog(transfer, rawData);
                 yield List.of();
             }
 
@@ -217,6 +264,20 @@ public class EventParser {
             });
             transferRepository.save(transfer);
         }
+    }
+
+    private void sendIncidentAuditlog(Transfer transfer, String rawData) {
+        eventService.sendEvent(event -> event
+                .setEventType(EventType.audit)
+                .setEvent("Incident event received for flow")
+                .setEventStatus(EventStatus.failure)
+                .setCorrelationIds(Map.of(
+                        "internalCorrelationId", transfer.getTransactionId(),
+                        "processInstanceId", transfer.getWorkflowInstanceKey().toString()
+                ))
+                .setPayload(rawData)
+                .setPayloadType("string")
+        );
     }
 
     private void applyTransformer(Transfer transfer, String variableName, String variableValue, TransferTransformerConfig.Transformer transformer) {
