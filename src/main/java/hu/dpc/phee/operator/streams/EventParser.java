@@ -22,6 +22,7 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -59,6 +60,9 @@ public class EventParser {
 
     public Pair<String, String> retrieveTenant(DocumentContext record) {
         String bpmnProcessIdWithTenant = findBpmnProcessId(record);
+        if (ObjectUtils.isEmpty(bpmnProcessIdWithTenant)) {
+            throw new RuntimeException("can't find bpmnProcessId in record: " + record.jsonString());
+        }
 
         String[] split = bpmnProcessIdWithTenant.split("-");
         if (split.length < 2) {
