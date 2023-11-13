@@ -91,28 +91,16 @@ public class StreamsSetup {
             return;
         }
 
-        String bpmn;
-        String tenantName;
-        String firstValid = "";
-        DocumentContext sample = null;
-        
-        for (String record : records) {
-            sample = JsonPathReader.parse(record);
-            if ("EXPIRED".equals(sample.read("$.intent"))) {
-                logger.debug("skipping expired record: {}", record);
-                continue;
-            }
-            firstValid = record;
-            break;
-        }
-
+        String firstValid = findFirstNonExpiredRecord(records);
         if (firstValid.isEmpty()) {
             logger.debug("skipping processing, all records are expired for key: {}", key);
             return;
         }
 
+        String bpmn;
+        String tenantName;
+        DocumentContext sample = JsonPathReader.parse(firstValid);
         try {
-
             Pair<String, String> bpmnAndTenant = eventParser.retrieveTenant(sample);
             bpmn = bpmnAndTenant.getFirst();
             tenantName = bpmnAndTenant.getSecond();
@@ -154,5 +142,20 @@ public class StreamsSetup {
         } finally {
             ThreadLocalContextUtil.clear();
         }
+    }
+
+    private String findFirstNonExpiredRecord(List<String> records) {
+        String firstValid = "";
+
+        for (String record : records) {
+            DocumentContext sample = JsonPathReader.parse(record);
+            if ("EXPIRED".equals(sample.read("$.intent"))) {
+                logger.debug("skipping expired record: {}", record);
+                continue;
+            }
+            firstValid = record;
+            break;
+        }
+        return firstValid;
     }
 }
