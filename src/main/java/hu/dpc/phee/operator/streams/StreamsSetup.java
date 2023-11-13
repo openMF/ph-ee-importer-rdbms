@@ -93,9 +93,26 @@ public class StreamsSetup {
 
         String bpmn;
         String tenantName;
-        String first = records.get(0);
-        DocumentContext sample = JsonPathReader.parse(first);
+        String firstValid = "";
+        DocumentContext sample = null;
+        
+        for (String record : records) {
+            sample = JsonPathReader.parse(record);
+            if ("EXPIRED".equals(sample.read("$.intent"))) {
+                logger.debug("skipping expired record: {}", record);
+                continue;
+            }
+            firstValid = record;
+            break;
+        }
+
+        if (firstValid.isEmpty()) {
+            logger.debug("skipping processing, all records are expired for key: {}", key);
+            return;
+        }
+
         try {
+
             Pair<String, String> bpmnAndTenant = eventParser.retrieveTenant(sample);
             bpmn = bpmnAndTenant.getFirst();
             tenantName = bpmnAndTenant.getSecond();
@@ -103,7 +120,7 @@ public class StreamsSetup {
             DataSource tenant = tenantsService.getTenantDataSource(tenantName);
             ThreadLocalContextUtil.setTenant(tenant);
         } catch (Exception e) {
-            logger.error("failed to process first record: {}, skipping whole batch", first, e);
+            logger.error("failed to process first valid record: {}, skipping whole batch", firstValid, e);
             return;
         }
 

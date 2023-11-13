@@ -136,15 +136,16 @@ public class EventParser {
 
                     logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
                     constantTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
-                    yield List.of(new Task()
-                            .withWorkflowInstanceKey(workflowInstanceKey)
-                            .withWorkflowKey(workflowKey)
-                            .withTimestamp(timestamp)
-                            .withIntent(intent)
-                            .withRecordType(recordType)
-                            .withType("START_FLOW")
-                            .withElementId(elementId)
-                    );
+//                    yield List.of(new Task()
+//                            .withWorkflowInstanceKey(workflowInstanceKey)
+//                            .withWorkflowKey(workflowKey)
+//                            .withTimestamp(timestamp)
+//                            .withIntent(intent)
+//                            .withRecordType(recordType)
+//                            .withType("START_FLOW")
+//                            .withElementId(elementId)
+//                    );
+                    yield List.of();
                 }
 
                 if ("EVENT".equals(recordType) && "END_EVENT".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
@@ -156,15 +157,16 @@ public class EventParser {
                         transfer.setStatus(TransferStatus.COMPLETED);
                     }
 
-                    yield List.of(new Task()
-                            .withWorkflowInstanceKey(workflowInstanceKey)
-                            .withWorkflowKey(workflowKey)
-                            .withTimestamp(timestamp)
-                            .withIntent(intent)
-                            .withRecordType(recordType)
-                            .withType("END_FLOW")
-                            .withElementId(elementId)
-                    );
+                    yield List.of();
+//                    yield List.of(new Task()
+//                            .withWorkflowInstanceKey(workflowInstanceKey)
+//                            .withWorkflowKey(workflowKey)
+//                            .withTimestamp(timestamp)
+//                            .withIntent(intent)
+//                            .withRecordType(recordType)
+//                            .withType("END_FLOW")
+//                            .withElementId(elementId)
+//                    );
                 }
 
                 if ("EVENT".equals(recordType) && "EXCLUSIVE_GATEWAY".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
