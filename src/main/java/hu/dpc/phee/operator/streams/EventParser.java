@@ -74,8 +74,8 @@ public class EventParser {
             logger.warn("can't find bpmnProcessId in record: {}, trying alternative ways..", record.jsonString());
             List<String> ids = record.read("$.value..bpmnProcessId", List.class);
             ids = ids.stream().filter(Objects::nonNull).toList();
-            if (ids.size() > 1) {
-                throw new RuntimeException("Invalid bpmnProcessIdWithTenant, has more than one bpmnProcessIds: '" + ids + "' in record: " + record.jsonString());
+            if (ids.size() != 1) {
+                throw new RuntimeException("Invalid bpmnProcessIdWithTenant, has " + ids.size() + " bpmnProcessIds: '" + ids + "' in record: " + record.jsonString());
             }
             bpmnProcessIdWithTenant = ids.get(0);
         }
