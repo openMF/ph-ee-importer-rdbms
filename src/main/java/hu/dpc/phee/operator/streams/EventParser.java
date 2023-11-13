@@ -29,10 +29,7 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -76,6 +73,7 @@ public class EventParser {
         if (bpmnProcessIdWithTenant == null) {
             logger.warn("can't find bpmnProcessId in record: {}, trying alternative ways..", record.jsonString());
             List<String> ids = record.read("$.value..bpmnProcessId", List.class);
+            ids = ids.stream().filter(Objects::nonNull).toList();
             if (ids.size() > 1) {
                 throw new RuntimeException("Invalid bpmnProcessIdWithTenant, has more than one bpmnProcessIds: '" + ids + "' in record: " + record.jsonString());
             }
