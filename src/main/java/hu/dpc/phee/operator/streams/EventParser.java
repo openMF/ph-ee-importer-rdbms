@@ -66,7 +66,7 @@ public class EventParser {
 
         String[] split = bpmnProcessIdWithTenant.split("-");
         if (split.length < 2) {
-            throw new RuntimeException("Invalid bpmnProcessId, has no tenant information: '" + bpmnProcessIdWithTenant + "'");
+            throw new RuntimeException("Invalid bpmnProcessId, has no tenant information: '" + bpmnProcessIdWithTenant + "' in record: " + record.jsonString());
         }
         return Pair.of(split[0], split[1]);
     }
@@ -77,7 +77,7 @@ public class EventParser {
             logger.warn("can't find bpmnProcessId in record: {}, trying alternative ways..", record.jsonString());
             List<String> ids = record.read("$.value..bpmnProcessId", List.class);
             if (ids.size() > 1) {
-                throw new RuntimeException("Invalid bpmnProcessIdWithTenant, has more than one bpmnProcessIds: '" + ids + "'");
+                throw new RuntimeException("Invalid bpmnProcessIdWithTenant, has more than one bpmnProcessIds: '" + ids + "' in record: " + record.jsonString());
             }
             bpmnProcessIdWithTenant = ids.get(0);
         }
