@@ -1,5 +1,6 @@
 package hu.dpc.phee.operator.streams;
 
+import com.baasflow.commons.events.EventLogLevel;
 import com.baasflow.commons.events.EventService;
 import com.baasflow.commons.events.EventStatus;
 import com.baasflow.commons.events.EventType;
@@ -248,7 +249,7 @@ public class EventParser {
                 transfer.setStatus(TransferStatus.EXCEPTION);
                 transfer.setCompletedAt(new Date(timestamp));
 
-                sendIncidentAuditlog(transfer, rawData);
+                sendIncidentAuditlog(tenantName, transfer, rawData);
                 yield List.of(
                         new Variable()
                                 .withWorkflowInstanceKey(workflowInstanceKey)
@@ -277,11 +278,14 @@ public class EventParser {
         }
     }
 
-    private void sendIncidentAuditlog(Transfer transfer, String rawData) {
+    private void sendIncidentAuditlog(String tenantName, Transfer transfer, String rawData) {
         eventService.sendEvent(event -> event
+                .setSourceModule("importer")
+                .setEventLogLevel(EventLogLevel.ERROR)
                 .setEventType(EventType.audit)
                 .setEvent("Incident event received for flow")
                 .setEventStatus(EventStatus.failure)
+                .setTenantId(tenantName)
                 .setCorrelationIds(Map.of(
                         "internalCorrelationId", transfer.getTransactionId(),
                         "processInstanceId", transfer.getWorkflowInstanceKey().toString()
