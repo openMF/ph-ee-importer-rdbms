@@ -249,7 +249,14 @@ public class EventParser {
                 transfer.setCompletedAt(new Date(timestamp));
 
                 sendIncidentAuditlog(transfer, rawData);
-                yield List.of();
+                yield List.of(
+                        new Variable()
+                                .withWorkflowInstanceKey(workflowInstanceKey)
+                                .withName("exception")
+                                .withWorkflowKey(workflowKey)
+                                .withTimestamp(timestamp)
+                                .withValue(rawData)
+                );
             }
 
             default -> throw new IllegalStateException("Unexpected event type: " + valueType);
