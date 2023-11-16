@@ -256,7 +256,7 @@ public class EventParser {
                                 .withName("exception")
                                 .withWorkflowKey(workflowKey)
                                 .withTimestamp(timestamp)
-                                .withValue(record.jsonString())
+                                .withValue(StringEscapeUtils.escapeJson(record.jsonString()))
                 );
             }
 
