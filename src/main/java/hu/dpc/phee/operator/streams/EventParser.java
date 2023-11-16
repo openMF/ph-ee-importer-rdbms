@@ -241,7 +241,7 @@ public class EventParser {
                                 .withName(variableName)
                                 .withWorkflowKey(workflowKey)
                                 .withTimestamp(timestamp)
-                                .withValue(record.jsonString()));
+                                .withValue(value));
             }
 
             case "INCIDENT" -> {
@@ -256,7 +256,7 @@ public class EventParser {
                                 .withName("exception")
                                 .withWorkflowKey(workflowKey)
                                 .withTimestamp(timestamp)
-                                .withValue(rawData)
+                                .withValue(record.jsonString())
                 );
             }
 
