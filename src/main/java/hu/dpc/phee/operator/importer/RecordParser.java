@@ -2,9 +2,6 @@ package hu.dpc.phee.operator.importer;
 
 import static hu.dpc.phee.operator.OperatorUtils.strip;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.BpmnProcess;
 import hu.dpc.phee.operator.config.BpmnProcessProperties;
@@ -20,17 +17,13 @@ import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequest;
 import hu.dpc.phee.operator.entity.transactionrequest.TransactionRequestRepository;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferRepository;
+import hu.dpc.phee.operator.entity.transfer.TransferStatus;
 import hu.dpc.phee.operator.entity.variable.Variable;
 import hu.dpc.phee.operator.entity.variable.VariableRepository;
+import hu.dpc.phee.operator.file.CsvFileService;
 import hu.dpc.phee.operator.file.FileTransferService;
 import hu.dpc.phee.operator.util.BatchFormatToTransferMapper;
-import java.io.IOException;
-import java.io.Reader;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +99,7 @@ public class RecordParser {
     private FileTransferService fileTransferService;
 
     @Autowired
-    private CsvMapper csvMapper;
+    private CsvFileService csvFileService;
 
     private final Map<Long, Long> inflightCallActivities = new ConcurrentHashMap<>();
 
@@ -155,6 +148,12 @@ public class RecordParser {
                 Batch batch = inflightBatchManager.getOrCreateBatch(workflowInstanceKey);
                 variableParser.getBatchParsers().get(name).accept(Pair.of(batch, value));
                 batchRepository.save(batch);
+
+                if (name.equals("duplicateTransactionFile")) {
+                    // insert the transaction into transfer table
+                    logger.info("Name {} and value: {}");
+                    updateTransferTableWithFailedDuplicateTransaction(workflowInstanceKey, value);
+                }
 
                 if (!bpmnProcess.getId().equalsIgnoreCase("bulk_processor")) {
                     logger.info("Inside if condition {}", name);
@@ -326,22 +325,7 @@ public class RecordParser {
                     workflowInstanceKey, filename);
             return;
         }
-        List<Transaction> transactionList;
-        try {
-            CsvSchema schema = CsvSchema.emptySchema().withHeader();
-            Reader reader = Files.newBufferedReader(Paths.get(filename), Charset.defaultCharset());
-            MappingIterator<Transaction> readValues = csvMapper.readerWithSchemaFor(Transaction.class).with(schema).readValues(reader);
-            transactionList = new ArrayList<>();
-            while (readValues.hasNext()) {
-                Transaction current = readValues.next();
-                transactionList.add(current);
-            }
-        } catch (IOException e) {
-            logger.debug(e.getMessage());
-            logger.error("Error building TransactionList for batch with instance key {} and batch filename {}", workflowInstanceKey,
-                    filename);
-            return;
-        }
+        List<Transaction> transactionList = csvFileService.getTransactionList(filename);
 
         Batch batch = batchRepository.findByWorkflowInstanceKey(workflowInstanceKey);
         for (Transaction transaction : transactionList) {
@@ -364,6 +348,23 @@ public class RecordParser {
             BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
             transferRepository.save(transfer);
         }
-
     }
+
+    private void updateTransferTableWithFailedDuplicateTransaction(Long workflowInstanceKey, String filename) {
+        logger.info("Filename {}", filename);
+        if (filename == null) {
+            return;
+        }
+        filename = strip(filename);
+        String localFilePath = fileTransferService.downloadFile(filename, bucketName);
+        List<Transaction> transactionList = csvFileService.getTransactionList(localFilePath);
+        for (Transaction transaction : transactionList) {
+            Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
+            transfer.setStatus(TransferStatus.FAILED);
+            transfer.setBatchId(tempDocumentStore.getBatchId(workflowInstanceKey));
+            logger.info("Inserting failed txn: {}", transfer);
+            transferRepository.save(transfer);
+        }
+    }
+
 }
