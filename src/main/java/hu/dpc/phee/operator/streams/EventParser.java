@@ -241,7 +241,7 @@ public class EventParser {
                                 .withName(variableName)
                                 .withWorkflowKey(workflowKey)
                                 .withTimestamp(timestamp)
-                                .withValue(StringEscapeUtils.escapeJson(value)));
+                                .withValue(variableValue));
             }
 
             case "INCIDENT" -> {
