@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class JsonParseTest {
-
+//Test
     String taskCreated = "{\n" +
             "  \"partitionId\": 3,\n" +
             "  \"sourceRecordPosition\": 12885411520,\n" +
