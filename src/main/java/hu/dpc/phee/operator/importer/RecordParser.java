@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -371,6 +372,8 @@ public class RecordParser {
             transfer.setStartedAt(new Date());
             transfer.setCompletedAt(new Date());
             transfer.setErrorInformation("Duplicate transaction");
+            transfer.setClientCorrelationId(UUID.randomUUID().toString());
+            transfer.setTransactionId(UUID.randomUUID().toString());
             logger.info("Inserting failed txn: {}", transfer);
             transferRepository.save(transfer);
         }
