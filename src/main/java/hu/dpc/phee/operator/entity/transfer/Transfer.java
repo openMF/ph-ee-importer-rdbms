@@ -31,6 +31,9 @@ public class Transfer {
     @Column(name = "COMPLETED_AT")
     private Date completedAt;
 
+    @Column(name = "ACCEPTANCE_DATE")
+    private Date acceptanceDate;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private TransferStatus status;
