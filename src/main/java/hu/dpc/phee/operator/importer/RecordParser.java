@@ -367,7 +367,7 @@ public class RecordParser {
         for (Transaction transaction : transactionList) {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setStatus(TransferStatus.FAILED);
-            transfer.setBatchId(tempDocumentStore.getBatchId(workflowInstanceKey));
+            transfer.setBatchId(strip(tempDocumentStore.getBatchId(workflowInstanceKey)));
             transfer.setStartedAt(new Date());
             transfer.setCompletedAt(new Date());
             transfer.setErrorInformation("Duplicate transaction");
