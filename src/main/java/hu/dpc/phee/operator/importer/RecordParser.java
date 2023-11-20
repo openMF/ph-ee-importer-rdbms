@@ -151,7 +151,7 @@ public class RecordParser {
 
                 if (name.equals("duplicateTransactionFile")) {
                     // insert the transaction into transfer table
-                    logger.info("Name {} and value: {}");
+                    logger.info("Name {} and value: {}", name, value);
                     updateTransferTableWithFailedDuplicateTransaction(workflowInstanceKey, value);
                 }
 
@@ -161,6 +161,12 @@ public class RecordParser {
                         logger.info("store filename {} in tempDocStore for instance {}", strip(value), workflowInstanceKey);
                         tempDocumentStore.storeBatchFileName(workflowInstanceKey, value);
                     }
+                    if (name.equals("batchId")) {
+                        logger.info("store batchid {} in tempDocStore for instance {}", strip(value), workflowInstanceKey);
+                        tempDocumentStore.storeBatchId(workflowInstanceKey, value);
+                    }
+                }
+                if (bpmnProcess.getId().equalsIgnoreCase("bulk_processor")) {
                     if (name.equals("batchId")) {
                         logger.info("store batchid {} in tempDocStore for instance {}", strip(value), workflowInstanceKey);
                         tempDocumentStore.storeBatchId(workflowInstanceKey, value);
@@ -362,6 +368,9 @@ public class RecordParser {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setStatus(TransferStatus.FAILED);
             transfer.setBatchId(tempDocumentStore.getBatchId(workflowInstanceKey));
+            transfer.setStartedAt(new Date());
+            transfer.setCompletedAt(new Date());
+            transfer.setErrorInformation("Duplicate transaction");
             logger.info("Inserting failed txn: {}", transfer);
             transferRepository.save(transfer);
         }
