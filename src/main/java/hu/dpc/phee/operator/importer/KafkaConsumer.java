@@ -107,6 +107,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
                             recordParser.processTask(doc);
                             break;
                         case "PROCESS_INSTANCE":
+                            logger.info("Inside PROCESS_INSTANCE "+(doc.read("$.value.bpmnElementType")));
                             if ("PROCESS".equals(doc.read("$.value.bpmnElementType"))) {
                                 recordParser.processWorkflowInstance(doc);
                             }
