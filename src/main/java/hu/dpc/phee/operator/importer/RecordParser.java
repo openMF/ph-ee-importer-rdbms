@@ -170,7 +170,7 @@ public class RecordParser {
             if (existingVariables.stream().filter(existing -> {
                 return name.equals(existing.getName()) && newTimestamp <= existing.getTimestamp(); // variable already inserted before
             }).findFirst().orElse(null) != null) {
-                logger.indo("Variable {} already inserted at {} for instance {}, skip processing!", name, newTimestamp, workflowInstanceKey);
+                logger.info("Variable {} already inserted at {} for instance {}, skip processing!", name, newTimestamp, workflowInstanceKey);
                 return null;
             }
         }
@@ -182,6 +182,7 @@ public class RecordParser {
         variable.setName(name);
         String value = json.read("$.value.value");
         variable.setValue(value);
+        logger.info("processVariable {} json {}",variable,json);
         variableRepository.save(variable);
         return json;
     }
