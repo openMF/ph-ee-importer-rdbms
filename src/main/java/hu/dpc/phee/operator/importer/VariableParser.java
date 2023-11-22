@@ -114,6 +114,7 @@ public class VariableParser {
                 throw new RuntimeException(e);
             }
         });
+        batchParsers.put("duplicateTransactionFile", pair -> { });
 
         outboundMessageParsers.put("tenantId", pair -> pair.getFirst().setTenantId(Long.parseLong(pair.getSecond())));
         outboundMessageParsers.put("externalId", pair -> pair.getFirst().setExternalId(strip(pair.getSecond())));
