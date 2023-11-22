@@ -100,7 +100,6 @@ public class RecordParser {
     private final Map<Long, Long> inflightCallActivities = new ConcurrentHashMap<>();
 
     public void addVariableToEntity(DocumentContext newVariable, String bpmnProcessId) {
-    logger.info("Inside addVariableEntity: newVariable {} bpmnProcessId {}", newVariable, bpmnProcessId);
         if (newVariable == null) {
             return;
         }
@@ -116,7 +115,7 @@ public class RecordParser {
         BpmnProcess bpmnProcess = bpmnProcessProperties.getById(bpmnProcessId);
         if (transferType.equals(bpmnProcess.getType())) {
             if (variableParser.getTransferParsers().containsKey(name)) {
-                logger.debug("add variable {} to transfer for workflow {}", name, workflowInstanceKey);
+                logger.info("add variable {} to transfer for workflow {}", name, workflowInstanceKey);
                 String value = newVariable.read("$.value.value");
 
                 Transfer transfer = inflightTransferManager.getOrCreateTransfer(workflowInstanceKey);
@@ -158,7 +157,7 @@ public class RecordParser {
             }
         }
         else {
-            logger.debug("Skip adding variable to {} and type is {}", bpmnProcessId, bpmnProcess.getType()); // xx
+            logger.info("Skip adding variable to {} and type is {}", bpmnProcessId, bpmnProcess.getType()); // xx
         }
     }
 
@@ -171,7 +170,7 @@ public class RecordParser {
             if (existingVariables.stream().filter(existing -> {
                 return name.equals(existing.getName()) && newTimestamp <= existing.getTimestamp(); // variable already inserted before
             }).findFirst().orElse(null) != null) {
-                logger.debug("Variable {} already inserted at {} for instance {}, skip processing!", name, newTimestamp, workflowInstanceKey);
+                logger.indo("Variable {} already inserted at {} for instance {}, skip processing!", name, newTimestamp, workflowInstanceKey);
                 return null;
             }
         }
@@ -270,7 +269,7 @@ public class RecordParser {
                 return;
             }
         }
-
+        logger.info("Creating new Workflowinstance");
         Task task = new Task();
         task.setWorkflowInstanceKey(workflowInstanceKey);
         task.setWorkflowKey(json.read("$.value.processDefinitionKey"));
