@@ -100,16 +100,16 @@ public class RecordParser {
     private final Map<Long, Long> inflightCallActivities = new ConcurrentHashMap<>();
 
     public void addVariableToEntity(DocumentContext newVariable, String bpmnProcessId) {
-
+    logger.info("Inside addVariableEntity: newVariable {} bpmnProcessId {}", newVariable, bpmnProcessId);
         if (newVariable == null) {
             return;
         }
-        logger.debug("newVariable in RecordParser: {}", newVariable.jsonString()); //
+        logger.info("newVariable in RecordParser: {}", newVariable.jsonString()); //
         String name = newVariable.read("$.value.name");
         Long workflowInstanceKey = newVariable.read("$.value.processInstanceKey");
         if (inflightCallActivities.containsKey(workflowInstanceKey)) {
             Long parentInstanceKey = inflightCallActivities.get(workflowInstanceKey);
-            logger.debug("variable {} in instance {} has parent workflowInstance {}", name, workflowInstanceKey, parentInstanceKey);
+            logger.info("variable {} in instance {} has parent workflowInstance {}", name, workflowInstanceKey, parentInstanceKey);
             workflowInstanceKey = parentInstanceKey;
         }
 
@@ -125,7 +125,7 @@ public class RecordParser {
             }
         } else if (transactionRequestType.equals(bpmnProcess.getType())) {
             if (variableParser.getTransactionRequestParsers().containsKey(name)) {
-                logger.debug("add variable to transactionRequest {} for workflow {}", name, workflowInstanceKey);
+                logger.info("add variable to transactionRequest {} for workflow {}", name, workflowInstanceKey);
                 String value = newVariable.read("$.value.value");
 
                 TransactionRequest transactionRequest = inflightTransactionRequestManager.getOrCreateTransactionRequest(workflowInstanceKey);
@@ -137,7 +137,7 @@ public class RecordParser {
             }
         } else if (batchType.equals(bpmnProcess.getType())) {
             if (variableParser.getBatchParsers().containsKey(name)) {
-                logger.debug("add variable {} to batch for workflow {}", name, workflowInstanceKey);
+                logger.info("add variable {} to batch for workflow {}", name, workflowInstanceKey);
                 String value = newVariable.read("$.value.value");
 
                 Batch batch = inflightBatchManager.getOrCreateBatch(workflowInstanceKey);
@@ -279,6 +279,7 @@ public class RecordParser {
         task.setRecordType(json.read("$.recordType"));
         task.setType(type);
         task.setElementId(newElementId);
+        logger.info("Task inside processTask "+task);
         taskRepository.save(task);
     }
 
