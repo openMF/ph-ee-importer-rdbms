@@ -55,6 +55,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
             }
 
             Long workflowKey = incomingRecord.read("$.value.processDefinitionKey");
+            logger.info( "workflowkey: {}", workflowKey);
             String bpmnprocessIdWithTenant = incomingRecord.read("$.value.bpmnProcessId");
             Long recordKey = incomingRecord.read("$.key");
             logger.info("bpmnprocessIdWithTenant: " + bpmnprocessIdWithTenant);
@@ -77,6 +78,7 @@ public class KafkaConsumer implements ConsumerSeekAware {
             if(tenant != null) {
                 logger.info("TenantServerConnection: " + tenant.toString());
             }
+            logger.info("TenantID"+ tenant);
             ThreadLocalContextUtil.setTenant(tenant);
             Long midTime1 = System.currentTimeMillis();
             logger.debug("Mid Time 1 {}", (midTime1-startTime));

@@ -61,7 +61,7 @@ public class Variable extends AbstractPersistableCustom<Long> {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name =  name;
     }
 
     public String getValue() {
