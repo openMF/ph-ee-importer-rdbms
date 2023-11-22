@@ -194,6 +194,7 @@ public class RecordParser {
         Long timestamp = json.read("$.timestamp");
         String intent = json.read("$.intent");
         Object parentWorkflowInstanceKey = json.read("$.value.parentProcessInstanceKey");
+        logger.info("Incoming doc"+json);
         boolean hasParent = false;
         if (parentWorkflowInstanceKey instanceof Long && (Long) parentWorkflowInstanceKey > 0) {
             hasParent = true;
@@ -201,25 +202,30 @@ public class RecordParser {
 
         String elementId = json.read("$.value.elementId");
         Long callActivityKey = json.read("$.key");
-
+        logger.info("Intent -"+intent);
         if (transferType.equals(bpmnProcess.getType())) {
+            logger.info("Inside transfer case");
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 if (hasParent) {
                     logger.debug("Sub process {} with key {} started from parent instance {}", bpmnProcessId, callActivityKey, parentWorkflowInstanceKey);
+                    logger.info("Inside ELEMENT_ACTIVATING Sub process {} with key {} started from parent instance {}", bpmnProcessId, callActivityKey, parentWorkflowInstanceKey);
                     inflightCallActivities.put(callActivityKey, (Long) parentWorkflowInstanceKey);
                     inflightTransferManager.transferStarted((Long) parentWorkflowInstanceKey, timestamp, outgoingDirection);
                 } else {
+                    logger.info("Inside ELEMENT_ACTIVATING else");
                     inflightTransferManager.transferStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
                 }
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 if (inflightCallActivities.containsKey(workflowInstanceKey)) {
                     Long parentInstanceKey = inflightCallActivities.remove(workflowInstanceKey);
                     logger.debug("Sub process {} with key {} ended from parent instance {}", bpmnProcessId, callActivityKey, parentInstanceKey);
+                    logger.info("Inside ELEMENT_COMPLETED Sub process {} with key {} started from parent instance {}", bpmnProcessId, callActivityKey, parentWorkflowInstanceKey);
                     workflowInstanceKey = parentInstanceKey;
                 }
                 inflightTransferManager.transferEnded(workflowInstanceKey, timestamp);
             }
         } else if (transactionRequestType.equals(bpmnProcess.getType())) {
+            logger.info("Inside else part");
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 inflightTransactionRequestManager.transactionRequestStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
@@ -227,6 +233,7 @@ public class RecordParser {
             }
         } else if (batchType.equals(bpmnProcess.getType())) {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
+                logger.info("Inside ELEMENT_ACTIVATING"+intent);
                 inflightBatchManager.batchStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 if (!bpmnProcess.getId().equalsIgnoreCase("bulk_processor")) {

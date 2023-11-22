@@ -21,13 +21,15 @@ public class InflightTransferManager {
     private TransferRepository transferRepository;
 
     public void transferStarted(Long workflowInstanceKey, Long timestamp, String direction) {
+        logger.info("Inside transferStarted workflow key {} timestamp {} direction {}", workflowInstanceKey,timestamp,direction);
         Transfer transfer = getOrCreateTransfer(workflowInstanceKey);
         if (transfer.getStartedAt() == null) {
             transfer.setDirection(direction);
             transfer.setStartedAt(new Date(timestamp));
             transferRepository.save(transfer);
+            logger.info("Transfer saved");
         } else {
-            logger.debug("transfer {} already started at {}", workflowInstanceKey, transfer.getStartedAt());
+            logger.info("transfer {} already started at {}", workflowInstanceKey, transfer.getStartedAt());//debug
         }
     }
 
@@ -55,7 +57,7 @@ public class InflightTransferManager {
                 transfer = transferRepository.findByWorkflowInstanceKey(workflowInstanceKey);
                 if (transfer == null) {
                     transfer = new Transfer(workflowInstanceKey); // Sets status to ONGOING
-                    logger.debug("started in-flight transfer {}", transfer.getWorkflowInstanceKey());
+                    logger.info("started in-flight transfer {}", transfer.getWorkflowInstanceKey());
                 }
                 inflightTransfers.put(workflowInstanceKey, transfer);
             }
