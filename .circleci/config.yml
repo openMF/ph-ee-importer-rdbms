@@ -58,7 +58,7 @@ jobs:
             IMAGE_TAG=$CIRCLE_TAG
             ./gradlew checkstyleMain
             ./gradlew clean bootJar
-            docker build -t openmf/$CIRCLE_PR_REPONAME:latest .
+            docker build -t openmf/ph-ee-importer-rdbms:latest .
 
             if [ "$CIRCLE_BRANCH" != "master" ]; then
               PR_NUMBER=$(basename $CIRCLE_PULL_REQUEST)
