@@ -15,10 +15,10 @@
     <appender name="LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 	<file>logs/console.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-	<fileNamePattern>logs/console-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>100MB</maxFileSize>
-            <maxHistory>3</maxHistory>
-            <totalSizeCap>300MB</totalSizeCap>
+	        <fileNamePattern>logs/console-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>${LOG_CONSOLE_MAXFILESIZE:-100MB}</maxFileSize>
+            <maxHistory>${LOG_CONSOLE_MAXHISTORY:-7}</maxHistory>
+            <totalSizeCap>${LOG_CONSOLE_TOTALSIZECAP:-300MB}</totalSizeCap>
         </rollingPolicy>
         <encoder>
             <pattern>${CONSOLE_LOG_PATTERN}</pattern>
