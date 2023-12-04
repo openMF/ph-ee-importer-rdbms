@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.kafka.streams.StreamsConfig.*;
-import static org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.REPLACE_THREAD;
 
 @EnableKafka
 @EnableKafkaStreams

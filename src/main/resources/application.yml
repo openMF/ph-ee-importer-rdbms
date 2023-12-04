@@ -1,65 +1,69 @@
 kafka:
-  msk: false
-  brokers: "localhost:9092"
-  consumer-group: ch1
-  commit-interval-ms: 1000
-  listener:
-    concurrency: 3
-    poll-timeout-ms: 3000
-    max-poll-records: 100
+    msk: false
+    brokers: "localhost:9092"
+    consumer-group: ch1
+    commit-interval-ms: 1000
+    listener:
+        concurrency: 3
+        poll-timeout-ms: 3000
+        max-poll-records: 100
 
 importer:
-  kafka:
-    topic: "zeebe-export"
-    reset: true
-    aggreation-window-seconds: 2
+    kafka:
+        topic: "zeebe-export"
+        reset: true
+        aggreation-window-seconds: 2
 
 spring:
-  jpa:
-    show-sql: false
-    properties:
-      eclipselink:
-        logging:
-          level: "INFO"
-          parameters: true
-          session: true
-          thread: true
-          timestamp: true
-          logger: "hu.dpc.phee.operator.config.EclipselinkLogger"
-    open-in-view: false
+    jpa:
+        show-sql: false
+        properties:
+            eclipselink:
+                logging:
+                    level: "INFO"
+                    parameters: true
+                    session: true
+                    thread: true
+                    timestamp: true
+                    logger: "hu.dpc.phee.operator.config.EclipselinkLogger"
+        open-in-view: false
 
 datasource:
-  common:
-    protocol: "jdbc"
-    subprotocol: "mysql"
-    driverclass_name: "com.mysql.cj.jdbc.Driver"
-  core:
-    port: 3306
-    host: "operationsmysql"
-    schema: "tenants"
-    username: "mifos"
-    password: "password"
+    common:
+        protocol: "jdbc"
+        subprotocol: "mysql"
+        driverclass_name: "com.mysql.cj.jdbc.Driver"
+    core:
+        port: 3306
+        host: "operationsmysql"
+        schema: "tenants"
+        username: "mifos"
+        password: "password"
 
 server:
-  port: 8000
+    port: 8000
 
 application:
-  bucket-name: paymenthub-ee-dev
+    bucket-name: paymenthub-ee-dev
 
 baasflow:
-  events:
-    disabled: "true"
+    events:
+        disabled: "true"
 
 management:
-  server:
-    port: 8080
-  endpoint:
-    health:
-      probes:
-        enabled: true
-      group:
-        kafka:
-          include: "kafka"
-          show-details: "always"
-  endpoints:
-    web.exposure.include: health,info,metrics,prometheus
+    server:
+        port: 8080
+    endpoint:
+        health:
+            probes:
+                enabled: true
+            group:
+                kafka:
+                    include: "kafka"
+                    show-details: "always"
+                liveness:
+                    include: "kafka"
+                readiness:
+                    include: "kafka"
+    endpoints:
+        web.exposure.include: health,info,kafka,metrics,prometheus

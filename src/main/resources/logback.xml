@@ -13,9 +13,9 @@
     </appender>
 
     <appender name="LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-	<file>logs/console.log</file>
+        <file>logs/console.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-	        <fileNamePattern>logs/console-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>logs/console-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>${LOG_CONSOLE_MAXFILESIZE:-100MB}</maxFileSize>
             <maxHistory>${LOG_CONSOLE_MAXHISTORY:-7}</maxHistory>
             <totalSizeCap>${LOG_CONSOLE_TOTALSIZECAP:-300MB}</totalSizeCap>
