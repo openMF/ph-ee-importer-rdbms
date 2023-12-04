@@ -58,3 +58,11 @@ cloud:
 baasflow:
   events:
     disabled: "true"
+
+management:
+  server:
+    port: 8080
+  endpoint:
+    health:
+      probes:
+        enabled: true
