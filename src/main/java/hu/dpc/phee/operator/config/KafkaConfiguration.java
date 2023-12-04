@@ -1,13 +1,16 @@
 package hu.dpc.phee.operator.config;
 
+import com.baasflow.commons.events.internal.KafkaHealthIndicator;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.jetbrains.annotations.NotNull;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +20,7 @@ import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
+import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
@@ -28,6 +32,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.kafka.streams.StreamsConfig.*;
+import static org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.REPLACE_THREAD;
 
 @EnableKafka
 @EnableKafkaStreams
@@ -54,6 +59,8 @@ public class KafkaConfiguration {
     @Value("${kafka.listener.poll-timeout-ms}")
     private int listenerPollTimeoutMs;
 
+    @Autowired
+    KafkaHealthIndicator kafkaHealthIndicator;
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
@@ -102,6 +109,19 @@ public class KafkaConfiguration {
         properties.put(DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
         properties.put(COMMIT_INTERVAL_MS_CONFIG, commitIntervalMs);
         return new KafkaStreamsConfiguration(properties);
+    }
+
+    @Bean
+    public StreamsBuilder streamsBuilder(StreamsBuilderFactoryBean factory) throws Exception {
+        factory.setStateListener((newState, oldState) -> {
+            logger.warn("Kafka streams state changed from {} to {}", oldState, newState);
+            if (newState == KafkaStreams.State.RUNNING) {
+                kafkaHealthIndicator.setHealthy();
+            } else {
+                kafkaHealthIndicator.setUnhealthy("Kafka streams state changed from " + oldState + " to " + newState);
+            }
+        });
+        return factory.getObject();
     }
 
     private static String buildKafkaClientId(Logger logger) {
