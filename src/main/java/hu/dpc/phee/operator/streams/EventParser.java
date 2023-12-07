@@ -30,6 +30,8 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -299,9 +301,10 @@ public class EventParser {
         logger.debug("applying transformer for field: {}", transformer.getField());
         try {
             String fieldName = transformer.getField();
+            String dateFormat = transformer.getDateFormat();
             if (Strings.isNotBlank(transformer.getConstant())) {
                 logger.debug("setting constant value: {}", transformer.getConstant());
-                PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, transformer.getConstant());
+                setPropertyValue(transfer, fieldName, variableValue, dateFormat);
                 return;
             }
 
@@ -321,7 +324,7 @@ public class EventParser {
                     } else {
                         value = result.toString();
                     }
-                    PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, value);
+                    setPropertyValue(transfer, fieldName, variableValue, dateFormat);
                 }
 
                 if (StringUtils.isBlank(value)) {
@@ -336,7 +339,8 @@ public class EventParser {
                 String result = xPathFactory.newXPath().compile(transformer.getXpath()).evaluate(document);
                 logger.debug("xpath result: {} for variable {}", result, variableName);
                 if (StringUtils.isNotBlank(result)) {
-                    PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, result);
+                    Date.class.getName().equals(PropertyAccessorFactory.forBeanPropertyAccess(transfer).getPropertyType("acceptanceDate").getName());
+                    setPropertyValue(transfer, fieldName, variableValue, dateFormat);
                 } else {
                     logger.error("null result when setting field {} from variable {}. Xpath: {}, variable value: {}", fieldName, variableName, transformer.getXpath(), variableValue);
                 }
@@ -344,10 +348,22 @@ public class EventParser {
             }
 
             logger.debug("setting simple variable value: {} for variable {}", variableValue, variableName);
-            PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, variableValue);
+            setPropertyValue(transfer, fieldName, variableValue, dateFormat);
 
         } catch (Exception e) {
             logger.error("failed to apply transformer {} to variable {}", transformer, variableName, e);
+        }
+    }
+
+    private void setPropertyValue(Transfer transfer, String fieldName, String variableValue, String dateFormat) {
+        if (Date.class.getName().equals(PropertyAccessorFactory.forBeanPropertyAccess(transfer).getPropertyType(fieldName).getName())) {
+            try {
+                PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, new SimpleDateFormat(dateFormat).parse(variableValue));
+            } catch (ParseException pe) {
+                logger.warn("failed to parse date {} with format {}", variableValue, dateFormat);
+            }
+        } else {
+            PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, variableValue);
         }
     }
 }
