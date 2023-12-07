@@ -86,7 +86,7 @@ public class StreamsSetup {
         Windowed<String> key = (Windowed<String>) _key;
         List<String> records = (List<String>) _value;
 
-        if (records == null || records.size() == 0) {
+        if (records == null || records.isEmpty()) {
             logger.warn("skipping processing, null records for key: {}", key);
             return;
         }
@@ -108,7 +108,7 @@ public class StreamsSetup {
             DataSource tenant = tenantsService.getTenantDataSource(tenantName);
             ThreadLocalContextUtil.setTenant(tenant);
         } catch (Exception e) {
-            logger.error("failed to process first valid record: {}, skipping whole batch", firstValid, e);
+            logger.warn("could not resolve tenantName from first valid record: {}, skipping whole batch", firstValid);
             return;
         }
 
