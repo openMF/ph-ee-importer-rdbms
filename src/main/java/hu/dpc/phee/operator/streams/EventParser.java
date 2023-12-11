@@ -357,7 +357,7 @@ public class EventParser {
     private void setPropertyValue(Transfer transfer, String fieldName, String variableValue, String dateFormat) {
         if (Date.class.getName().equals(PropertyAccessorFactory.forBeanPropertyAccess(transfer).getPropertyType(fieldName).getName())) {
             try {
-                logger.warn("Parsing date {} with format {}", variableValue, dateFormat);
+                logger.debug("Parsing date {} with format {}", variableValue, dateFormat);
                 PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, new SimpleDateFormat(dateFormat).parse(variableValue));
             } catch (ParseException pe) {
                 logger.warn("failed to parse date {} with format {}", variableValue, dateFormat);
