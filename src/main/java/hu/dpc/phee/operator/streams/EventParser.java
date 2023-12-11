@@ -339,8 +339,7 @@ public class EventParser {
                 String result = xPathFactory.newXPath().compile(transformer.getXpath()).evaluate(document);
                 logger.debug("xpath result: {} for variable {}", result, variableName);
                 if (StringUtils.isNotBlank(result)) {
-                    Date.class.getName().equals(PropertyAccessorFactory.forBeanPropertyAccess(transfer).getPropertyType("acceptanceDate").getName());
-                    setPropertyValue(transfer, fieldName, variableValue, dateFormat);
+                    setPropertyValue(transfer, fieldName, result, dateFormat);
                 } else {
                     logger.error("null result when setting field {} from variable {}. Xpath: {}, variable value: {}", fieldName, variableName, transformer.getXpath(), variableValue);
                 }
@@ -358,6 +357,7 @@ public class EventParser {
     private void setPropertyValue(Transfer transfer, String fieldName, String variableValue, String dateFormat) {
         if (Date.class.getName().equals(PropertyAccessorFactory.forBeanPropertyAccess(transfer).getPropertyType(fieldName).getName())) {
             try {
+                logger.warn("Parsing date {} with format {}", variableValue, dateFormat);
                 PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, new SimpleDateFormat(dateFormat).parse(variableValue));
             } catch (ParseException pe) {
                 logger.warn("failed to parse date {} with format {}", variableValue, dateFormat);
