@@ -36,6 +36,7 @@ application:
 cloud:
   aws:
     enabled: true
+    host: "http://localhost:9000"
     credentials:
       access-key: ${AWS_ACCESS_KEY:access_key_from_aws}
       secret-key: ${AWS_SECRET_KEY:secret_key_from_aws}
