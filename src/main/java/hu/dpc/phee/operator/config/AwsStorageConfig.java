@@ -22,7 +22,7 @@ public class AwsStorageConfig {
 
     @Value("${cloud.aws.region.static}")
     private String region;
-    @Value("${cloud.aws.host}")
+    @Value("${cloud.aws.s3BaseUrl}")
     private String endpoint;
 
     @Bean
