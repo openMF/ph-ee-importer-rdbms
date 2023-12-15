@@ -324,7 +324,7 @@ public class EventParser {
                     } else {
                         value = result.toString();
                     }
-                    setPropertyValue(transfer, fieldName, variableValue, dateFormat);
+                    setPropertyValue(transfer, fieldName, value, dateFormat);
                 }
 
                 if (StringUtils.isBlank(value)) {
