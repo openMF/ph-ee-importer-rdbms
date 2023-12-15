@@ -255,9 +255,11 @@ public class RecordParser {
             }
         } else if (batchType.equals(bpmnProcess.getType())) {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
+                logger.info("inside batch activating");
                 inflightBatchManager.batchStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 if (!bpmnProcess.getId().equalsIgnoreCase("bulk_processor")) {
+                    logger.info("inside batch completed");
                     logger.info("Inside if condition PROCESS_INSTANCE, json {}", json.jsonString());
                     checkWorkerIdAndUpdateTransferData(workflowInstanceKey, timestamp);
                 }
