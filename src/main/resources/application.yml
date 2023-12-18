@@ -31,7 +31,7 @@ server:
   port: 8000
 
 application:
-  bucket-name: paymenthub-ee-dev
+  bucket-name: paymenthub-ee
 
 cloud:
   aws:
