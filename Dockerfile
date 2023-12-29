@@ -1,6 +1,5 @@
-FROM openjdk:13
-EXPOSE 8000
+FROM openjdk:17
+EXPOSE 8080
 
-COPY build/libs/*.jar .
+COPY build/libs/*.jar ./
 CMD java -jar *.jar
-

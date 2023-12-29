@@ -1,7 +1,11 @@
 package hu.dpc.phee.operator.entity.outboundmessages;
 
 import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
+
+import hu.dpc.phee.operator.entity.transfer.TransferStatus;
 import hu.dpc.phee.operator.util.SmsMessageStatusType;
+import lombok.Data;
+
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;

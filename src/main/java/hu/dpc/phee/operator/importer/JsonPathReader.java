@@ -1,7 +1,5 @@
 package hu.dpc.phee.operator.importer;
 
-import static hu.dpc.phee.operator.OperatorUtils.strip;
-
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -29,4 +27,9 @@ public final class JsonPathReader {
         String rawString = StringEscapeUtils.unescapeJson(strip(escapedJson));
         return jsonParser.parse(rawString);
     }
+
+    public static String strip(String str) {
+        return str.replaceAll("^\"|\"$", "");
+    }
+
 }

@@ -11,3 +11,5 @@ bin/
 build
 .DS_Store
 createDDL.jdbc
+console*.log
+

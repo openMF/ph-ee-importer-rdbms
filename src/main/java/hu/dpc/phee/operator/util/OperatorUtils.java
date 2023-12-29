@@ -1,4 +1,4 @@
-package hu.dpc.phee.operator;
+package hu.dpc.phee.operator.util;
 
 import java.text.SimpleDateFormat;
 

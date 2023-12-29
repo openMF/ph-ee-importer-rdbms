@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
@@ -22,7 +23,7 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 @Configuration
 @EntityScan(basePackages = "hu.dpc.phee.operator")
 @EnableJpaRepositories(basePackages = "hu.dpc.phee.operator")
-@EnableTransactionManagement(proxyTargetClass = true)
+@EnableTransactionManagement(proxyTargetClass = true, mode = AdviceMode.PROXY)
 public class EclipselinkJpaConfiguration extends JpaBaseConfiguration {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -31,6 +32,7 @@ public class EclipselinkJpaConfiguration extends JpaBaseConfiguration {
             ObjectProvider<JtaTransactionManager> jtaTransactionManager,
             ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
         super(routingDataSource, properties, jtaTransactionManager);
+        logger.info("## Eclipselink datasource: {}", routingDataSource);
     }
 
     @Override
@@ -49,8 +51,7 @@ public class EclipselinkJpaConfiguration extends JpaBaseConfiguration {
         map.put("eclipselink.jdbc.batch-writing", "JDBC");
         map.put("eclipselink.jdbc.batch-writing.size", "1000");
         map.put("eclipselink.cache.shared.default", "false");
-
-        map.put("eclipselink.logging.level.sql", "INFO");
+        map.put("eclipselink.logging.level.sql", "FINE");
         map.put("eclipselink.logging.parameters", "true");
         map.put("eclipselink.logging.session", "true");
         map.put("eclipselink.logging.thread", "true");
