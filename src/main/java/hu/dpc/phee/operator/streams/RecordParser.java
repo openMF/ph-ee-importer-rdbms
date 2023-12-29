@@ -87,7 +87,7 @@ public class RecordParser {
                 .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
                 .flatMap(it -> it.getTransformers().stream())
                 .filter(it -> Strings.isNotBlank(it.getConstant()))
-                .toList();
+                .collect(Collectors.toList());
 
         if ("TRANSFER".equalsIgnoreCase(flowType)) {
             logger.info("Processing flow of type TRANSFER");
@@ -142,7 +142,7 @@ public class RecordParser {
             batchRepository.save(batch);
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
             logger.info("Processing flow of type OUTBOUND MESSAGES");
-            OutboudMessages outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, recordDocument);
+            OutboudMessages outboudMessages = (OutboudMessages) inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, recordDocument);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 outboudMessages.setSubmittedOnDate(new Date(timestamp));
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
@@ -175,7 +175,7 @@ public class RecordParser {
                 .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
                 .flatMap(it -> it.getTransformers().stream())
                 .filter(it -> variableName.equalsIgnoreCase(it.getVariableName()))
-                .toList();
+                .collect(Collectors.toList());
 
         matchTransformerForFlowType(flowType, bpmn, sample, matchingTransformers, variableName, value, workflowInstanceKey);
 
@@ -209,7 +209,7 @@ public class RecordParser {
                 }
             }
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
-            OutboudMessages outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, sample);
+            OutboudMessages outboudMessages = (OutboudMessages) inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, sample);
             matchingTransformers.forEach(transformer -> applyTransformer(outboudMessages, variableName, value, transformer));
             outboundMessagesRepository.save(outboudMessages);
         } else {
@@ -253,7 +253,7 @@ public class RecordParser {
             batch.setCompletedAt(new Date(timestamp));
             batchRepository.save(batch);
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
-            OutboudMessages outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, sample);
+            OutboudMessages outboudMessages = (OutboudMessages) inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, sample);
             logger.warn("failing Outbound Message Request {} based on incident event", outboudMessages.getInternalId());
             outboudMessages.setDeliveredOnDate(new Date(timestamp));
             outboudMessages.setDeliveryErrorMessage("Failed Message Request");

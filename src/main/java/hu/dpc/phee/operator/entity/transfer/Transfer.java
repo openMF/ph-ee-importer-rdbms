@@ -1,9 +1,8 @@
 package hu.dpc.phee.operator.entity.transfer;
 
-import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.persistence.Column;
+import javax.persistence.Cacheable;import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
+import org.springframework.data.annotation.Id;
 
 @Entity
 @Table(name = "transfers")
@@ -98,10 +98,6 @@ public class Transfer {
 
     @Column(name = "CLIENTCORRELATIONID")
     private String clientCorrelationId;
-
-    @Column(name = "SUB_BATCH_ID")
-    private String subBatchId;
-    public Transfer() {}
 
     public Transfer(Long workflowInstanceKey) {
         this.workflowInstanceKey = workflowInstanceKey;

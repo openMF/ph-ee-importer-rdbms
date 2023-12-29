@@ -4,13 +4,14 @@ import hu.dpc.phee.operator.entity.parent.AbstractPersistableCustom;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Lob;
+import javax.persistence.IdClass;import javax.persistence.Lob;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 import org.eclipse.persistence.annotations.Index;
+import org.springframework.data.annotation.Id;
 
 @Entity
 @IdClass(VariableId.class)
