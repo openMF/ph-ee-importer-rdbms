@@ -135,6 +135,9 @@ bpmn:
     - id: "minimal_mock_fund_transfer_account_lookup"
       direction: "${bpmn.outgoing-direction}"
       type: "${bpmn.transfer-type}"
+    - id: "bulk_processor_account_lookup"
+      direction: "UNKNOWN"
+      type: "${bpmn.batch-type}"
 
 logging:
   level:
