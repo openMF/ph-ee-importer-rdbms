@@ -43,6 +43,7 @@ cloud:
     region:
       static: us-east-2
 
+
 bpmn:
   transfer-type: "TRANSFER"
   transaction-request-type: "TRANSACTION-REQUEST"
