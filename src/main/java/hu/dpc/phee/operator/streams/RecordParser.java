@@ -1,5 +1,6 @@
 package hu.dpc.phee.operator.streams;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
@@ -33,6 +34,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -156,7 +158,7 @@ public class RecordParser {
         return List.of();
     }
 
-    public List<Object> processVariable(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long workflowKey, Long timestamp, String flowType, DocumentContext sample) {
+    public List<Object> processVariable(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long workflowKey, Long timestamp, String flowType, DocumentContext sample)throws JsonProcessingException {
         logger.info("Processing variable instance");
         String variableName = recordDocument.read("$.value.name", String.class);
         String variableValue = recordDocument.read("$.value.value", String.class);
@@ -169,6 +171,10 @@ public class RecordParser {
                         .withWorkflowKey(workflowKey)
                         .withTimestamp(timestamp)
                         .withValue(value));
+
+        if(variableName.equals("subBatchDetails")) {
+            parseSubBatchDetails(variableValue);
+        }
 
         logger.debug("finding transformers for bpmn: {} and variable: {}", bpmn, variableName);
         List<TransferTransformerConfig.Transformer> matchingTransformers = transferTransformerConfig.getFlows().stream()
@@ -336,6 +342,15 @@ public class RecordParser {
 
         if (StringUtils.isBlank(value)) {
             logger.error("null result when setting field {} from variable {}. Jsonpath: {}, variable value: {}", fieldName, variableName, transformer.getJsonPath(), variableValue);
+        }
+    }
+
+    @Transactional
+    public void parseSubBatchDetails(String jsonString) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Batch> batches = Arrays.asList(objectMapper.readValue(jsonString, Batch[].class));
+        for (Batch bt : batches) {
+            batchRepository.save(bt);
         }
     }
 }
