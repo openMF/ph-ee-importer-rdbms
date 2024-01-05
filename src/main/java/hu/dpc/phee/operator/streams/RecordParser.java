@@ -176,7 +176,7 @@ public class RecordParser {
             parseSubBatchDetails(variableValue);
         }
 
-        if (variableName.equals("duplicateTransactionFile")) {
+        if (variableName.equals("failedTransactionFile")) {
             // insert the transaction into transfer table
             logger.info("Name {} and value: {}");
             inflightBatchManager.updateTransferTableWithFailedDuplicateTransaction(workflowInstanceKey, value);
