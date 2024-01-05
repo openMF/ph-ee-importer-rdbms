@@ -80,18 +80,6 @@ public class Transfer {
     @Column(name = "BATCH_ID")
     private String batchId;
 
-    @Column(name = "ENDTOENDIDENTIFICATION")
-    private String endToEndIdentification;
-
-    @Column(name = "RECALL_STATUS")
-    private String recallStatus;
-
-    @Column(name = "RECALL_DIRECTION")
-    private String recallDirection;
-
-    @Column(name = "PAYMENT_STATUS")
-    private String paymentStatus;
-
     @Column(name = "CLIENTCORRELATIONID")
     private String clientCorrelationId;
 
