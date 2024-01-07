@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static hu.dpc.phee.operator.util.OperatorUtils.strip;
 
@@ -111,7 +112,7 @@ public class InflightBatchManager {
 
     }
 
-    public void updateTransferTableWithFailedDuplicateTransaction(Long workflowInstanceKey, String filename) {
+    public void updateTransferTableWithFailedTransaction(Long workflowInstanceKey, String filename) {
             logger.info("Filename {}", filename);
             if (filename == null) {
                 return;
@@ -122,8 +123,14 @@ public class InflightBatchManager {
             for (Transaction transaction : transactionList) {
                 Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
                 transfer.setStatus(TransferStatus.FAILED);
-//                transfer.setBatchId(tempDocumentStore.getBatchId(workflowInstanceKey));
-                logger.info("Inserting failed txn: {}", transfer);
+                transfer.setBatchId(strip(getBatchId(workflowInstanceKey)));
+                transfer.setStartedAt(new Date());
+                transfer.setCompletedAt(new Date());
+                transfer.setErrorInformation(transaction.getNote());
+                transfer.setClientCorrelationId(UUID.randomUUID().toString());
+                transfer.setTransactionId(UUID.randomUUID().toString());
+                logger.debug("Inserting failed txn: {}", transfer);
+                logger.info("Inserting failed txn with note: {}", transaction.getNote());
                 transferRepository.save(transfer);
             }
         }

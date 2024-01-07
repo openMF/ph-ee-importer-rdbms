@@ -179,7 +179,7 @@ public class RecordParser {
         if (variableName.equals("failedTransactionFile")) {
             // insert the transaction into transfer table
             logger.info("Name {} and value: {}");
-            inflightBatchManager.updateTransferTableWithFailedDuplicateTransaction(workflowInstanceKey, value);
+            inflightBatchManager.updateTransferTableWithFailedTransaction(workflowInstanceKey, value);
         }
 
         logger.debug("finding transformers for bpmn: {} and variable: {}", bpmn, variableName);
