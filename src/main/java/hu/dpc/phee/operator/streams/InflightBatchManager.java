@@ -151,6 +151,7 @@ public class InflightBatchManager {
     public void storeBatchId(Long workflowKey, String batchId) {
         synchronized (workflowKeyBatchFileNameAssociations) {
             workflowKeyBatchIdAssociations.put(workflowKey, batchId);
+            logger.info("************ storing batch id **************" + LocalDateTime.now());
         }
     }
 
@@ -163,7 +164,6 @@ public class InflightBatchManager {
     public void storeBatchFileName(Long workflowKey, String filename) {
         synchronized (workflowKeyBatchFileNameAssociations) {
             workflowKeyBatchFileNameAssociations.put(workflowKey, filename);
-            logger.info("************ storing batch id **************" + LocalDateTime.now());
         }
     }
 }
