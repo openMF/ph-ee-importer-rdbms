@@ -120,6 +120,7 @@ public class InflightBatchManager {
             filename = strip(filename);
             String localFilePath = fileTransferService.downloadFile(filename, bucketName);
             List<Transaction> transactionList = csvFileService.getTransactionList(localFilePath);
+            logger.info(String.valueOf(transactionList.size()));
             for (Transaction transaction : transactionList) {
                 Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
                 transfer.setStatus(TransferStatus.FAILED);
