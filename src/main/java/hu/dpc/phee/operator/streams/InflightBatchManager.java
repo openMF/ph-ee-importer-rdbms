@@ -121,10 +121,14 @@ public class InflightBatchManager {
             String localFilePath = fileTransferService.downloadFile(filename, bucketName);
             List<Transaction> transactionList = csvFileService.getTransactionList(localFilePath);
             logger.info(String.valueOf(transactionList.size()));
+            logger.info(transactionList.get(0).toString());
             for (Transaction transaction : transactionList) {
+                logger.info("****126***");
                 Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
+                logger.info("****128***");
                 transfer.setStatus(TransferStatus.FAILED);
                 transfer.setBatchId(strip(getBatchId(workflowInstanceKey)));
+                logger.info("****131***");
                 transfer.setStartedAt(new Date());
                 transfer.setCompletedAt(new Date());
                 transfer.setErrorInformation(transaction.getNote());
