@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +125,7 @@ public class InflightBatchManager {
             for (Transaction transaction : transactionList) {
                 logger.info("****126***");
                 Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
-                logger.info("****128***");
+                logger.info("****128***" + LocalDateTime.now());
                 transfer.setStatus(TransferStatus.FAILED);
                 logger.info(workflowInstanceKey.toString());
                 logger.info(getBatchId(workflowInstanceKey));
@@ -163,6 +163,7 @@ public class InflightBatchManager {
     public void storeBatchFileName(Long workflowKey, String filename) {
         synchronized (workflowKeyBatchFileNameAssociations) {
             workflowKeyBatchFileNameAssociations.put(workflowKey, filename);
+            logger.info("************ storing batch id **************" + LocalDateTime.now());
         }
     }
 }
