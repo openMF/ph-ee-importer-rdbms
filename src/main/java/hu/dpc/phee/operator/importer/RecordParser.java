@@ -255,6 +255,7 @@ public class RecordParser {
             }
         } else if (batchType.equals(bpmnProcess.getType())) {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
+                logger.info("Inside ELEMENT_ACTIVATING");
                 inflightBatchManager.batchStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 logger.info("Inside ELEMENT_COMPLETED");
