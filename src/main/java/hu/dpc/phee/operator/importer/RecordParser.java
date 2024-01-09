@@ -257,7 +257,9 @@ public class RecordParser {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 inflightBatchManager.batchStarted(workflowInstanceKey, timestamp, bpmnProcess.getDirection());
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
+                logger.info("Inside ELEMENT_COMPLETED");
                 if (!bpmnProcess.getId().equalsIgnoreCase("bulk_processor")) {
+                    logger.info("Inside bulk_processor condition");
                     logger.info("Inside if condition PROCESS_INSTANCE, json {}", json.jsonString());
                     checkWorkerIdAndUpdateTransferData(workflowInstanceKey, timestamp);
                 }
@@ -320,7 +322,9 @@ public class RecordParser {
 
     // reads data from csv file and write data to transfers table
     private void updateTransferTableForBatch(Long workflowInstanceKey, Long completeTimestamp) {
+        logger.info("Inside updateTransferTableForBatch");
         String filename = tempDocumentStore.getBatchFileName(workflowInstanceKey);
+        logger.info("Inside updateTransferTableForBatch filr {}", filename);
         logger.info("Filename {}", filename);
         if (filename == null) {
             return;
@@ -333,6 +337,7 @@ public class RecordParser {
             return;
         }
         List<Transaction> transactionList = csvFileService.getTransactionList(filename);
+        logger.info("Inside updateTransferTableForBatch transaction {}", transactionList.size());
 
         Batch batch = batchRepository.findByWorkflowInstanceKey(workflowInstanceKey);
         for (Transaction transaction : transactionList) {
