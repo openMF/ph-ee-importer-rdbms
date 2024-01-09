@@ -182,6 +182,11 @@ public class RecordParser {
             inflightBatchManager.updateTransferTableWithFailedTransaction(workflowInstanceKey, value);
         }
 
+        if (variableName.equals("batchId")) {
+            logger.info("store batchid {} in tempDocStore for instance {}", strip(value), workflowInstanceKey);
+            inflightBatchManager.storeBatchId(workflowInstanceKey, value);
+        }
+
         logger.debug("finding transformers for bpmn: {} and variable: {}", bpmn, variableName);
         List<TransferTransformerConfig.Transformer> matchingTransformers = transferTransformerConfig.getFlows().stream()
                 .filter(it -> bpmn.equalsIgnoreCase(it.getName()))

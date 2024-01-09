@@ -123,6 +123,7 @@ public class InflightBatchManager {
             for (Transaction transaction : transactionList) {
                 Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
                 transfer.setStatus(TransferStatus.FAILED);
+                transfer.setWorkflowInstanceKey(workflowInstanceKey);;
                 transfer.setBatchId(strip(getBatchId(workflowInstanceKey)));
                 transfer.setStartedAt(new Date());
                 transfer.setCompletedAt(new Date());
