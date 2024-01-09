@@ -127,6 +127,7 @@ public class InflightBatchManager {
                 Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
                 logger.info("****128***" + LocalDateTime.now());
                 transfer.setStatus(TransferStatus.FAILED);
+                transfer.setWorkflowInstanceKey(workflowInstanceKey);
                 logger.info(workflowInstanceKey.toString());
                 logger.info(getBatchId(workflowInstanceKey));
                 transfer.setBatchId(strip(getBatchId(workflowInstanceKey)));
