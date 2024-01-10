@@ -1,8 +1,5 @@
 package hu.dpc.phee.operator.streams;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;
 import hu.dpc.phee.operator.entity.batch.Batch;
@@ -11,6 +8,8 @@ import hu.dpc.phee.operator.entity.batch.Transaction;
 import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferRepository;
+import hu.dpc.phee.operator.entity.transfer.TransferStatus;
+import hu.dpc.phee.operator.file.CsvFileService;
 import hu.dpc.phee.operator.file.FileTransferService;
 import hu.dpc.phee.operator.util.BatchFormatToTransferMapper;
 import org.slf4j.Logger;
@@ -19,18 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.Reader;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static hu.dpc.phee.operator.util.OperatorUtils.strip;
 
@@ -47,7 +41,7 @@ public class InflightBatchManager {
     private FileTransferService fileTransferService;
 
     @Autowired
-    private CsvMapper csvMapper;
+    private CsvFileService csvFileService;
 
     @Value("${application.bucket-name}")
     private String bucketName;
@@ -93,22 +87,7 @@ public class InflightBatchManager {
                     workflowInstanceKey, filename);
             return;
         }
-        List<Transaction> transactionList;
-        try {
-            CsvSchema schema = CsvSchema.emptySchema().withHeader();
-            Reader reader = Files.newBufferedReader(Paths.get(filename), Charset.defaultCharset());
-            MappingIterator<Transaction> readValues = csvMapper.readerWithSchemaFor(Transaction.class).with(schema).readValues(reader);
-            transactionList = new ArrayList<>();
-            while (readValues.hasNext()) {
-                Transaction current = readValues.next();
-                transactionList.add(current);
-            }
-        } catch (IOException e) {
-            logger.debug(e.getMessage());
-            logger.error("Error building TransactionList for batch with instance key {} and batch filename {}", workflowInstanceKey,
-                    filename);
-            return;
-        }
+        List<Transaction> transactionList = csvFileService.getTransactionList(filename);
 
         for (Transaction transaction : transactionList) {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
@@ -132,6 +111,30 @@ public class InflightBatchManager {
         }
 
     }
+
+    public void updateTransferTableWithFailedTransaction(Long workflowInstanceKey, String filename) {
+            logger.info("Filename {}", filename);
+            if (filename == null) {
+                return;
+            }
+            filename = strip(filename);
+            String localFilePath = fileTransferService.downloadFile(filename, bucketName);
+            List<Transaction> transactionList = csvFileService.getTransactionList(localFilePath);
+            for (Transaction transaction : transactionList) {
+                Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
+                transfer.setStatus(TransferStatus.FAILED);
+                transfer.setWorkflowInstanceKey(workflowInstanceKey);;
+                transfer.setBatchId(strip(getBatchId(workflowInstanceKey)));
+                transfer.setStartedAt(new Date());
+                transfer.setCompletedAt(new Date());
+                transfer.setErrorInformation(transaction.getNote());
+                transfer.setClientCorrelationId(UUID.randomUUID().toString());
+                transfer.setTransactionId(UUID.randomUUID().toString());
+                logger.debug("Inserting failed txn: {}", transfer);
+                logger.info("Inserting failed txn with note: {}", transaction.getNote());
+                transferRepository.save(transfer);
+            }
+        }
 
     public String getBatchFileName(Long workflowKey) {
         synchronized (workflowKeyBatchFileNameAssociations) {

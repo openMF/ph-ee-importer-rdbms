@@ -2,7 +2,7 @@ tenants:
   connections:
     - name: gorilla
       schema_server: operationsmysql
-      schema_name: tenants
+      schema_name:
       schema_server_port: 3306
       schema_username: mifos
       schema_password: password
@@ -28,7 +28,7 @@ tenants:
       schema_connection_parameters:
     - name: rhino
       schema_server: operationsmysql
-      schema_name: tenants
+      schema_name:
       schema_server_port: 3306
       schema_username: mifos
       schema_password: password
@@ -54,7 +54,7 @@ tenants:
       schema_connection_parameters:
     - name: lion
       schema_server: operationsmysql
-      schema_name: tenants
+      schema_name:
       schema_server_port: 3306
       schema_username: mifos
       schema_password: password
