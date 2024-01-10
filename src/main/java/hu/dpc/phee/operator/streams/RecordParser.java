@@ -130,6 +130,7 @@ public class RecordParser {
         } else if ("BATCH".equalsIgnoreCase(flowType)) {
             logger.info("Processing flow of type BATCH");
             logger.info("intent {}", intent);
+            logger.info("Record {}", recordDocument);
             Batch batch = inflightBatchManager.retrieveOrCreateBatch(bpmn, sample);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 batch.setStartedAt(new Date(timestamp));
