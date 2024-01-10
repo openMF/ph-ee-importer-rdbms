@@ -73,6 +73,10 @@ transfer:
         - field: paymentMode
           variableName: transactionList
           jsonPath: $.payment_mode
+        - field: approvedAmount
+          variableName: totalApprovedAmount
+        - field: approvedCount
+          variableName: totalApprovedCount
     - name: slcb
       direction: UNKNOWN
       type: BATCH

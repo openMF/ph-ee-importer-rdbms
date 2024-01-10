@@ -134,6 +134,7 @@ public class RecordParser {
                 batch.setStartedAt(new Date(timestamp));
                 logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
+                logger.info("Inside ELEMENT_COMPLETED");
                 if (!config.get().getName().equalsIgnoreCase("bulk_processor")) {
                     logger.info("Inside if condition PROCESS_INSTANCE, json {}", recordType);
                     inflightBatchManager.checkWorkerIdAndUpdateTransferData(batch, workflowInstanceKey, timestamp);
