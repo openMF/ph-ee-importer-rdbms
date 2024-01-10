@@ -304,7 +304,7 @@ public class EventParser {
             String dateFormat = transformer.getDateFormat();
             if (Strings.isNotBlank(transformer.getConstant())) {
                 logger.debug("setting constant value: {}", transformer.getConstant());
-                setPropertyValue(transfer, fieldName, variableValue, dateFormat);
+                setPropertyValue(transfer, fieldName, transformer.getConstant(), dateFormat);
                 return;
             }
 
