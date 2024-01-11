@@ -84,7 +84,7 @@ public class RecordParser {
         String recordType = recordDocument.read("$.recordType", String.class);
         String intent = recordDocument.read("$.intent", String.class);
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
-
+        logger.info("Inside processWorkflowInstance recordDocument {}", recordDocument);
         List<TransferTransformerConfig.Transformer> constantTransformers = transferTransformerConfig.getFlows().stream()
                 .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
                 .flatMap(it -> it.getTransformers().stream())
