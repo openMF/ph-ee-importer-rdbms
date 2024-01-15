@@ -75,6 +75,8 @@ public class Transfer {
 
     @Column(name = "direction")
     private String direction;
+    @Column(name = "rtp_direction")
+    private String rtpDirection;
 
     @Column(name = "error_information")
     private String errorInformation;
