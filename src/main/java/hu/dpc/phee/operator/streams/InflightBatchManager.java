@@ -71,7 +71,7 @@ public class InflightBatchManager {
             batchRepository.save(batch);
         } else {
             logger.info("Inside batch found cond");
-            String subBatchId = record.read("$.value.subBatchId", String.Class);
+            String subBatchId = record.read("$.value.subBatchId", String.class);
             logger.info("Fetching subBatchId: {}", subBatchId);
             if(subBatchId!=null) {
                 Batch subBatch = batchRepository.findBySubBatchId(subBatchId);
