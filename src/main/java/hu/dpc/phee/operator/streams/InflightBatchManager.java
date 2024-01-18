@@ -57,14 +57,35 @@ public class InflightBatchManager {
 
     public Batch retrieveOrCreateBatch(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
+        logger.info("Inside retrieveOrCreateBatch.....");
+        logger.info("Document data: {}", record);
+        String batchId = record.read("$.value.batchId", String.class);
+        logger.info("Batch ID: {}", batchId);
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
-        Batch batch = batchRepository.findByWorkflowInstanceKey(processInstanceKey);
+//        Batch batch = batchRepository.findByWorkflowInstanceKey(processInstanceKey);
+        Batch batch= batchRepository.findByBatchId(batchId);
         if (batch == null) {
             logger.debug("creating new Batch for processInstanceKey: {}", processInstanceKey);
+            logger.info("Inside batch == null cond");
             batch = new Batch(processInstanceKey);
             batchRepository.save(batch);
         } else {
-            logger.info("found existing Batch for processInstanceKey: {}", processInstanceKey);
+            logger.info("Inside batch found cond");
+            String subBatchId = record.read("$.value.subBatchId", String.Class);
+            logger.info("Fetching subBatchId: {}", subBatchId);
+            if(subBatchId!=null) {
+                Batch subBatch = batchRepository.findBySubBatchId(subBatchId);
+                if (subBatch == null) {
+                    logger.debug("creating new Batch for processInstanceKey: {}", processInstanceKey);
+                    logger.info("Creating new batch for subBatchId: {}", subBatchId);
+                    batch = new Batch(processInstanceKey);
+                    batchRepository.save(batch);
+                } else {
+                    logger.info("Inside subBatch also found");
+                }
+            } else {
+                logger.info("SubBatch Id is null cond");
+            }
         }
         return batch;
     }
