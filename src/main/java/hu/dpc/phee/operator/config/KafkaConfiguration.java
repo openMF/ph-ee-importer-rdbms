@@ -43,7 +43,7 @@ public class KafkaConfiguration {
     @Value("${kafka.brokers}")
     private String kafkaBrokers;
 
-    @Value("kafka.consumer-group")
+    @Value("${kafka.consumer-group}")
     private String consumerGroup;
 
     @Value("${kafka.msk}")
