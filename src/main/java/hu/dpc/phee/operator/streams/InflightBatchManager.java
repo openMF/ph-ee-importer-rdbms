@@ -35,6 +35,8 @@ public class InflightBatchManager {
     BatchRepository batchRepository;
 
     @Autowired
+    TransferRepository transferRepository;
+    @Autowired
     TransferTransformerConfig transferTransformerConfig;
 
     @Autowired
@@ -46,9 +48,6 @@ public class InflightBatchManager {
     @Value("${application.bucket-name}")
     private String bucketName;
 
-    @Autowired
-    TransferRepository transferRepository;
-
     private final Map<Long, String> workflowKeyBatchFileNameAssociations = new HashMap<>();
 
     private final Map<Long, String> workflowKeyBatchIdAssociations = new HashMap<>();
@@ -57,35 +56,21 @@ public class InflightBatchManager {
 
     public Batch retrieveOrCreateBatch(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
-        logger.info("Inside retrieveOrCreateBatch.....");
-        logger.info("Document data: {}", record);
-        String batchId = record.read("$.value.batchId", String.class);
-        logger.info("Batch ID: {}", batchId);
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
-//        Batch batch = batchRepository.findByWorkflowInstanceKey(processInstanceKey);
-        Batch batch= batchRepository.findByBatchId(batchId);
+        Batch batch = batchRepository.findByWorkflowInstanceKey(processInstanceKey);
         if (batch == null) {
             logger.debug("creating new Batch for processInstanceKey: {}", processInstanceKey);
-            logger.info("Inside batch == null cond");
-            batch = new Batch(processInstanceKey);
-            batchRepository.save(batch);
-        } else {
-            logger.info("Inside batch found cond");
-            String subBatchId = record.read("$.value.subBatchId", String.class);
-            logger.info("Fetching subBatchId: {}", subBatchId);
-            if(subBatchId!=null) {
-                Batch subBatch = batchRepository.findBySubBatchId(subBatchId);
-                if (subBatch == null) {
-                    logger.debug("creating new Batch for processInstanceKey: {}", processInstanceKey);
-                    logger.info("Creating new batch for subBatchId: {}", subBatchId);
+            String batchId = getBatchId(processInstanceKey);
+            if(batchId!=null) {
+                Optional<Batch> bt = batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId);
+                if(bt.isEmpty())
+                {
                     batch = new Batch(processInstanceKey);
                     batchRepository.save(batch);
-                } else {
-                    logger.info("Inside subBatch also found");
                 }
-            } else {
-                logger.info("SubBatch Id is null cond");
             }
+        } else {
+            logger.info("found existing Batch for processInstanceKey: {}", processInstanceKey);
         }
         return batch;
     }
@@ -95,7 +80,7 @@ public class InflightBatchManager {
 
     }
 
-    private void updateTransferTableForBatch(Batch batch, Long workflowInstanceKey, Long completeTimestamp) {
+    private void    updateTransferTableForBatch(Batch batch, Long workflowInstanceKey, Long completeTimestamp) {
         String filename = getBatchFileName(workflowInstanceKey);
         logger.info("Filename {}", filename);
         if (filename == null) {
@@ -114,23 +99,69 @@ public class InflightBatchManager {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
 
-            String batchId = getBatchId(workflowInstanceKey);
-            transfer.setBatchId(strip(batchId));
+            //String batchId = getBatchId(workflowInstanceKey);
+            //transfer.setBatchId(strip(batchId));
             transfer.setCompletedAt(new Date(completeTimestamp));
             transfer.setTransactionId(transaction.getRequestId());
-
+            transfer.setClientCorrelationId(UUID.randomUUID().toString());
             transfer.setPayeeDfspId(batch.getPaymentMode());
             transfer.setPayerDfspId(ThreadLocalContextUtil.getTenant().toString());
-
+            if(transaction.getBatchId() == null || transaction.getBatchId().isEmpty())
+            {
+                transfer.setBatchId(getBatchId(workflowInstanceKey));
+            }else {
+                transfer.setBatchId(transaction.getBatchId());
+            }
             transfer.setPayeeFeeCurrency(transaction.getCurrency());
             transfer.setPayeeFee(BigDecimal.ZERO);
             transfer.setPayerFeeCurrency(transaction.getCurrency());
             transfer.setPayerFee(BigDecimal.ZERO);
 
             BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
+            transfer = updatedExistingRecord(transfer);
             transferRepository.save(transfer);
+            logger.debug("Saved transfer with batchId: {}", transfer.getBatchId());
         }
 
+    }
+
+    public Transfer updatedExistingRecord(Transfer transfer)
+    {
+        Transfer existingTransfer = transferRepository.findByTransactionIdAndBatchId(transfer.getTransactionId(), transfer.getBatchId());
+        if(existingTransfer == null)
+        {
+            return transfer;
+        }
+        transfer = updateTransfer(existingTransfer, transfer);
+        return transfer;
+    }
+
+    public Transfer updateTransfer(Transfer transfer1, Transfer transfer2) {
+        transfer1.setWorkflowInstanceKey(transfer2.getWorkflowInstanceKey());
+        transfer1.setTransactionId(transfer2.getTransactionId());
+        transfer1.setStartedAt(transfer2.getStartedAt());
+        transfer1.setCompletedAt(transfer2.getCompletedAt());
+        transfer1.setStatus(transfer2.getStatus());
+        transfer1.setStatusDetail(transfer2.getStatusDetail());
+        transfer1.setPayeeDfspId(transfer2.getPayeeDfspId());
+        transfer1.setPayeePartyId(transfer2.getPayeePartyId());
+        transfer1.setPayeePartyIdType(transfer2.getPayeePartyIdType());
+        transfer1.setPayeeFee(transfer2.getPayeeFee());
+        transfer1.setPayeeFeeCurrency(transfer2.getPayeeFeeCurrency());
+        transfer1.setPayeeQuoteCode(transfer2.getPayeeQuoteCode());
+        transfer1.setPayerDfspId(transfer2.getPayerDfspId());
+        transfer1.setPayerPartyId(transfer2.getPayerPartyId());
+        transfer1.setPayerPartyIdType(transfer2.getPayerPartyIdType());
+        transfer1.setPayerFee(transfer2.getPayerFee());
+        transfer1.setPayerFeeCurrency(transfer2.getPayerFeeCurrency());
+        transfer1.setPayerQuoteCode(transfer2.getPayerQuoteCode());
+        transfer1.setAmount(transfer2.getAmount());
+        transfer1.setCurrency(transfer2.getCurrency());
+        transfer1.setDirection(transfer2.getDirection());
+        transfer1.setErrorInformation(transfer2.getErrorInformation());
+        transfer1.setBatchId(transfer2.getBatchId());
+        transfer1.setClientCorrelationId(transfer2.getClientCorrelationId());
+        return transfer1;
     }
 
     public void updateTransferTableWithFailedTransaction(Long workflowInstanceKey, String filename) {
@@ -145,7 +176,8 @@ public class InflightBatchManager {
                 Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
                 transfer.setStatus(TransferStatus.FAILED);
                 transfer.setWorkflowInstanceKey(workflowInstanceKey);;
-                transfer.setBatchId(strip(getBatchId(workflowInstanceKey)));
+                //transfer.setBatchId(strip(getBatchId(workflowInstanceKey)));
+                transfer.setBatchId(transaction.getBatchId());
                 transfer.setStartedAt(new Date());
                 transfer.setCompletedAt(new Date());
                 transfer.setErrorInformation(transaction.getNote());

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "id", "request_id", "payment_mode", "account_number", "payer_identifier_type", "payer_identifier",
-        "payee_identifier_type", "payee_identifier", "amount", "currency", "note", "program_shortcode", "cycle" })
+        "payee_identifier_type", "payee_identifier", "amount", "currency", "note", "program_shortcode", "cycle" , "batch_id"})
 public class Transaction implements CsvSchema {
 
     @JsonProperty("id")
@@ -49,7 +49,7 @@ public class Transaction implements CsvSchema {
     @JsonProperty("cycle")
     private String cycle;
 
-    @JsonIgnore
+    @JsonProperty("batch_id")
     private String batchId;
 
     @JsonIgnore

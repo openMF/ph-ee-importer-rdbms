@@ -21,6 +21,10 @@ import java.util.Date;
 public class Transfer {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
+    private Long id;
+
     @Column(name = "WORKFLOW_INSTANCE_KEY")
     private Long workflowInstanceKey;
 
@@ -83,8 +87,6 @@ public class Transfer {
     @Column(name = "CLIENTCORRELATIONID")
     private String clientCorrelationId;
 
-    @Column(name = "SUB_BATCH_ID")
-    private String subBatchId;
 
     public Transfer(Long workflowInstanceKey) {
         this.workflowInstanceKey = workflowInstanceKey;

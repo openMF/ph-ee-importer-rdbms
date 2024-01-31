@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface TransferRepository extends JpaRepository<Transfer, Long>, JpaSpecificationExecutor {
 
     Transfer findByWorkflowInstanceKey(Long workflowInstanceKey);
-
+    Transfer findByTransactionIdAndBatchId(String transactionId, String batchId);
 }

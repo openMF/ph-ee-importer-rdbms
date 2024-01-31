@@ -362,7 +362,11 @@ public class RecordParser {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Batch> batches = Arrays.asList(objectMapper.readValue(jsonString, Batch[].class));
         for (Batch bt : batches) {
-            batchRepository.save(bt);
+            Batch batch = batchRepository.findBySubBatchId(bt.getSubBatchId());
+            if(batch==null)
+            {
+                batchRepository.save(bt);
+            }
         }
     }
 }

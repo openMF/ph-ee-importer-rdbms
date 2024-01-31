@@ -28,6 +28,7 @@ public final class BatchFormatToTransferMapper {
         transfer.setPayerPartyIdType(transaction.getPayerIdentifierType());
         transfer.setPayerPartyId(transaction.getPayerIdentifier());
         transfer.setDirection("UNKNOWN");
+        transfer.setBatchId(transaction.getBatchId());
         transfer.setCurrency(transaction.getCurrency());
         TransferStatus status;
         if (transaction.getStatus() != null) {
