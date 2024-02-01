@@ -98,9 +98,6 @@ public class InflightBatchManager {
         for (Transaction transaction : transactionList) {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
-
-            //String batchId = getBatchId(workflowInstanceKey);
-            //transfer.setBatchId(strip(batchId));
             transfer.setCompletedAt(new Date(completeTimestamp));
             transfer.setTransactionId(transaction.getRequestId());
             transfer.setClientCorrelationId(UUID.randomUUID().toString());

@@ -1,5 +1,5 @@
 kafka:
-  brokers: "localhost:9095"
+  brokers: "kafka:9092"
   consumer-group: ch1
 #  To be used when auth is enabled in kafka
 #  username: "admin"
@@ -34,7 +34,7 @@ datasource:
     driverclass_name: "com.mysql.cj.jdbc.Driver"
   core:
     port: 3306
-    host: "localhost"
+    host: "operationsmysql"
     schema: "tenants"
     username: "mifos"
     password: "password"
@@ -48,10 +48,10 @@ application:
 cloud:
   aws:
     enabled: true
-    s3BaseUrl: http://localhost:9000
+    s3BaseUrl: "https://s3.ap-south-1.amazonaws.com"
     credentials:
-      access-key: ${AWS_ACCESS_KEY:root}
-      secret-key: ${AWS_SECRET_KEY:password}
+      access-key: ${AWS_ACCESS_KEY:access_key_from_aws}
+      secret-key: ${AWS_SECRET_KEY:secret_key_from_aws}
     region:
       static: ap-south-1
 

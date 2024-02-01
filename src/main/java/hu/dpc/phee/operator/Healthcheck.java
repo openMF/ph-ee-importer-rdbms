@@ -12,7 +12,7 @@ public class Healthcheck {
 
     @PostConstruct
     public void start() {
-        int port = 5001;
+        int port = 5000;
         logger.info("starting healthcheck service on port {}", port);
         Javalin.create()
                 .get("/", ctx -> ctx.result())

@@ -1,6 +1,6 @@
 datasource:
   core:
-    host: localhost
+    host: operationsmysql
     port: 3306
     schema: tenants
     username: mifos
