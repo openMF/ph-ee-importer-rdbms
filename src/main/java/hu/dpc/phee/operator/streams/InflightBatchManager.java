@@ -103,9 +103,10 @@ public class InflightBatchManager {
             transfer.setClientCorrelationId(UUID.randomUUID().toString());
             transfer.setPayeeDfspId(batch.getPaymentMode());
             transfer.setPayerDfspId(ThreadLocalContextUtil.getTenant().toString());
+            String batchId = getBatchId(workflowInstanceKey);
             if(transaction.getBatchId() == null || transaction.getBatchId().isEmpty())
             {
-                transfer.setBatchId(getBatchId(workflowInstanceKey));
+                transfer.setBatchId(batchId);
             }else {
                 transfer.setBatchId(transaction.getBatchId());
             }
@@ -115,19 +116,23 @@ public class InflightBatchManager {
             transfer.setPayerFee(BigDecimal.ZERO);
 
             BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
-            transfer = updatedExistingRecord(transfer);
+            transfer = updatedExistingRecord(transfer, batchId);
             transferRepository.save(transfer);
             logger.debug("Saved transfer with batchId: {}", transfer.getBatchId());
         }
 
     }
 
-    public Transfer updatedExistingRecord(Transfer transfer)
+    public Transfer updatedExistingRecord(Transfer transfer, String batchId)
     {
-        Transfer existingTransfer = transferRepository.findByTransactionIdAndBatchId(transfer.getTransactionId(), transfer.getBatchId());
-        if(existingTransfer == null)
-        {
-            return transfer;
+        Transfer existingTransfer = transferRepository.findByTransactionIdAndBatchId(transfer.getTransactionId(), batchId);
+        if (existingTransfer == null) {
+            Transfer updatedExistingTransfer = transferRepository.findByTransactionIdAndBatchId(transfer.getTransactionId(), transfer.getBatchId());
+            if (updatedExistingTransfer == null) {
+                return transfer;
+            } else {
+                existingTransfer = updatedExistingTransfer;
+            }
         }
         transfer = updateTransfer(existingTransfer, transfer);
         return transfer;
@@ -173,8 +178,13 @@ public class InflightBatchManager {
                 Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
                 transfer.setStatus(TransferStatus.FAILED);
                 transfer.setWorkflowInstanceKey(workflowInstanceKey);;
-                //transfer.setBatchId(strip(getBatchId(workflowInstanceKey)));
-                transfer.setBatchId(transaction.getBatchId());
+                String batchId = getBatchId(workflowInstanceKey);
+                if(transaction.getBatchId() == null || transaction.getBatchId().isEmpty())
+                {
+                    transfer.setBatchId(batchId);
+                }else {
+                    transfer.setBatchId(transaction.getBatchId());
+                }
                 transfer.setStartedAt(new Date());
                 transfer.setCompletedAt(new Date());
                 transfer.setErrorInformation(transaction.getNote());
@@ -182,6 +192,7 @@ public class InflightBatchManager {
                 transfer.setTransactionId(UUID.randomUUID().toString());
                 logger.debug("Inserting failed txn: {}", transfer);
                 logger.info("Inserting failed txn with note: {}", transaction.getNote());
+                transfer = updatedExistingRecord(transfer, batchId);
                 transferRepository.save(transfer);
             }
         }

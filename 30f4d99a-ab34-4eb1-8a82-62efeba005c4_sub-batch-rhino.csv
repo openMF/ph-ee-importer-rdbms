@@ -1,0 +1,3 @@
+id,request_id,payment_mode,account_number,payer_identifier_type,payer_identifier,payee_identifier_type,payee_identifier,amount,currency,note,program_shortcode,cycle,payee_dfsp_id,batch_id
+2,"f1e22fe3-9740-4fba-97b6-78f43bfa7f0f",closedloop,,accountNumber,003001003879112168,accountNumber,,840,USD,"Test Payee Payment",,,rhino,"a6ca1d79-ee41-40a8-b335-55bb048f19e1"
+5,"z1e22fe3-9740-4fba-97b6-78f43bfa7f0f",closedloop,,accountNumber,003001003879112168,accountNumber,,740,USD,"Test Payee Payment",,,rhino,"a6ca1d79-ee41-40a8-b335-55bb048f19e1"

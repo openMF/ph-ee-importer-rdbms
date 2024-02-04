@@ -444,8 +444,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: PayeeQuoteTransfer
       direction: INCOMING
       type: TRANSFER
@@ -480,8 +478,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: transferProcess
       direction: UNKNOWN
       type: TRANSFER
@@ -516,8 +512,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: international_remittance_payee_process
       direction: OUTGOING
       type: TRANSFER
@@ -552,8 +546,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: international_remittance_payer_process
       direction: OUTGOING
       type: TRANSFER
@@ -588,8 +580,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: gsma_base_transaction
       direction: OUTGOING
       type: TRANSFER
@@ -624,8 +614,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: inbound_transfer_paygops
       direction: INCOMING
       type: TRANSFER
@@ -660,8 +648,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: inbound_transfer_roster
       direction: INCOMING
       type: TRANSFER
@@ -696,8 +682,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: PayeeQuoteTransfer
       direction: INCOMING
       type: TRANSFER
@@ -732,8 +716,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: transferProcess
       direction: UNKNOWN
       type: TRANSFER
@@ -768,8 +750,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: international_remittance_payee_process
       direction: OUTGOING
       type: TRANSFER
@@ -804,8 +784,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: international_remittance_payer_process
       direction: OUTGOING
       type: TRANSFER
@@ -840,8 +818,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: gsma_base_transaction
       direction: OUTGOING
       type: TRANSFER
@@ -876,8 +852,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: mock_payment_transfer
       direction: OUTGOING
       type: TRANSFER
@@ -912,8 +886,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: mock_payer_fund_transfer
       direction: OUTGOING
       type: TRANSFER
@@ -948,8 +920,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: mock_payment_transfer_debit
       direction: OUTGOING
       type: TRANSFER
@@ -984,8 +954,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: minimal_mock_fund_transfer
       direction: OUTGOING
       type: TRANSFER
@@ -1020,8 +988,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: minimal_mock_fund_transfer_account_lookup
       direction: OUTGOING
       type: TRANSFER
@@ -1056,8 +1022,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: inbound_transfer_tupande
       direction: INCOMING
       type: TRANSFER
@@ -1092,8 +1056,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: inbound_transfer_erply
       direction: INCOMING
       type: TRANSFER
@@ -1128,8 +1090,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: mock_payment_transfer
       direction: OUTGOING
       type: TRANSFER
@@ -1164,8 +1124,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: mock_payer_fund_transfer
       direction: OUTGOING
       type: TRANSFER
@@ -1200,8 +1158,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: mock_payment_transfer_debit
       direction: OUTGOING
       type: TRANSFER
@@ -1236,8 +1192,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: minimal_mock_fund_transfer
       direction: OUTGOING
       type: TRANSFER
@@ -1272,8 +1226,6 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
     - name: minimal_mock_fund_transfer_account_lookup
       direction: OUTGOING
       type: TRANSFER
@@ -1308,7 +1260,5 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
-        - field: subBatchId
-          variableName: subBatchId
 
 

@@ -29,6 +29,7 @@ public class InFlightTransferManager {
         Transfer transfer = transferRepository.findByWorkflowInstanceKey(processInstanceKey);
         if (transfer == null) {
             logger.debug("creating new Transfer for processInstanceKey: {}", processInstanceKey);
+
             transfer = new Transfer(processInstanceKey);
             transfer.setStatus(TransferStatus.IN_PROGRESS);
 

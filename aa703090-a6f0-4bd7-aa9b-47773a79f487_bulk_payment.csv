@@ -1,0 +1,7 @@
+id,request_id,payment_mode,payer_identifier_type,payer_identifier,payee_identifier_type,payee_identifier,amount,currency,note
+0,g1e22fe3-9740-4fba-97b6-78f43bfa7f2f,closedloop,accountNumber,003001003879112168,accountNumber,3001003873110196,850,USD,Test Payee Payment
+1,72aa3ea4-e6f6-4880-877f-39f6ac4d052e,closedloop,accountNumber,003001003879112168,accountNumber,3001003874120160,222,USD,Test Payee Payment
+2,f1e22fe3-9740-4fba-97b6-78f43bfa7f0f,closedloop,accountNumber,003001003879112168,accountNumber,3001003873110195,840,USD,Test Payee Payment
+3,q1e22fe3-9740-4fba-97b6-78f43bfa7f2f,closedloop,accountNumber,003001003879112168,accountNumber,3001003873110196,750,USD,Test Payee Payment
+4,a2aa3ea4-e6f6-4880-877f-39f6ac4d052e,closedloop,accountNumber,003001003879112168,accountNumber,3001003874120160,122,USD,Test Payee Payment
+5,z1e22fe3-9740-4fba-97b6-78f43bfa7f0f,closedloop,accountNumber,003001003879112168,accountNumber,3001003873110195,740,USD,Test Payee Payment
