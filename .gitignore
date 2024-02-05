@@ -1,4 +1,5 @@
 *.iml
+.git-versioned-pom.xml
 target
 .idea
 .project
