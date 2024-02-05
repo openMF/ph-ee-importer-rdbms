@@ -26,21 +26,26 @@ public class InFlightTransferManager {
     public Transfer retrieveOrCreateTransfer(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
-        Transfer transfer = transferRepository.findByWorkflowInstanceKey(processInstanceKey);
-        if (transfer == null) {
-            logger.debug("creating new Transfer for processInstanceKey: {}", processInstanceKey);
-            transfer = new Transfer(processInstanceKey);
-            transfer.setStatus(TransferStatus.IN_PROGRESS);
 
-            if (config.isPresent()) {
-                transfer.setDirection(config.get().getDirection());
-            } else {
+        Optional<Transfer> optionalTransfer = transferRepository.findByWorkflowInstanceKey(processInstanceKey);
+
+        Transfer transfer = optionalTransfer.orElseGet(() -> {
+            logger.debug("Creating new Transfer for processInstanceKey: {}", processInstanceKey);
+            Transfer newTransfer = new Transfer(processInstanceKey);
+            newTransfer.setStatus(TransferStatus.IN_PROGRESS);
+
+            config.ifPresent(c -> newTransfer.setDirection(c.getDirection()));
+
+            if (config.isEmpty()) {
                 logger.error("No config found for bpmn: {}", bpmn);
             }
-            transferRepository.save(transfer);
-        } else {
-            logger.info("found existing Transfer for processInstanceKey: {}", processInstanceKey);
-        }
+
+            transferRepository.save(newTransfer);
+            return newTransfer;
+        });
+
+        optionalTransfer.ifPresent(t -> logger.info("Found existing Transfer for processInstanceKey: {}", processInstanceKey));
+
         return transfer;
     }
 }

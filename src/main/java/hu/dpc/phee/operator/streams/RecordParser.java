@@ -84,7 +84,7 @@ public class RecordParser {
         String recordType = recordDocument.read("$.recordType", String.class);
         String intent = recordDocument.read("$.intent", String.class);
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
-
+        logger.debug("Inside processWorkflowInstance recordDocument {}", recordDocument);
         List<TransferTransformerConfig.Transformer> constantTransformers = transferTransformerConfig.getFlows().stream()
                 .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
                 .flatMap(it -> it.getTransformers().stream())
@@ -134,6 +134,7 @@ public class RecordParser {
                 batch.setStartedAt(new Date(timestamp));
                 logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
+                logger.info("Inside ELEMENT_COMPLETED");
                 if (!config.get().getName().equalsIgnoreCase("bulk_processor")) {
                     logger.info("Inside if condition PROCESS_INSTANCE, json {}", recordType);
                     inflightBatchManager.checkWorkerIdAndUpdateTransferData(batch, workflowInstanceKey, timestamp);
@@ -360,8 +361,14 @@ public class RecordParser {
     public void parseSubBatchDetails(String jsonString) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Batch> batches = Arrays.asList(objectMapper.readValue(jsonString, Batch[].class));
+
         for (Batch bt : batches) {
-            batchRepository.save(bt);
+            Optional<Batch> existingBatchOpt = batchRepository.findBySubBatchId(bt.getSubBatchId());
+
+            existingBatchOpt.orElseGet(() -> {
+                batchRepository.save(bt);
+                return bt; // Return bt as it's saved now.
+            });
         }
     }
 }
