@@ -57,23 +57,25 @@ public class InflightBatchManager {
     public Batch retrieveOrCreateBatch(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
-        Batch batch = batchRepository.findByWorkflowInstanceKey(processInstanceKey);
-        if (batch == null) {
-            logger.debug("creating new Batch for processInstanceKey: {}", processInstanceKey);
+
+        Optional<Batch> batchOptional = batchRepository.findByWorkflowInstanceKey(processInstanceKey);
+
+        if (batchOptional.isEmpty()) {
+            logger.debug("Creating new Batch for processInstanceKey: {}", processInstanceKey);
             String batchId = getBatchId(processInstanceKey);
-            if(batchId!=null) {
-                Optional<Batch> bt = batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId);
-                if(bt.isEmpty())
-                {
-                    batch = new Batch(processInstanceKey);
-                    batchRepository.save(batch);
-                }
+
+            if (batchId != null && batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId).isEmpty()) {
+                Batch batch = new Batch(processInstanceKey);
+                batchRepository.save(batch);
+                return batch;
             }
         } else {
-            logger.info("found existing Batch for processInstanceKey: {}", processInstanceKey);
+            logger.info("Found existing Batch for processInstanceKey: {}", processInstanceKey);
         }
-        return batch;
+
+        return batchOptional.orElse(null);
     }
+
 
     public void checkWorkerIdAndUpdateTransferData(Batch batch, Long workflowInstanceKey, Long timestamp) {
         updateTransferTableForBatch(batch, workflowInstanceKey, timestamp);
@@ -123,19 +125,22 @@ public class InflightBatchManager {
 
     }
 
-    public Transfer updatedExistingRecord(Transfer transfer, String batchId)
-    {
-        Transfer existingTransfer = transferRepository.findByTransactionIdAndBatchId(transfer.getTransactionId(), batchId);
+    public Transfer updatedExistingRecord(Transfer transfer, String batchId) {
+        // Attempt to find an existing transfer with the provided batchId
+        Optional<Transfer> existingTransferOpt = transferRepository.findByTransactionIdAndBatchId(transfer.getTransactionId(), batchId);
+
+        // If not found, attempt to find with the transfer's own batchId
+        Transfer existingTransfer = existingTransferOpt.orElseGet(() ->
+                transferRepository.findByTransactionIdAndBatchId(transfer.getTransactionId(), transfer.getBatchId())
+                        .orElse(null));
+
+        // If still not found, return the original transfer
         if (existingTransfer == null) {
-            Transfer updatedExistingTransfer = transferRepository.findByTransactionIdAndBatchId(transfer.getTransactionId(), transfer.getBatchId());
-            if (updatedExistingTransfer == null) {
-                return transfer;
-            } else {
-                existingTransfer = updatedExistingTransfer;
-            }
+            return transfer;
         }
-        transfer = updateTransfer(existingTransfer, transfer);
-        return transfer;
+
+        // If found, update the existing transfer with the provided transfer's details and return
+        return updateTransfer(existingTransfer, transfer);
     }
 
     public Transfer updateTransfer(Transfer transfer1, Transfer transfer2) {
