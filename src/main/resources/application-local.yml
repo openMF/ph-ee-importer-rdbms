@@ -1298,5 +1298,7 @@ transfer:
           variableName: billAmount
         - field: payerDfspId
           variableName: payerTenantId
+        - field: payeeDfspId
+          variableName: payeeDfspId
 
 
