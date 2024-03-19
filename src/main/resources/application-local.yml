@@ -1286,5 +1286,29 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
+    - name: bill_request
+      direction: INCOMING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: amount
+          variableName: billAmount
+        - field: payerDfspId
+          variableName: tenantId
+        - field: payeeDfspId
+          variableName: payeeDfspId
+        - field: clientCorrelationId
+          variableName: X-CorrelationID\
+        - field: payeePartyIdType
+          variableName: payeePartyIdType
+        - field: payeePartyId
+          variableName: payeePartyId
+        - field: payerPartyIdType
+          variableName: payerPartyIdType
+        - field: payerPartyId
+          variableName: payerPartyId
+        - field: errorInformation
+          variableName: errorInformation
 
 
