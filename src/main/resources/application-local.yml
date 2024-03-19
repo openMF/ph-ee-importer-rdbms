@@ -1260,5 +1260,31 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
+    - name: payment_notification
+      direction: OUTGOING
+      type: TRANSFER
+      transformers:
+        - field: amount
+          variableName: amount
+        - field: payeePartyIdType
+          variableName: payeePartyIdType
+        - field: payeePartyId
+          variableName: payeePartyId
+        - field: payerPartyIdType
+          variableName: payerPartyIdType
+        - field: payerPartyId
+          variableName: payerPartyId
+        - field: transactionId
+          variableName: transactionId
+        - field: currency
+          variableName: currency
+        - field: batchId
+          variableName: batchId
+        - field: tenantId
+          variableName: tenantId
+        - field: errorInformation
+          variableName: errorInformation
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
 
 
