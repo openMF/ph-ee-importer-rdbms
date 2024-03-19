@@ -1301,7 +1301,7 @@ transfer:
         - field: payeeDfspId
           variableName: payeeDfspId
         - field: clientCorrelationId
-          variableName: X-CorrelationID\
+          variableName: X-CorrelationID
         - field: payeePartyIdType
           variableName: payeePartyIdType
         - field: payeePartyId
