@@ -124,6 +124,9 @@ public class RecordParser {
                 } else {
                     transactionRequest.setState(TransactionRequestState.ACCEPTED);
                 }
+            } else {
+                logger.info("Transaction request intent {}", intent);
+                logger.info("Transaction request element {}", elementId);
             }
             constantTransformers.forEach(it -> applyTransformer(transactionRequest, null, null, it));
             transactionRequestRepository.save(transactionRequest);
