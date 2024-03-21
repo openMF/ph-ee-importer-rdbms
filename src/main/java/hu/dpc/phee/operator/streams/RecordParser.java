@@ -115,6 +115,9 @@ public class RecordParser {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 transactionRequest.setStartedAt(new Date(timestamp));
                 transactionRequest.setDirection(config.get().getDirection());
+                if(config.get().getName().contains("bill_request")){
+                    updateRtpTransaction(transactionRequest, intent, elementId);
+                }
                 logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 logger.info("finishing transaction for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
@@ -160,6 +163,18 @@ public class RecordParser {
             logger.error("No matching flow types for the given request");
         }
         return List.of();
+    }
+
+    public void updateRtpTransaction(TransactionRequest transactionRequest, String intent, String elementId){
+            if("ELEMENT_ACTIVATING".equals(intent) && "payerRtpRequest".equals(elementId)){
+                transactionRequest.setState(TransactionRequestState.IN_PROGRESS);
+            } else if("ELEMENT_ACTIVATING".equals(intent) && "billerRtpResponse".equals(elementId)){
+                transactionRequest.setState(TransactionRequestState.REQUEST_ACCEPTED);
+            } else if("ELEMENT_ACTIVATING".equals(intent) && "billPay".equals(elementId)){
+                transactionRequest.setState(TransactionRequestState.ACCEPTED);
+            } else if("ELEMENT_ACTIVATING".equals(intent) && "billPayResponse".equals(elementId)){
+                transactionRequest.setState(TransactionRequestState.SUCCESS);
+            }
     }
 
     public List<Object> processVariable(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long workflowKey, Long timestamp, String flowType, DocumentContext sample)throws JsonProcessingException {
