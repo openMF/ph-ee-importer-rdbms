@@ -115,17 +115,22 @@ public class RecordParser {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 transactionRequest.setStartedAt(new Date(timestamp));
                 transactionRequest.setDirection(config.get().getDirection());
-                if(config.get().getName().contains("bill_request")){
-                    updateRtpTransaction(transactionRequest, intent, elementId);
-                }
+
                 logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 logger.info("finishing transaction for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
+                if(config.get().getName().contains("bill_request")){
+                    updateRtpTransaction(transactionRequest, intent, elementId);
+                }
                 transactionRequest.setCompletedAt(new Date(timestamp));
                 if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
                     transactionRequest.setState(TransactionRequestState.FAILED);
                 } else {
-                    transactionRequest.setState(TransactionRequestState.ACCEPTED);
+                    if(!config.get().getName().contains("bill_request")) {
+                        transactionRequest.setState(TransactionRequestState.ACCEPTED);
+                    }else {
+                        transactionRequest.setState(TransactionRequestState.SUCCESS);
+                    }
                 }
             } else {
                 logger.info("Transaction request intent {}", intent);
@@ -172,8 +177,6 @@ public class RecordParser {
                 transactionRequest.setState(TransactionRequestState.REQUEST_ACCEPTED);
             } else if("ELEMENT_ACTIVATING".equals(intent) && "billPay".equals(elementId)){
                 transactionRequest.setState(TransactionRequestState.ACCEPTED);
-            } else if("ELEMENT_ACTIVATING".equals(intent) && "Event_1gke4n8".equals(elementId)){
-                transactionRequest.setState(TransactionRequestState.SUCCESS);
             }
     }
 
