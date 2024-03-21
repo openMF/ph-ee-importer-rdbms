@@ -172,7 +172,7 @@ public class RecordParser {
                 transactionRequest.setState(TransactionRequestState.REQUEST_ACCEPTED);
             } else if("ELEMENT_ACTIVATING".equals(intent) && "billPay".equals(elementId)){
                 transactionRequest.setState(TransactionRequestState.ACCEPTED);
-            } else if("ELEMENT_ACTIVATING".equals(intent) && "billPayResponse".equals(elementId)){
+            } else if("ELEMENT_ACTIVATING".equals(intent) && "Event_1gke4n8".equals(elementId)){
                 transactionRequest.setState(TransactionRequestState.SUCCESS);
             }
     }
