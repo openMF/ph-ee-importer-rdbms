@@ -113,23 +113,26 @@ public class RecordParser {
             logger.info("Processing flow of type TRANSACTION");
             TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
+                logger.info("Transaction request intent inside ACTIVATING {}", intent);
+                logger.info("Transaction request element inside ACTIVATING {}", elementId);
                 transactionRequest.setStartedAt(new Date(timestamp));
                 transactionRequest.setDirection(config.get().getDirection());
+                if(config.get().getName().contains("bill_request")){
+                    updateRtpTransaction(transactionRequest, intent, elementId);
+                }
 
                 logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 logger.info("finishing transaction for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
-                if(config.get().getName().contains("bill_request")){
-                    updateRtpTransaction(transactionRequest, intent, elementId);
-                }
+
                 transactionRequest.setCompletedAt(new Date(timestamp));
                 if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
                     transactionRequest.setState(TransactionRequestState.FAILED);
                 } else {
-                    if(!config.get().getName().contains("bill_request")) {
-                        transactionRequest.setState(TransactionRequestState.ACCEPTED);
-                    }else {
+                    if(config.get().getName().contains("bill_request")) {
                         transactionRequest.setState(TransactionRequestState.SUCCESS);
+                    }else {
+                        transactionRequest.setState(TransactionRequestState.ACCEPTED);
                     }
                 }
             } else {
