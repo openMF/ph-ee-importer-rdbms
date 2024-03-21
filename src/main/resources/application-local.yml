@@ -1260,6 +1260,8 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
+        - field: payeeDfspId
+          variableName: partyLookupFspId
     - name: payment_notification
       direction: OUTGOING
       type: TRANSFER
