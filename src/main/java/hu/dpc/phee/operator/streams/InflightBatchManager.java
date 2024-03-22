@@ -69,6 +69,10 @@ public class InflightBatchManager {
                 batchRepository.save(batch);
                 return batch;
             }
+            else if (batchId != null) {
+                Batch batch = batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId).orElse(null);
+                return batch;
+            }
         } else {
             logger.info("Found existing Batch for processInstanceKey: {}", processInstanceKey);
         }
@@ -116,6 +120,10 @@ public class InflightBatchManager {
             transfer.setPayeeFee(BigDecimal.ZERO);
             transfer.setPayerFeeCurrency(transaction.getCurrency());
             transfer.setPayerFee(BigDecimal.ZERO);
+            transfer.setPayeePartyIdType(transaction.getPayeeIdentifierType());
+            transfer.setPayeePartyId(transaction.getPayeeIdentifier());
+            transfer.setPayerPartyIdType(transaction.getPayerIdentifierType());
+            transfer.setPayerPartyId(transaction.getPayerIdentifier());
 
             BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
             transfer = updatedExistingRecord(transfer, batchId);

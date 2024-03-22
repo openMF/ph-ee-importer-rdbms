@@ -174,7 +174,7 @@ public class RecordParser {
                         .withValue(value));
 
         if(variableName.equals("subBatchDetails")) {
-            parseSubBatchDetails(variableValue);
+            parseSubBatchDetails(variableValue, bpmn, timestamp);
         }
 
         if (variableName.equals("failedTransactionFile")) {
@@ -358,12 +358,18 @@ public class RecordParser {
     }
 
     @Transactional
-    public void parseSubBatchDetails(String jsonString) throws JsonProcessingException {
+    public void parseSubBatchDetails(String jsonString, String bpmn, Long timestamp) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Batch> batches = Arrays.asList(objectMapper.readValue(jsonString, Batch[].class));
 
         for (Batch bt : batches) {
             Optional<Batch> existingBatchOpt = batchRepository.findBySubBatchId(bt.getSubBatchId());
+
+            Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
+            if(!config.get().getName().contains("bulk_processor")) {
+                inflightBatchManager.storeBatchFileName(bt.getWorkflowKey(), bt.getRequestFile());
+                inflightBatchManager.checkWorkerIdAndUpdateTransferData(bt, bt.getWorkflowInstanceKey(), timestamp);
+            }
 
             existingBatchOpt.orElseGet(() -> {
                 batchRepository.save(bt);
