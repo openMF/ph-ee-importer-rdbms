@@ -131,10 +131,8 @@ public class RecordParser {
                 if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
                     transactionRequest.setState(TransactionRequestState.FAILED);
                 } else {
-                    if(config.get().getName().contains("bill_request")) {
+                    if(!config.get().getName().contains("bill_request")) {
                         transactionRequest.setState(TransactionRequestState.SUCCESS);
-                    }else {
-                        transactionRequest.setState(TransactionRequestState.ACCEPTED);
                     }
                 }
             } else {
