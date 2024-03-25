@@ -236,6 +236,7 @@ public class RecordParser {
         } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
             logger.info("Inside matchTransformerForFlowType");
             TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
+            logger.info("Inside matchTransformerForFlowType {}", transactionRequest.getTransactionId());
             matchingTransformers.forEach(transformer -> applyTransformer(transactionRequest, variableName, value, transformer));
             transactionRequestRepository.save(transactionRequest);
         } else if ("BATCH".equalsIgnoreCase(flowType)) {
