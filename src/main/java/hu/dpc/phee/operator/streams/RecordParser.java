@@ -234,6 +234,7 @@ public class RecordParser {
             matchingTransformers.forEach(transformer -> applyTransformer(transfer, variableName, value, transformer));
             transferRepository.save(transfer);
         } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
+            logger.info("Inside matchTransformerForFlowType");
             TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
             matchingTransformers.forEach(transformer -> applyTransformer(transactionRequest, variableName, value, transformer));
             transactionRequestRepository.save(transactionRequest);
