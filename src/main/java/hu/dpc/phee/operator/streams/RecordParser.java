@@ -113,15 +113,8 @@ public class RecordParser {
             logger.info("Processing flow of type TRANSACTION");
             TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
             if ("ELEMENT_ACTIVATING".equals(intent)) {
-                logger.info("Transaction request intent inside ACTIVATING {}", intent);
-                logger.info("Transaction request element inside ACTIVATING {}", elementId);
-                logger.info("Transaction request record inside ACTIVATING {}", recordDocument.jsonString());
-                logger.info("Transaction request sample inside ACTIVATING {}", sample.jsonString());
                 transactionRequest.setStartedAt(new Date(timestamp));
                 transactionRequest.setDirection(config.get().getDirection());
-                if(config.get().getName().contains("bill_request")){
-                    //updateRtpTransaction(transactionRequest, intent, elementId);
-                }
 
                 logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
@@ -135,9 +128,6 @@ public class RecordParser {
                         transactionRequest.setState(TransactionRequestState.SUCCESS);
                     }
                 }
-            } else {
-                logger.info("Transaction request intent {}", intent);
-                logger.info("Transaction request element {}", elementId);
             }
             constantTransformers.forEach(it -> applyTransformer(transactionRequest, null, null, it));
             transactionRequestRepository.save(transactionRequest);
@@ -173,14 +163,7 @@ public class RecordParser {
         return List.of();
     }
 
-    public void updateRtpTransaction(TransactionRequest transactionRequest, String intent, String elementId, String value){
-/*            if("ELEMENT_ACTIVATING".equals(intent) && "payerRtpRequest".equals(elementId)){
-                transactionRequest.setState(TransactionRequestState.IN_PROGRESS);
-            } else if("ELEMENT_ACTIVATING".equals(intent) && "billerRtpResponse".equals(elementId)){
-                transactionRequest.setState(TransactionRequestState.REQUEST_ACCEPTED);
-            } else if("ELEMENT_ACTIVATING".equals(intent) && "billPay".equals(elementId)){
-                transactionRequest.setState(TransactionRequestState.ACCEPTED);
-            }*/
+    public void updateRtpTransaction(TransactionRequest transactionRequest, String value){
         if(value.equals("INITIATED")){
             transactionRequest.setState(TransactionRequestState.INITIATED);
         } else if(value.equals("IN_PROGRESS")){
@@ -243,12 +226,9 @@ public class RecordParser {
             matchingTransformers.forEach(transformer -> applyTransformer(transfer, variableName, value, transformer));
             transferRepository.save(transfer);
         } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
-            logger.info("Inside matchTransformerForFlowType");
             TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
-            logger.info("Inside matchTransformerForFlowType {} {}", transactionRequest.getTransactionId(), transactionRequest.getState());
             if(variableName.equals("state")){
-                logger.info("Inside matchTransformerForFlowType condition {} {} {} {}", transactionRequest.getTransactionId(), transactionRequest.getState(), variableName, value);
-                updateRtpTransaction(transactionRequest, "", "", value);
+                updateRtpTransaction(transactionRequest, value);
             }
             matchingTransformers.forEach(transformer -> applyTransformer(transactionRequest, variableName, value, transformer));
             transactionRequestRepository.save(transactionRequest);
