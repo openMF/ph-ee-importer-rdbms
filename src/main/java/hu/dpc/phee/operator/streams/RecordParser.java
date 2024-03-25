@@ -189,6 +189,8 @@ public class RecordParser {
             transactionRequest.setState(TransactionRequestState.REQUEST_ACCEPTED);
         } else if (value.equals("ACCEPTED")){
             transactionRequest.setState(TransactionRequestState.ACCEPTED);
+        } else if(value.equals("SUCCESS")){
+            transactionRequest.setState(TransactionRequestState.SUCCESS);
         }
     }
 
