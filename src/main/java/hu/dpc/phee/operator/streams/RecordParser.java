@@ -115,8 +115,8 @@ public class RecordParser {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 logger.info("Transaction request intent inside ACTIVATING {}", intent);
                 logger.info("Transaction request element inside ACTIVATING {}", elementId);
-                logger.info("Transaction request record inside ACTIVATING {}", recordDocument);
-                logger.info("Transaction request sample inside ACTIVATING {}", sample);
+                logger.info("Transaction request record inside ACTIVATING {}", recordDocument.jsonString());
+                logger.info("Transaction request sample inside ACTIVATING {}", sample.jsonString());
                 transactionRequest.setStartedAt(new Date(timestamp));
                 transactionRequest.setDirection(config.get().getDirection());
                 if(config.get().getName().contains("bill_request")){
