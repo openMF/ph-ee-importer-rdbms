@@ -120,7 +120,7 @@ public class RecordParser {
                 transactionRequest.setStartedAt(new Date(timestamp));
                 transactionRequest.setDirection(config.get().getDirection());
                 if(config.get().getName().contains("bill_request")){
-                    updateRtpTransaction(transactionRequest, intent, elementId);
+                    //updateRtpTransaction(transactionRequest, intent, elementId);
                 }
 
                 logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
@@ -175,14 +175,23 @@ public class RecordParser {
         return List.of();
     }
 
-    public void updateRtpTransaction(TransactionRequest transactionRequest, String intent, String elementId){
-            if("ELEMENT_ACTIVATING".equals(intent) && "payerRtpRequest".equals(elementId)){
+    public void updateRtpTransaction(TransactionRequest transactionRequest, String intent, String elementId, String value){
+/*            if("ELEMENT_ACTIVATING".equals(intent) && "payerRtpRequest".equals(elementId)){
                 transactionRequest.setState(TransactionRequestState.IN_PROGRESS);
             } else if("ELEMENT_ACTIVATING".equals(intent) && "billerRtpResponse".equals(elementId)){
                 transactionRequest.setState(TransactionRequestState.REQUEST_ACCEPTED);
             } else if("ELEMENT_ACTIVATING".equals(intent) && "billPay".equals(elementId)){
                 transactionRequest.setState(TransactionRequestState.ACCEPTED);
-            }
+            }*/
+        if(value.equals("INITIATED")){
+            transactionRequest.setState(TransactionRequestState.INITIATED);
+        } else if(value.equals("IN_PROGRESS")){
+            transactionRequest.setState(TransactionRequestState.IN_PROGRESS);
+        } else if(value.equals("REQUEST ACCEPTED")){
+            transactionRequest.setState(TransactionRequestState.REQUEST_ACCEPTED);
+        } else if (value.equals("ACCEPTED")){
+            transactionRequest.setState(TransactionRequestState.ACCEPTED);
+        }
     }
 
     public List<Object> processVariable(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long workflowKey, Long timestamp, String flowType, DocumentContext sample)throws JsonProcessingException {
@@ -239,7 +248,7 @@ public class RecordParser {
             logger.info("Inside matchTransformerForFlowType {} {}", transactionRequest.getTransactionId(), transactionRequest.getState());
             if(variableName.equals("state")){
                 logger.info("Inside matchTransformerForFlowType condition {} {} {} {}", transactionRequest.getTransactionId(), transactionRequest.getState(), variableName, value);
-                updateRtpTransaction(transactionRequest, value,"");
+                updateRtpTransaction(transactionRequest, "", "", value);
             }
             matchingTransformers.forEach(transformer -> applyTransformer(transactionRequest, variableName, value, transformer));
             transactionRequestRepository.save(transactionRequest);
