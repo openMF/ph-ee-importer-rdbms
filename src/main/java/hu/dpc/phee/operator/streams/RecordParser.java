@@ -121,10 +121,10 @@ public class RecordParser {
                 logger.info("finishing transaction for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
 
                 transactionRequest.setCompletedAt(new Date(timestamp));
-                if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
-                    transactionRequest.setState(TransactionRequestState.FAILED);
-                } else {
-                    if(!config.get().getName().contains("bill_request")) {
+                if(!config.get().getName().contains("bill_request")) {
+                    if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
+                        transactionRequest.setState(TransactionRequestState.FAILED);
+                    } else {
                         transactionRequest.setState(TransactionRequestState.SUCCESS);
                     }
                 }
@@ -168,7 +168,7 @@ public class RecordParser {
             transactionRequest.setState(TransactionRequestState.INITIATED);
         } else if(value.equals("IN_PROGRESS")){
             transactionRequest.setState(TransactionRequestState.IN_PROGRESS);
-        } else if(value.equals("REQUEST ACCEPTED")){
+        } else if(value.equals("REQUEST_ACCEPTED")){
             transactionRequest.setState(TransactionRequestState.REQUEST_ACCEPTED);
         } else if (value.equals("ACCEPTED")){
             transactionRequest.setState(TransactionRequestState.ACCEPTED);
