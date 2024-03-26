@@ -115,17 +115,15 @@ public class RecordParser {
             if ("ELEMENT_ACTIVATING".equals(intent)) {
                 transactionRequest.setStartedAt(new Date(timestamp));
                 transactionRequest.setDirection(config.get().getDirection());
-
                 logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 logger.info("finishing transaction for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
-
                 transactionRequest.setCompletedAt(new Date(timestamp));
                 if(!config.get().getName().contains("bill_request")) {
                     if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
                         transactionRequest.setState(TransactionRequestState.FAILED);
                     } else {
-                        transactionRequest.setState(TransactionRequestState.SUCCESS);
+                        transactionRequest.setState(TransactionRequestState.ACCEPTED);
                     }
                 }
             }
