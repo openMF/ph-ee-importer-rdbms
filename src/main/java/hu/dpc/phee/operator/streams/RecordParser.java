@@ -119,10 +119,12 @@ public class RecordParser {
             } else if ("ELEMENT_COMPLETED".equals(intent)) {
                 logger.info("finishing transaction for processInstanceKey: {} at elementId: {}", workflowInstanceKey, elementId);
                 transactionRequest.setCompletedAt(new Date(timestamp));
-                if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
-                    transactionRequest.setState(TransactionRequestState.FAILED);
-                } else {
-                    transactionRequest.setState(TransactionRequestState.ACCEPTED);
+                if(!config.get().getName().contains("bill_request")) {
+                    if (StringUtils.isNotEmpty(elementId) && elementId.contains("Failed")) {
+                        transactionRequest.setState(TransactionRequestState.FAILED);
+                    } else {
+                        transactionRequest.setState(TransactionRequestState.ACCEPTED);
+                    }
                 }
             }
             constantTransformers.forEach(it -> applyTransformer(transactionRequest, null, null, it));
@@ -157,6 +159,20 @@ public class RecordParser {
             logger.error("No matching flow types for the given request");
         }
         return List.of();
+    }
+
+    public void updateRtpTransaction(TransactionRequest transactionRequest, String value){
+        if(value.equals("INITIATED")){
+            transactionRequest.setState(TransactionRequestState.INITIATED);
+        } else if(value.equals("IN_PROGRESS")){
+            transactionRequest.setState(TransactionRequestState.IN_PROGRESS);
+        } else if(value.equals("REQUEST_ACCEPTED")){
+            transactionRequest.setState(TransactionRequestState.REQUEST_ACCEPTED);
+        } else if (value.equals("ACCEPTED")){
+            transactionRequest.setState(TransactionRequestState.ACCEPTED);
+        } else if(value.equals("SUCCESS")){
+            transactionRequest.setState(TransactionRequestState.SUCCESS);
+        }
     }
 
     public List<Object> processVariable(DocumentContext recordDocument, String bpmn, Long workflowInstanceKey, Long workflowKey, Long timestamp, String flowType, DocumentContext sample)throws JsonProcessingException {
@@ -209,6 +225,9 @@ public class RecordParser {
             transferRepository.save(transfer);
         } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
             TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
+            if(variableName.equals("state")){
+                updateRtpTransaction(transactionRequest, value);
+            }
             matchingTransformers.forEach(transformer -> applyTransformer(transactionRequest, variableName, value, transformer));
             transactionRequestRepository.save(transactionRequest);
         } else if ("BATCH".equalsIgnoreCase(flowType)) {
