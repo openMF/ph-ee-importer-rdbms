@@ -69,11 +69,17 @@ public class InflightBatchManager {
                 batchRepository.save(batch);
                 return batch;
             }
+            else if (batchId != null) {
+                Batch batch = batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId).orElse(null);
+                assert batch != null;
+                batch.setWorkflowInstanceKey(processInstanceKey);
+                return batch;
+            }
         } else {
             logger.info("Found existing Batch for processInstanceKey: {}", processInstanceKey);
         }
 
-        return batchOptional.orElse(null);
+        return batchOptional.orElse(new Batch(processInstanceKey));
     }
 
 
@@ -82,7 +88,7 @@ public class InflightBatchManager {
 
     }
 
-    private void    updateTransferTableForBatch(Batch batch, Long workflowInstanceKey, Long completeTimestamp) {
+    private void  updateTransferTableForBatch(Batch batch, Long workflowInstanceKey, Long completeTimestamp) {
         String filename = getBatchFileName(workflowInstanceKey);
         logger.info("Filename {}", filename);
         if (filename == null) {
@@ -96,7 +102,6 @@ public class InflightBatchManager {
             return;
         }
         List<Transaction> transactionList = csvFileService.getTransactionList(filename);
-
         for (Transaction transaction : transactionList) {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
