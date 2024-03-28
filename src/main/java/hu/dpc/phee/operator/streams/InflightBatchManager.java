@@ -72,7 +72,6 @@ public class InflightBatchManager {
             else if (batchId != null) {
                 Batch batch = batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId).orElse(null);
                 assert batch != null;
-                batch.setWorkflowInstanceKey(processInstanceKey);
                 return batch;
             }
         } else {
