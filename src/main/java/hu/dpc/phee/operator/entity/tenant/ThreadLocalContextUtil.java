@@ -25,7 +25,7 @@ import javax.sql.DataSource;
 public class ThreadLocalContextUtil {
 
     private static final ThreadLocal<DataSource> tenantcontext = new ThreadLocal<>();
-
+    private static String tenantName;
     public static void setTenant(final DataSource dataSource) {
         Assert.notNull(dataSource, "tenant dataSource cannot be null");
         tenantcontext.set(dataSource);
@@ -37,5 +37,13 @@ public class ThreadLocalContextUtil {
 
     public static void clear() {
         tenantcontext.remove();
+    }
+
+    public static String getTenantName() {
+        return tenantName;
+    }
+
+    public static void setTenantName(String tenantName) {
+        ThreadLocalContextUtil.tenantName = tenantName;
     }
 }

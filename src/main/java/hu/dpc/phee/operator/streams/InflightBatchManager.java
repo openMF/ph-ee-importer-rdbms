@@ -108,7 +108,7 @@ public class InflightBatchManager {
             transfer.setTransactionId(transaction.getRequestId());
             transfer.setClientCorrelationId(UUID.randomUUID().toString());
             transfer.setPayeeDfspId(batch.getPaymentMode());
-            transfer.setPayerDfspId(ThreadLocalContextUtil.getTenant().toString());
+            transfer.setPayerDfspId(ThreadLocalContextUtil.getTenantName());
             String batchId = getBatchId(workflowInstanceKey);
             if(transaction.getBatchId() == null || transaction.getBatchId().isEmpty())
             {

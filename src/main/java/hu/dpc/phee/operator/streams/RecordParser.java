@@ -361,7 +361,7 @@ public class RecordParser {
     public void parseSubBatchDetails(String jsonString) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Batch> batches = Arrays.asList(objectMapper.readValue(jsonString, Batch[].class));
-
+        logger.info("Inside parseSubBatchDetails batch size - {}", batches.size());
         for (Batch bt : batches) {
             Optional<Batch> existingBatchOpt = batchRepository.findBySubBatchId(bt.getSubBatchId());
 
