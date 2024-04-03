@@ -255,8 +255,10 @@ public class RecordParser {
         if ("TRANSFER".equalsIgnoreCase(flowType)) {
             Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample, "INCIDENT");
             //Skipping dummy transfer cases
-            if(!transfer.getWorkflowInstanceKey().equals(0L)) {
-                logger.warn("failing Transfer {} based on incident event", transfer.getTransactionId());
+            if(transfer.getWorkflowInstanceKey().equals(0L) || transfer.getErrorInformation().equals("404")) {
+                logger.info("Inside dummy fail case ------------------------------------------------------ ");
+            } else {
+                logger.info("failing Transfer {} based on incident event", transfer.getTransactionId());
                 transfer.setStatus(TransferStatus.EXCEPTION);
                 transfer.setCompletedAt(new Date(timestamp));
                 transferRepository.save(transfer);

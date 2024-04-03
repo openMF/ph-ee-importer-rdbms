@@ -45,7 +45,9 @@ public class InFlightTransferManager {
                 return newTransfer;
             } else {
                 //Since no transaction found returning dummy transaction
-                return new Transfer(0L);
+                Transfer dummy = new Transfer(0L);
+                dummy.setErrorInformation("404");
+                return dummy;
             }
         });
 
