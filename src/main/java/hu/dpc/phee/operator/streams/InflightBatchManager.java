@@ -198,7 +198,7 @@ public class InflightBatchManager {
                 transfer.setCompletedAt(new Date());
                 transfer.setErrorInformation(transaction.getNote());
                 transfer.setClientCorrelationId(UUID.randomUUID().toString());
-                transfer.setTransactionId(UUID.randomUUID().toString());
+                transfer.setTransactionId(transaction.getRequestId());
                 logger.debug("Inserting failed txn: {}", transfer);
                 logger.info("Inserting failed txn with note: {}", transaction.getNote());
                 transfer = updatedExistingRecord(transfer, batchId);
