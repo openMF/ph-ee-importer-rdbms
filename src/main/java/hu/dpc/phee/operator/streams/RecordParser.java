@@ -93,7 +93,7 @@ public class RecordParser {
 
         if ("TRANSFER".equalsIgnoreCase(flowType)) {
             logger.info("Processing flow of type TRANSFER");
-            Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
+            Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample, "PROCESS_INSTANCE");
             if ("EVENT".equals(recordType) && "START_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
                 transfer.setStartedAt(new Date(timestamp));
                 transfer.setDirection(config.get().getDirection());
@@ -204,7 +204,7 @@ public class RecordParser {
     private void matchTransformerForFlowType(String flowType, String bpmn, DocumentContext sample, List<TransferTransformerConfig.Transformer> matchingTransformers, String variableName, String value, Long workflowInstanceKey) {
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
         if ("TRANSFER".equalsIgnoreCase(flowType)) {
-            Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
+            Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample, "VARIABLE");
             matchingTransformers.forEach(transformer -> applyTransformer(transfer, variableName, value, transformer));
             transferRepository.save(transfer);
         } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
@@ -253,11 +253,14 @@ public class RecordParser {
     public List<Object> processIncident(Long timestamp, String flowType, String bpmn, DocumentContext sample, Long workflowInstanceKey) {
         logger.info("Processing incident instance");
         if ("TRANSFER".equalsIgnoreCase(flowType)) {
-            Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample);
-            logger.warn("failing Transfer {} based on incident event", transfer.getTransactionId());
-            transfer.setStatus(TransferStatus.EXCEPTION);
-            transfer.setCompletedAt(new Date(timestamp));
-            transferRepository.save(transfer);
+            Transfer transfer = inFlightTransferManager.retrieveOrCreateTransfer(bpmn, sample, "INCIDENT");
+            //Skipping dummy transfer cases
+            if(!transfer.getWorkflowInstanceKey().equals(0L)) {
+                logger.warn("failing Transfer {} based on incident event", transfer.getTransactionId());
+                transfer.setStatus(TransferStatus.EXCEPTION);
+                transfer.setCompletedAt(new Date(timestamp));
+                transferRepository.save(transfer);
+            }
         } else if ("TRANSACTION-REQUEST".equalsIgnoreCase(flowType)) {
             TransactionRequest transactionRequest = inflightTransactionRequestManager.retrieveOrCreateTransaction(bpmn, sample);
             logger.warn("failing Transaction {} based on incident event", transactionRequest.getTransactionId());
