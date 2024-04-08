@@ -69,6 +69,11 @@ public class InflightBatchManager {
                 batchRepository.save(batch);
                 return batch;
             }
+            else if (batchId != null) {
+                Batch batch = batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId).orElse(null);
+                assert batch != null;
+                return batch;
+            }
         } else {
             logger.info("Found existing Batch for processInstanceKey: {}", processInstanceKey);
         }
@@ -82,7 +87,7 @@ public class InflightBatchManager {
 
     }
 
-    private void    updateTransferTableForBatch(Batch batch, Long workflowInstanceKey, Long completeTimestamp) {
+    private void  updateTransferTableForBatch(Batch batch, Long workflowInstanceKey, Long completeTimestamp) {
         String filename = getBatchFileName(workflowInstanceKey);
         logger.info("Filename {}", filename);
         if (filename == null) {
@@ -96,7 +101,6 @@ public class InflightBatchManager {
             return;
         }
         List<Transaction> transactionList = csvFileService.getTransactionList(filename);
-
         for (Transaction transaction : transactionList) {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
@@ -104,7 +108,7 @@ public class InflightBatchManager {
             transfer.setTransactionId(transaction.getRequestId());
             transfer.setClientCorrelationId(UUID.randomUUID().toString());
             transfer.setPayeeDfspId(batch.getPaymentMode());
-            transfer.setPayerDfspId(ThreadLocalContextUtil.getTenant().toString());
+            transfer.setPayerDfspId(ThreadLocalContextUtil.getTenantName());
             String batchId = getBatchId(workflowInstanceKey);
             if(transaction.getBatchId() == null || transaction.getBatchId().isEmpty())
             {
@@ -194,7 +198,7 @@ public class InflightBatchManager {
                 transfer.setCompletedAt(new Date());
                 transfer.setErrorInformation(transaction.getNote());
                 transfer.setClientCorrelationId(UUID.randomUUID().toString());
-                transfer.setTransactionId(UUID.randomUUID().toString());
+                transfer.setTransactionId(transaction.getRequestId());
                 logger.debug("Inserting failed txn: {}", transfer);
                 logger.info("Inserting failed txn with note: {}", transaction.getNote());
                 transfer = updatedExistingRecord(transfer, batchId);
