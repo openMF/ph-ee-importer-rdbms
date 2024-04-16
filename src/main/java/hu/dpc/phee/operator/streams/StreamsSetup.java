@@ -12,6 +12,7 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -23,9 +24,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -121,13 +120,15 @@ public class StreamsSetup {
             transactionTemplate.executeWithoutResult(status -> {
                 Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
                 MDC.put("transactionId", transfer.getTransactionId());
+                logger.info("processing key: {}, records: {}", key, records);
+
+                Map<Long, DocumentContext> sortedRecords = getSortedRecords(records);
                 try {
-                    logger.info("processing key: {}, records: {}", key, records);
-                    for (String record : records) {
+                    for (Map.Entry<Long, DocumentContext> entry : sortedRecords.entrySet()) {
                         try {
-                            eventParser.process(bpmn, tenantName, transfer, record);
+                            eventParser.process(bpmn, tenantName, transfer, entry.getValue());
                         } catch (Exception e) {
-                            logger.error("failed to parse record: {}", record, e);
+                            logger.error("failed to parse record: {}", entry.getValue(), e);
                         }
                     }
                     transferRepository.save(transfer);
@@ -142,6 +143,15 @@ public class StreamsSetup {
         } finally {
             ThreadLocalContextUtil.clear();
         }
+    }
+
+    private static @NotNull Map<Long, DocumentContext> getSortedRecords(List<String> records) {
+        Map<Long, DocumentContext> sortedRecords = new TreeMap<>(Comparator.naturalOrder());
+        for (String record : records) {
+            DocumentContext json = JsonPathReader.parse(record);
+            sortedRecords.put(json.read("$.position", Long.class), json);
+        }
+        return sortedRecords;
     }
 
     private String findFirstNonExpiredRecord(List<String> records) {

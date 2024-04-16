@@ -107,8 +107,7 @@ public class EventParser {
         return transfer;
     }
 
-    public void process(String bpmn, String tenantName, Transfer transfer, String rawData) {
-        DocumentContext record = JsonPathReader.parse(rawData);
+    public void process(String bpmn, String tenantName, Transfer transfer, DocumentContext record) {
         logger.info("from kafka: {}", record.jsonString());
 
         String valueType = record.read("$.valueType", String.class);
@@ -251,7 +250,7 @@ public class EventParser {
                 transfer.setStatus(TransferStatus.EXCEPTION);
                 transfer.setCompletedAt(new Date(timestamp));
 
-                sendIncidentAuditlog(tenantName, transfer, rawData);
+                sendIncidentAuditlog(tenantName, transfer, record.jsonString());
                 yield List.of(
                         new Variable()
                                 .withWorkflowInstanceKey(workflowInstanceKey)
