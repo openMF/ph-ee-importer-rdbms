@@ -59,7 +59,6 @@ public class InflightBatchManager {
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
 
         Optional<Batch> batchOptional = batchRepository.findByWorkflowInstanceKey(processInstanceKey);
-
         if (batchOptional.isEmpty()) {
             logger.debug("Creating new Batch for processInstanceKey: {}", processInstanceKey);
             String batchId = getBatchId(processInstanceKey);
@@ -72,6 +71,11 @@ public class InflightBatchManager {
             else if (batchId != null) {
                 Batch batch = batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId).orElse(null);
                 assert batch != null;
+                return batch;
+            }
+            else{
+                Batch batch = new Batch(processInstanceKey);
+                batchRepository.save(batch);
                 return batch;
             }
         } else {
