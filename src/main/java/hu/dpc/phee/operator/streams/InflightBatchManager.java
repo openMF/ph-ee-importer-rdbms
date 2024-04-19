@@ -65,7 +65,7 @@ public class InflightBatchManager {
             String batchId = getBatchId(processInstanceKey);
 
             if (batchId != null && batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId).isEmpty()) {
-                logger.info("Inside Batch Create if condition{}",batchOptional.get());
+                logger.info("Inside Batch Create if condition");
                 Batch batch = new Batch(processInstanceKey);
                 batchRepository.save(batch);
                 return batch;
@@ -80,7 +80,7 @@ public class InflightBatchManager {
         } else {
             logger.info("Found existing Batch for processInstanceKey: {}", processInstanceKey);
         }
-        logger.info("Inside Batch Create lasst {}",batchOptional.get());
+        logger.info("Inside Batch Create lasst {}",batchOptional.isEmpty());
 
         return batchOptional.orElse(null);
     }
