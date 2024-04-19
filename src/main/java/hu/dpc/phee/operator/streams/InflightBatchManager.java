@@ -63,6 +63,7 @@ public class InflightBatchManager {
         if (batchOptional.isEmpty()) {
             logger.info("Creating new Batch for processInstanceKey: {}", processInstanceKey);
             String batchId = getBatchId(processInstanceKey);
+            logger.info("Creating new Batch for batchId: {}", batchId);
 
             if (batchId != null && batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId).isEmpty()) {
                 logger.info("Inside Batch Create if condition");
@@ -75,6 +76,12 @@ public class InflightBatchManager {
                 Batch batch = batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId).orElse(null);
                 logger.info("Inside Batch Create else {}",batch);
                 assert batch != null;
+                return batch;
+            }
+            else{
+                logger.info("Inside Batch Create else condition  batchId null");
+                Batch batch = new Batch(processInstanceKey);
+                batchRepository.save(batch);
                 return batch;
             }
         } else {
