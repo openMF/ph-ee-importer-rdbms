@@ -73,11 +73,6 @@ public class InflightBatchManager {
                 assert batch != null;
                 return batch;
             }
-            else{
-                Batch batch = new Batch(processInstanceKey);
-                batchRepository.save(batch);
-                return batch;
-            }
         } else {
             logger.info("Found existing Batch for processInstanceKey: {}", processInstanceKey);
         }
