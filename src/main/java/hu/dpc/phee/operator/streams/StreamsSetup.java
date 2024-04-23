@@ -121,9 +121,12 @@ public class StreamsSetup {
             transactionTemplate.executeWithoutResult(status -> {
                 Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
                 MDC.put("transactionId", transfer.getTransactionId());
-                logger.info("processing key: {}, records: {}", key, records);
-
                 Map<Long, DocumentContext> sortedRecords = getSortedRecords(records);
+                logger.info("## processing key: {}, size: {}, partitions: {}, records: {}", key, records.size(),
+                        sortedRecords.entrySet().stream()
+                                .map(Map.Entry::getKey)
+                                .map(String::valueOf)
+                                .collect(Collectors.joining(",")), records);
                 try {
                     for (Map.Entry<Long, DocumentContext> entry : sortedRecords.entrySet()) {
                         try {
