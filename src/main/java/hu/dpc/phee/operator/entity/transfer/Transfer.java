@@ -26,7 +26,6 @@ public class Transfer {
     @Column(name = "TRANSACTION_ID")
     private String transactionId;
 
-    @Version
     @Column(name = "LAST_UPDATED")
     private Long lastUpdated;
 

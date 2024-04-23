@@ -25,6 +25,8 @@ import org.springframework.data.util.Pair;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.orm.jpa.JpaOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -258,7 +260,7 @@ public class EventParser {
             entities.forEach(entity -> {
                 if (entity instanceof Variable) {
                     try {
-                        variableRepository.save((Variable) entity);
+                        variableRepository.saveIfFresh((Variable) entity);
                     } catch (JpaOptimisticLockingFailureException e) {
                         logger.warn("ignoring OptimisticLockingFailureException when saving Variable");
                     }
@@ -275,9 +277,10 @@ public class EventParser {
 
     public void save(Transfer transfer) {
         try {
-            transferRepository.save(transfer);
+            transferRepository.saveIfFresh(transfer);
         } catch (JpaOptimisticLockingFailureException e) {
             logger.warn("ignoring OptimisticLockingFailureException when saving Transfer");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
 
