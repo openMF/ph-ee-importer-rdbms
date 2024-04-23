@@ -1,6 +1,7 @@
 package hu.dpc.phee.operator.entity.variable;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.repository.CrudRepository;
@@ -16,7 +17,7 @@ public interface VariableRepository extends CrudRepository<Variable, Long> {
 
     @Transactional
     default Variable saveIfFresh(Variable variable) {
-        EntityManager entityManager = getEntityManager();
+        EntityManager entityManager = entityManager();
         VariableId id = new VariableId(variable.getWorkflowInstanceKey(), variable.getName());
 
         Variable existingVariable = entityManager.find(Variable.class, id);
@@ -28,5 +29,6 @@ public interface VariableRepository extends CrudRepository<Variable, Long> {
         }
     }
 
-    EntityManager getEntityManager();
+    @PersistenceContext
+    EntityManager entityManager();
 }

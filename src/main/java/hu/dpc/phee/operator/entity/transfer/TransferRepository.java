@@ -1,6 +1,7 @@
 package hu.dpc.phee.operator.entity.transfer;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +16,7 @@ public interface TransferRepository extends JpaRepository<Transfer, Long>, JpaSp
 
     @Transactional
     default Transfer saveIfFresh(Transfer transfer) {
-        EntityManager entityManager = getEntityManager();
+        EntityManager entityManager = entityManager();
 
         Transfer existingTransfer = entityManager.find(Transfer.class, transfer.getWorkflowInstanceKey());
         if (existingTransfer == null || existingTransfer.getLastUpdated() < transfer.getLastUpdated()) {
@@ -26,5 +27,6 @@ public interface TransferRepository extends JpaRepository<Transfer, Long>, JpaSp
         }
     }
 
-    EntityManager getEntityManager();
+    @PersistenceContext
+    EntityManager entityManager();
 }
