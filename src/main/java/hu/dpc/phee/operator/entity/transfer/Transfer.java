@@ -27,7 +27,7 @@ public class Transfer {
     private String transactionId;
 
     @Version
-    @Column(name = "TIMESTAMP")
+    @Column(name = "LAST_UPDATED")
     private Long lastUpdated;
 
     @Column(name = "STARTED_AT")
