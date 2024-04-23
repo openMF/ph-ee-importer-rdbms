@@ -28,6 +28,7 @@ public class Variable {
     @Column(name = "WORKFLOW_KEY")
     private Long workflowKey;
 
+    @Version
     @Column(name = "TIMESTAMP")
     private Long timestamp;
 

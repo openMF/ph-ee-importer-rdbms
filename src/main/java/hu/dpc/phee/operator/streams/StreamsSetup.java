@@ -19,6 +19,7 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -131,7 +132,8 @@ public class StreamsSetup {
                             logger.error("failed to parse record: {}", entry.getValue(), e);
                         }
                     }
-                    transferRepository.save(transfer);
+
+                    eventParser.save(transfer);
                 } finally {
                     MDC.clear();
                 }
@@ -144,6 +146,7 @@ public class StreamsSetup {
             ThreadLocalContextUtil.clear();
         }
     }
+
 
     private static @NotNull Map<Long, DocumentContext> getSortedRecords(List<String> records) {
         Map<Long, DocumentContext> sortedRecords = new TreeMap<>(Comparator.naturalOrder());

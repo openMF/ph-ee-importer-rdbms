@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
@@ -88,12 +89,14 @@ public class EventParser {
 
     public Transfer retrieveOrCreateTransfer(String bpmn, DocumentContext record) {
         Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
+        Long timestamp = record.read("$.timestamp", Long.class);
 
         Transfer transfer = transferRepository.findByWorkflowInstanceKey(processInstanceKey);
         if (transfer == null) {
             logger.debug("creating new Transfer for processInstanceKey: {}", processInstanceKey);
             transfer = new Transfer(processInstanceKey);
             transfer.setStatus(TransferStatus.IN_PROGRESS);
+            transfer.setLastUpdated(timestamp);
             Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
             if (config.isPresent()) {
                 transfer.setDirection(config.get().getDirection());
@@ -127,6 +130,7 @@ public class EventParser {
                 String intent = record.read("$.intent", String.class);
                 if ("EVENT".equals(recordType) && "START_EVENT".equals(bpmnElementType) && "ELEMENT_ACTIVATED".equals(intent)) {
                     transfer.setStartedAt(new Date(timestamp));
+                    transfer.setLastUpdated(timestamp);
 
                     List<TransferTransformerConfig.Transformer> constantTransformers = transferTransformerConfig.getFlows().stream()
                             .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
@@ -135,16 +139,7 @@ public class EventParser {
                             .toList();
 
                     logger.debug("found {} constant transformers for flow start {}", constantTransformers.size(), bpmn);
-                    constantTransformers.forEach(it -> applyTransformer(transfer, null, null, it));
-//                    yield List.of(new Task()
-//                            .withWorkflowInstanceKey(workflowInstanceKey)
-//                            .withWorkflowKey(workflowKey)
-//                            .withTimestamp(timestamp)
-//                            .withIntent(intent)
-//                            .withRecordType(recordType)
-//                            .withType("START_FLOW")
-//                            .withElementId(elementId)
-//                    );
+                    constantTransformers.forEach(it -> applyTransformer(timestamp, transfer, null, null, it));
                     yield List.of();
                 }
 
@@ -156,17 +151,9 @@ public class EventParser {
                     } else {
                         transfer.setStatus(TransferStatus.COMPLETED);
                     }
+                    transfer.setLastUpdated(timestamp);
 
                     yield List.of();
-//                    yield List.of(new Task()
-//                            .withWorkflowInstanceKey(workflowInstanceKey)
-//                            .withWorkflowKey(workflowKey)
-//                            .withTimestamp(timestamp)
-//                            .withIntent(intent)
-//                            .withRecordType(recordType)
-//                            .withType("END_FLOW")
-//                            .withElementId(elementId)
-//                    );
                 }
 
                 if ("EVENT".equals(recordType) && "EXCLUSIVE_GATEWAY".equals(bpmnElementType) && "ELEMENT_COMPLETED".equals(intent)) {
@@ -234,7 +221,7 @@ public class EventParser {
                         .filter(it -> variableName.equalsIgnoreCase(it.getVariableName()))
                         .toList();
 
-                matchingTransformers.forEach(transformer -> applyTransformer(transfer, variableName, value, transformer));
+                matchingTransformers.forEach(transformer -> applyTransformer(timestamp, transfer, variableName, value, transformer));
 
                 yield List.of(
                         new Variable()
@@ -249,6 +236,7 @@ public class EventParser {
                 logger.warn("failing Transfer {} based on incident event", transfer.getTransactionId());
                 transfer.setStatus(TransferStatus.EXCEPTION);
                 transfer.setCompletedAt(new Date(timestamp));
+                transfer.setLastUpdated(timestamp);
 
                 sendIncidentAuditlog(tenantName, transfer, record.jsonString());
                 yield List.of(
@@ -268,16 +256,30 @@ public class EventParser {
             logger.info("Saving {} entities", entities.size());
             entities.forEach(entity -> {
                 if (entity instanceof Variable) {
-                    variableRepository.save((Variable) entity);
+                    try {
+                        variableRepository.save((Variable) entity);
+                    } catch (ObjectOptimisticLockingFailureException e) {
+                        logger.warn("ignoring OptimisticLockingFailureException when saving Variable");
+                    }
                 } else if (entity instanceof Task) {
                     taskRepository.save((Task) entity);
                 } else {
                     throw new IllegalStateException("Unexpected entity type: " + entity.getClass());
                 }
             });
-            transferRepository.save(transfer);
+
+            save(transfer);
         }
     }
+
+    public void save(Transfer transfer) {
+        try {
+            transferRepository.save(transfer);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            logger.warn("ignoring OptimisticLockingFailureException when saving Transfer");
+        }
+    }
+
 
     private void sendIncidentAuditlog(String tenantName, Transfer transfer, String rawData) {
         eventService.sendEvent(event -> event
@@ -296,14 +298,14 @@ public class EventParser {
         );
     }
 
-    private void applyTransformer(Transfer transfer, String variableName, String variableValue, TransferTransformerConfig.Transformer transformer) {
+    private void applyTransformer(Long timestamp, Transfer transfer, String variableName, String variableValue, TransferTransformerConfig.Transformer transformer) {
         logger.debug("applying transformer for field: {}", transformer.getField());
         try {
             String fieldName = transformer.getField();
             String dateFormat = transformer.getDateFormat();
             if (Strings.isNotBlank(transformer.getConstant())) {
                 logger.debug("setting constant value: {}", transformer.getConstant());
-                setPropertyValue(transfer, fieldName, transformer.getConstant(), dateFormat);
+                setPropertyValue(timestamp, transfer, fieldName, transformer.getConstant(), dateFormat);
                 return;
             }
 
@@ -315,15 +317,12 @@ public class EventParser {
 
                 String value = null;
                 if (result != null) {
-                    if (result instanceof String) {
-                        value = (String) result;
-                    }
                     if (result instanceof List) {
                         value = ((List<?>) result).stream().map(Object::toString).collect(Collectors.joining(" "));
                     } else {
                         value = result.toString();
                     }
-                    setPropertyValue(transfer, fieldName, value, dateFormat);
+                    setPropertyValue(timestamp, transfer, fieldName, value, dateFormat);
                 }
 
                 if (StringUtils.isBlank(value)) {
@@ -338,7 +337,7 @@ public class EventParser {
                 String result = xPathFactory.newXPath().compile(transformer.getXpath()).evaluate(document);
                 logger.debug("xpath result: {} for variable {}", result, variableName);
                 if (StringUtils.isNotBlank(result)) {
-                    setPropertyValue(transfer, fieldName, result, dateFormat);
+                    setPropertyValue(timestamp, transfer, fieldName, result, dateFormat);
                 } else {
                     logger.error("null result when setting field {} from variable {}. Xpath: {}, variable value: {}", fieldName, variableName, transformer.getXpath(), variableValue);
                 }
@@ -346,14 +345,14 @@ public class EventParser {
             }
 
             logger.debug("setting simple variable value: {} for variable {}", variableValue, variableName);
-            setPropertyValue(transfer, fieldName, variableValue, dateFormat);
+            setPropertyValue(timestamp, transfer, fieldName, variableValue, dateFormat);
 
         } catch (Exception e) {
             logger.error("failed to apply transformer {} to variable {}", transformer, variableName, e);
         }
     }
 
-    private void setPropertyValue(Transfer transfer, String fieldName, String variableValue, String dateFormat) {
+    private void setPropertyValue(Long timestamp, Transfer transfer, String fieldName, String variableValue, String dateFormat) {
         if (Date.class.getName().equals(PropertyAccessorFactory.forBeanPropertyAccess(transfer).getPropertyType(fieldName).getName())) {
             try {
                 logger.debug("Parsing date {} with format {}", variableValue, dateFormat);
@@ -364,5 +363,6 @@ public class EventParser {
         } else {
             PropertyAccessorFactory.forBeanPropertyAccess(transfer).setPropertyValue(fieldName, variableValue);
         }
+        transfer.setLastUpdated(timestamp);
     }
 }

@@ -26,6 +26,10 @@ public class Transfer {
     @Column(name = "TRANSACTION_ID")
     private String transactionId;
 
+    @Version
+    @Column(name = "TIMESTAMP")
+    private Long lastUpdated;
+
     @Column(name = "STARTED_AT")
     private Date startedAt;
     @Column(name = "COMPLETED_AT")
