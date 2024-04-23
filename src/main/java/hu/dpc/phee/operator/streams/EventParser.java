@@ -23,6 +23,7 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.orm.jpa.JpaOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
@@ -103,7 +104,7 @@ public class EventParser {
             } else {
                 logger.error("No config found for bpmn: {}", bpmn);
             }
-            transferRepository.save(transfer);
+            save(transfer);
         } else {
             logger.debug("found existing Transfer for processInstanceKey: {}", processInstanceKey);
         }
@@ -258,7 +259,7 @@ public class EventParser {
                 if (entity instanceof Variable) {
                     try {
                         variableRepository.save((Variable) entity);
-                    } catch (ObjectOptimisticLockingFailureException e) {
+                    } catch (JpaOptimisticLockingFailureException e) {
                         logger.warn("ignoring OptimisticLockingFailureException when saving Variable");
                     }
                 } else if (entity instanceof Task) {
@@ -275,7 +276,7 @@ public class EventParser {
     public void save(Transfer transfer) {
         try {
             transferRepository.save(transfer);
-        } catch (ObjectOptimisticLockingFailureException e) {
+        } catch (JpaOptimisticLockingFailureException e) {
             logger.warn("ignoring OptimisticLockingFailureException when saving Transfer");
         }
     }
