@@ -18,10 +18,11 @@ public interface VariableRepository extends CrudRepository<Variable, Long> {
     default Variable saveIfFresh(Variable variable) {
         Optional<Variable> existingVariable = findByWorkflowInstanceKeyAndName(variable.getWorkflowInstanceKey(), variable.getName());
 
-        if (existingVariable.isEmpty() || existingVariable.get().getTimestamp() < variable.getTimestamp()) {
+        if (existingVariable.isEmpty() || existingVariable.get().getTimestamp() <= variable.getTimestamp()) {
             return save(variable);
         } else {
-            logger.warn("not merging obsolete variable: {} for workflow instance: {}", variable.getName(), variable.getWorkflowInstanceKey());
+            logger.warn("not merging obsolete variable: {} for workflow instance: {} (old timestamp: {}, new timestamp: {})",
+                    variable.getName(), variable.getWorkflowInstanceKey(), existingVariable.get().getTimestamp(), variable.getTimestamp());
             return existingVariable.orElse(null);
         }
     }
