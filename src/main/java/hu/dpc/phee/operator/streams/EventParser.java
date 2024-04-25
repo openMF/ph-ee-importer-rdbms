@@ -249,7 +249,15 @@ public class EventParser {
                 );
             }
 
-            default -> throw new IllegalStateException("Unexpected event type: " + valueType);
+            case "PROCESS_EVENT" -> {
+                logger.warn("ignoring PROCESS_EVENT type event record");
+                yield List.of();
+            }
+
+            default -> {
+                logger.error("Unexpected event type: " + valueType);
+                yield List.of();
+            }
         };
 
         if (entities.size() != 0) {
