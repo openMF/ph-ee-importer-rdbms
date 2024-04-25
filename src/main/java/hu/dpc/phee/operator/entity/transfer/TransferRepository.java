@@ -12,16 +12,4 @@ public interface TransferRepository extends JpaRepository<Transfer, Long>, JpaSp
     Logger logger = LoggerFactory.getLogger(TransferRepository.class);
 
     Transfer findByWorkflowInstanceKey(Long workflowInstanceKey);
-
-
-    @Transactional
-    default Transfer saveIfFresh(Transfer transfer) {
-        Optional<Transfer> existingTransfer = findById(transfer.getWorkflowInstanceKey());
-        if (existingTransfer.isEmpty() || existingTransfer.get().getLastUpdated() < transfer.getLastUpdated()) {
-            return save(transfer);
-        } else {
-            logger.warn("not merging obsolete transfer: {}", transfer);
-            return existingTransfer.get();
-        }
-    }
 }

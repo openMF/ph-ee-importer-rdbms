@@ -12,7 +12,8 @@ importer:
     kafka:
         topic: "zeebe-export"
         reset: true
-        aggreation-window-seconds: 2
+        aggregation-window-seconds: 6
+        aggregation-after-end-seconds: 1
 
 spring:
     jpa:

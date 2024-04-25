@@ -19,7 +19,6 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -39,8 +38,11 @@ public class StreamsSetup {
     @Value("${importer.kafka.topic}")
     private String kafkaTopic;
 
-    @Value("${importer.kafka.aggreation-window-seconds}")
+    @Value("${importer.kafka.aggregation-window-seconds}")
     private int aggregationWindowSeconds;
+
+    @Value("${importer.kafka.aggregation-after-end-seconds}")
+    private int aggregationAfterEndSeconds;
 
     @Autowired
     private StreamsBuilder streamsBuilder;
@@ -74,7 +76,7 @@ public class StreamsSetup {
 
         streamsBuilder.stream(kafkaTopic, Consumed.with(STRING_SERDE, STRING_SERDE))
                 .groupByKey()
-                .windowedBy(SessionWindows.ofInactivityGapAndGrace(Duration.ofSeconds(aggregationWindowSeconds), Duration.ZERO))
+                .windowedBy(SessionWindows.ofInactivityGapAndGrace(Duration.ofSeconds(aggregationWindowSeconds), Duration.ofSeconds(aggregationAfterEndSeconds)))
                 .aggregate(ArrayList::new, aggregator, merger, Materialized.with(STRING_SERDE, ListSerde(ArrayList.class, STRING_SERDE)))
                 .toStream()
                 .foreach(this::process);
@@ -136,7 +138,7 @@ public class StreamsSetup {
                         }
                     }
 
-                    eventParser.save(transfer);
+                    eventParser.transferRepository.save(transfer);
                 } finally {
                     MDC.clear();
                 }

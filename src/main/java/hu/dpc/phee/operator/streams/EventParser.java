@@ -22,11 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.orm.jpa.JpaOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -106,7 +103,7 @@ public class EventParser {
             } else {
                 logger.error("No config found for bpmn: {}", bpmn);
             }
-            save(transfer);
+            transferRepository.save(transfer);
         } else {
             logger.debug("found existing Transfer for processInstanceKey: {}", processInstanceKey);
         }
@@ -271,19 +268,9 @@ public class EventParser {
                 }
             });
 
-            save(transfer);
+            transferRepository.save(transfer);
         }
     }
-
-    public void save(Transfer transfer) {
-        try {
-            transferRepository.saveIfFresh(transfer);
-        } catch (JpaOptimisticLockingFailureException e) {
-            logger.warn("ignoring OptimisticLockingFailureException when saving Transfer");
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-        }
-    }
-
 
     private void sendIncidentAuditlog(String tenantName, Transfer transfer, String rawData) {
         eventService.sendEvent(event -> event

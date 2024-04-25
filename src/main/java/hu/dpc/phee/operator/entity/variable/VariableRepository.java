@@ -3,7 +3,6 @@ package hu.dpc.phee.operator.entity.variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +15,6 @@ public interface VariableRepository extends CrudRepository<Variable, Long> {
     Optional<Variable> findByWorkflowInstanceKeyAndName(Long workflowInstanceKey, String name);
 
 
-    @Transactional
     default Variable saveIfFresh(Variable variable) {
         Optional<Variable> existingVariable = findByWorkflowInstanceKeyAndName(variable.getWorkflowInstanceKey(), variable.getName());
 
