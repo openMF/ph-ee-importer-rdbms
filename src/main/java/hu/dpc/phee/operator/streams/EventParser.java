@@ -118,6 +118,7 @@ public class EventParser {
 
         Long workflowKey = record.read("$.value.processDefinitionKey");
         Long workflowInstanceKey = record.read("$.value.processInstanceKey");
+        Long position = record.read("$.position");
         Long timestamp = record.read("$.timestamp");
         String bpmnElementType = record.read("$.value.bpmnElementType");
         String bpmnEventType = record.read("$.value.bpmnEventType");
@@ -228,7 +229,7 @@ public class EventParser {
                                 .withWorkflowInstanceKey(workflowInstanceKey)
                                 .withName(variableName)
                                 .withWorkflowKey(workflowKey)
-                                .withTimestamp(timestamp)
+                                .withTimestamp(position)  // TODO: fix this in the future
                                 .withValue(value));
             }
 
@@ -244,7 +245,7 @@ public class EventParser {
                                 .withWorkflowInstanceKey(workflowInstanceKey)
                                 .withName("exception")
                                 .withWorkflowKey(workflowKey)
-                                .withTimestamp(timestamp)
+                                .withTimestamp(position)  // TODO: fix this in the future
                                 .withValue(StringEscapeUtils.escapeJson(record.jsonString()))
                 );
             }
