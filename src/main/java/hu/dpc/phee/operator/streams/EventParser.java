@@ -229,7 +229,8 @@ public class EventParser {
                                 .withWorkflowInstanceKey(workflowInstanceKey)
                                 .withName(variableName)
                                 .withWorkflowKey(workflowKey)
-                                .withTimestamp(position)  // TODO: fix this in the future
+                                .withTimestamp(timestamp)
+                                .withPosition(position)
                                 .withValue(value));
             }
 
@@ -245,7 +246,8 @@ public class EventParser {
                                 .withWorkflowInstanceKey(workflowInstanceKey)
                                 .withName("exception")
                                 .withWorkflowKey(workflowKey)
-                                .withTimestamp(position)  // TODO: fix this in the future
+                                .withTimestamp(timestamp)
+                                .withPosition(position)
                                 .withValue(StringEscapeUtils.escapeJson(record.jsonString()))
                 );
             }
