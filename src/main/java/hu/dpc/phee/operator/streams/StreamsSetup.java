@@ -124,7 +124,7 @@ public class StreamsSetup {
                 Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
                 MDC.put("transactionId", transfer.getTransactionId());
                 Map<Long, DocumentContext> sortedRecords = getSortedRecords(records);
-                logger.info("## processing key: {}, size: {}, partitions: {}, records: {}", key, records.size(),
+                logger.info("## processing key: {}, size: {}, positions: {}, records: {}", key, records.size(),
                         sortedRecords.entrySet().stream()
                                 .map(Map.Entry::getKey)
                                 .map(String::valueOf)
