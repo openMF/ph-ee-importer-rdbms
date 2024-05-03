@@ -118,7 +118,7 @@ public class EventParser {
 
         Long workflowKey = record.read("$.value.processDefinitionKey");
         Long workflowInstanceKey = record.read("$.value.processInstanceKey");
-        Long position = Long.valueOf(record.read("$.position", Integer.class));
+        Long position = record.read("$.position", Long.class);
         Long timestamp = record.read("$.timestamp");
         String bpmnElementType = record.read("$.value.bpmnElementType");
         String bpmnEventType = record.read("$.value.bpmnEventType");
