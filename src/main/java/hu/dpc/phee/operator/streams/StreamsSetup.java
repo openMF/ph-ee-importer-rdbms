@@ -12,7 +12,6 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -62,6 +61,9 @@ public class StreamsSetup {
     @Autowired
     TenantsService tenantsService;
 
+    @Autowired
+    PreFilters preFilters;
+
 
     @PostConstruct
     public void setup() {
@@ -80,64 +82,69 @@ public class StreamsSetup {
                 .aggregate(ArrayList::new, aggregator, merger, Materialized.with(STRING_SERDE, ListSerde(ArrayList.class, STRING_SERDE)))
                 .toStream()
                 .foreach(this::process);
-
-        // TODO kafka-ba kell leirni a vegen az entitaslistat, nem DB-be, hogy konzisztens es ujrajatszhato legyen !!
     }
 
     public void process(Object _key, Object _value) {
-        Windowed<String> key = (Windowed<String>) _key;
+        String key = ((Windowed<String>) _key).key();
         List<String> records = (List<String>) _value;
 
         if (records == null || records.isEmpty()) {
-            logger.warn("skipping processing, null records for key: {}", key);
+            logger.warn("skipping processing, received no records for key: {}", key);
             return;
         }
 
-        String firstValid = findFirstNonExpiredRecord(records);
-        if (firstValid.isEmpty()) {
-            logger.debug("skipping processing, all records are expired for key: {}", key);
+        Collection<DocumentContext> parsedRecords = parseAndSortInterestingRecords(records);
+        if (parsedRecords.isEmpty()) {
+            logger.debug("skipping processing, all records are messages or expired for key: {}", key);
             return;
         }
 
-        String bpmn;
-        String tenantName;
-        DocumentContext sample = JsonPathReader.parse(firstValid);
-        try {
-            Pair<String, String> bpmnAndTenant = eventParser.retrieveTenant(sample);
-            bpmn = bpmnAndTenant.getFirst();
-            tenantName = bpmnAndTenant.getSecond();
-            logger.trace("resolving tenant server connection for tenant: {}", tenantName);
-            DataSource tenant = tenantsService.getTenantDataSource(tenantName);
-            ThreadLocalContextUtil.setTenant(tenant);
-        } catch (Exception e) {
-            logger.warn("could not resolve tenantName from first valid record: {}, skipping whole batch", firstValid);
-            return;
-        }
+        logger.info("received {} records for key: {}", parsedRecords.size(), key);
 
-        try {
-            if (transferTransformerConfig.findFlow(bpmn).isEmpty()) {
-                logger.warn("skip saving flow information, no configured flow found for bpmn: {}", bpmn);
-                return;
+        String bpmn = null;
+        String tenantName = null;
+        DocumentContext sample = null;
+        for (DocumentContext record : parsedRecords) {
+            sample = record;
+            try {
+                Pair<String, String> bpmnAndTenant = eventParser.retrieveTenant(record);
+                bpmn = bpmnAndTenant.getFirst();
+                tenantName = bpmnAndTenant.getSecond();
+                logger.trace("resolving tenant server connection for tenant: {}", tenantName);
+                DataSource tenant = tenantsService.getTenantDataSource(tenantName);
+                ThreadLocalContextUtil.setTenant(tenant);
+
+                if (transferTransformerConfig.findFlow(bpmn).isEmpty()) {
+                    logger.warn("skipping record, no configured flow found for bpmn: {}", bpmn);
+                    continue;
+                }
+
+                break;
+            } catch (Exception e) {
+                logger.warn("could not resolve tenantName from record: {}", record);
             }
+        }
+        if (bpmn == null) {
+            logger.error("could not resolve tenantName for key: {}, skipping whole batch", key);
+            return;
+        }
 
+        doProcess(bpmn, sample, key, parsedRecords, tenantName);
+    }
+
+    private void doProcess(String bpmn, DocumentContext sample, String key, Collection<DocumentContext> parsedRecords, String tenantName) {
+        try {
             transactionTemplate.executeWithoutResult(status -> {
                 Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
-                MDC.put("transactionId", transfer.getTransactionId());
-                Map<Long, DocumentContext> sortedRecords = getSortedRecords(records);
-                logger.info("## processing key: {}, size: {}, positions: {}, records: {}", key, records.size(),
-                        sortedRecords.entrySet().stream()
-                                .map(Map.Entry::getKey)
-                                .map(String::valueOf)
-                                .collect(Collectors.joining(",")), records);
                 try {
-                    for (Map.Entry<Long, DocumentContext> entry : sortedRecords.entrySet()) {
+                    MDC.put("transactionId", transfer.getTransactionId());
+                    for (DocumentContext record : parsedRecords) {
                         try {
-                            eventParser.process(bpmn, tenantName, transfer, entry.getValue());
+                            eventParser.process(bpmn, tenantName, transfer, record);
                         } catch (Exception e) {
-                            logger.error("failed to parse record: {}", entry.getValue(), e);
+                            logger.error("failed to process record: {}", record, e);
                         }
                     }
-
                     eventParser.transferRepository.save(transfer);
                 } finally {
                     MDC.clear();
@@ -152,28 +159,22 @@ public class StreamsSetup {
         }
     }
 
-
-    private static @NotNull Map<Long, DocumentContext> getSortedRecords(List<String> records) {
+    private Collection<DocumentContext> parseAndSortInterestingRecords(List<String> records) {
         Map<Long, DocumentContext> sortedRecords = new TreeMap<>(Comparator.naturalOrder());
         for (String record : records) {
             DocumentContext json = JsonPathReader.parse(record);
-            sortedRecords.put(json.read("$.position", Long.class), json);
+            if (isNotMessageType(json) && isNotExpired(json)) {
+                sortedRecords.put(json.read("$.position", Long.class), json);
+            }
         }
-        return sortedRecords;
+        return sortedRecords.values();
     }
 
-    private String findFirstNonExpiredRecord(List<String> records) {
-        String firstValid = "";
+    private boolean isNotMessageType(DocumentContext json) {
+        return !"MESSAGE".equals(json.read("$.valueType"));
+    }
 
-        for (String record : records) {
-            DocumentContext sample = JsonPathReader.parse(record);
-            if ("EXPIRED".equals(sample.read("$.intent"))) {
-                logger.debug("skipping expired record: {}", record);
-                continue;
-            }
-            firstValid = record;
-            break;
-        }
-        return firstValid;
+    private boolean isNotExpired(DocumentContext json) {
+        return !"EXPIRED".equals(json.read("$.intent"));
     }
 }
