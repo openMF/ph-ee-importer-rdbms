@@ -61,9 +61,6 @@ public class StreamsSetup {
     @Autowired
     TenantsService tenantsService;
 
-    @Autowired
-    PreFilters preFilters;
-
 
     @PostConstruct
     public void setup() {
