@@ -100,29 +100,29 @@ transfer:
         - field: paymentMode
           variableName: transactionList
           jsonPath: $.payment_mode
-    - name: bulk_connector_closedloop
-      direction: UNKNOWN
-      type: BATCH
-      transformers:
-        - field: batchId
-          variableName: batchId
-        - field: payerFsp
-          variableName: tenantId
-        - field: requestFile
-          variableName: filename
-        - field: registeringInstitutionId
-          variableName: registeringInstituteId
-        - field: correlationId
-          variableName: clientCorrelationId
-        - field: requestId
-          variableName: transactionList
-          jsonPath: $.request_id
-        - field: note
-          variableName: transactionList
-          jsonPath: $.note
-        - field: paymentMode
-          variableName: transactionList
-          jsonPath: $.payment_mode
+#    - name: bulk_connector_closedloop
+#      direction: UNKNOWN
+#      type: BATCH
+#      transformers:
+#        - field: batchId
+#          variableName: batchId
+#        - field: payerFsp
+#          variableName: tenantId
+#        - field: requestFile
+#          variableName: filename
+#        - field: registeringInstitutionId
+#          variableName: registeringInstituteId
+#        - field: correlationId
+#          variableName: clientCorrelationId
+#        - field: requestId
+#          variableName: transactionList
+#          jsonPath: $.request_id
+#        - field: note
+#          variableName: transactionList
+#          jsonPath: $.note
+#        - field: paymentMode
+#          variableName: transactionList
+#          jsonPath: $.payment_mode
     - name: inbound_transfer_mifos
       direction: INCOMING
       type: TRANSACTION-REQUEST
