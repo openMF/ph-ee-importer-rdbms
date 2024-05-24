@@ -2,6 +2,8 @@ package hu.dpc.phee.operator.streams;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;
+import hu.dpc.phee.operator.entity.ancillary.TimestampRepository;
+import hu.dpc.phee.operator.entity.ancillary.Timestamps;
 import hu.dpc.phee.operator.entity.batch.BatchRepository;
 import hu.dpc.phee.operator.entity.outboundmessages.OutboundMessagesRepository;
 import hu.dpc.phee.operator.entity.task.Task;
@@ -86,6 +88,9 @@ public class StreamsSetup {
     @Autowired
     TaskRepository taskRepository;
 
+    @Autowired
+    private TimestampRepository timestampRepository;
+
 
     @PostConstruct
     public void setup() {
@@ -149,6 +154,7 @@ public class StreamsSetup {
                 for (String record : records) {
                     try {
                         DocumentContext recordDocument = JsonPathReader.parse(record);
+                        logToTimestampsTable(recordDocument);
                         logger.info("from kafka: {}", recordDocument.jsonString());
 
                         String valueType = recordDocument.read("$.valueType", String.class);
@@ -232,5 +238,19 @@ public class StreamsSetup {
         }
         logger.debug("resolved bpmnProcessIdWithTenant: {}", bpmnProcessIdWithTenant);
         return bpmnProcessIdWithTenant;
+    }
+
+    public void logToTimestampsTable(DocumentContext incomingRecord) {
+        try{
+            Timestamps timestamps = new Timestamps();
+            timestamps.setWorkflowInstanceKey(incomingRecord.read("$.value.processInstanceKey"));
+            timestamps.setTransactionId(incomingRecord.read("$.value.transactionId"));
+            timestamps.setExportedTime(incomingRecord.read("$.value.exportedTime"));
+            timestamps.setImportedTime(incomingRecord.read("$.value.importedTime"));
+            timestamps.setZeebeTime(incomingRecord.read("$.value.timestamp"));
+            timestampRepository.save(timestamps);
+        }catch (Exception e) {
+            logger.info("Error parsing record");
+        }
     }
 }
