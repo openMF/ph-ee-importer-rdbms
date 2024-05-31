@@ -234,7 +234,7 @@ public class RecordParser {
             Batch batch = inflightBatchManager.retrieveOrCreateBatch(bpmn, sample);
             matchingTransformers.forEach(transformer -> applyTransformer(batch, variableName, value, transformer));
             batchRepository.save(batch);
-            if (!config.get().getName().equalsIgnoreCase("bulk_processor")) {
+            //if (!config.get().getName().equalsIgnoreCase("bulk_processor")) {
                 logger.info("Inside if condition {}", variableName);
                 if (variableName.equals("filename")) {
                     logger.info("store filename {} in tempDocStore for instance {}", strip(value), workflowInstanceKey);
@@ -244,7 +244,7 @@ public class RecordParser {
                     logger.info("store batchid {} in tempDocStore for instance {}", strip(value), workflowInstanceKey);
                     inflightBatchManager.storeBatchId(workflowInstanceKey, value);
                 }
-            }
+            //}
         } else if ("OUTBOUND_MESSAGES".equalsIgnoreCase(flowType)) {
             OutboudMessages outboudMessages = inflightOutboundMessageManager.retrieveOrCreateOutboundMessage(bpmn, sample);
             matchingTransformers.forEach(transformer -> applyTransformer(outboudMessages, variableName, value, transformer));
