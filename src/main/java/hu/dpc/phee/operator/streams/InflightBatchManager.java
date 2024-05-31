@@ -124,10 +124,12 @@ public class InflightBatchManager {
             transfer.setPayeeFee(BigDecimal.ZERO);
             transfer.setPayerFeeCurrency(transaction.getCurrency());
             transfer.setPayerFee(BigDecimal.ZERO);
+            if(transaction.getPaymentMode().equals("closedloop")) {
 
-            BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
-            transfer = updatedExistingRecord(transfer, batchId);
-            transferRepository.save(transfer);
+                BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
+                transfer = updatedExistingRecord(transfer, batchId);
+                transferRepository.save(transfer);
+            }
             logger.debug("Saved transfer with batchId: {}", transfer.getBatchId());
         }
 
