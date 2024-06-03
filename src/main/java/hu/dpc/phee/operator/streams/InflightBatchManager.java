@@ -12,6 +12,7 @@ import hu.dpc.phee.operator.entity.transfer.TransferStatus;
 import hu.dpc.phee.operator.file.CsvFileService;
 import hu.dpc.phee.operator.file.FileTransferService;
 import hu.dpc.phee.operator.util.BatchFormatToTransferMapper;
+import hu.dpc.phee.operator.util.PaymentModeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,10 +125,12 @@ public class InflightBatchManager {
             transfer.setPayeeFee(BigDecimal.ZERO);
             transfer.setPayerFeeCurrency(transaction.getCurrency());
             transfer.setPayerFee(BigDecimal.ZERO);
+            if(transaction.getPaymentMode().equals(PaymentModeEnum.CLOSED_LOOP.getValue())) {
 
-            BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
-            transfer = updatedExistingRecord(transfer, batchId);
-            transferRepository.save(transfer);
+                BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
+                transfer = updatedExistingRecord(transfer, batchId);
+                transferRepository.save(transfer);
+            }
             logger.debug("Saved transfer with batchId: {}", transfer.getBatchId());
         }
 
