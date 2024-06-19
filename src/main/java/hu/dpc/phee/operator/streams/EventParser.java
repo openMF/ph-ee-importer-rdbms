@@ -257,13 +257,18 @@ public class EventParser {
                 yield List.of();
             }
 
+            case "TIMER" -> {
+                logger.warn("ignoring TIMER type event record");
+                yield List.of();
+            }
+
             default -> {
-                logger.error("Unexpected event type: " + valueType);
+                logger.error("Unexpected event type: {}", valueType);
                 yield List.of();
             }
         };
 
-        if (entities.size() != 0) {
+        if (!entities.isEmpty()) {
             logger.info("Saving {} entities", entities.size());
             entities.forEach(entity -> {
                 if (entity instanceof Variable) {
