@@ -252,13 +252,8 @@ public class EventParser {
                 );
             }
 
-            case "PROCESS_EVENT" -> {
-                logger.warn("ignoring PROCESS_EVENT type event record");
-                yield List.of();
-            }
-
-            case "TIMER" -> {
-                logger.warn("ignoring TIMER type event record");
+            case "PROCESS_EVENT", "TIMER" -> {
+                logger.warn("ignoring {} type event record", valueType);
                 yield List.of();
             }
 
