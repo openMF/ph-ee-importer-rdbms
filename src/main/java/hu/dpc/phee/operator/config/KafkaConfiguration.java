@@ -81,7 +81,6 @@ public class KafkaConfiguration {
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, hostname);
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.put(DEFAULT_PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG, KafkaProductionExceptionHandler.class);
 
         return new DefaultKafkaConsumerFactory<>(properties);
     }
@@ -89,6 +88,7 @@ public class KafkaConfiguration {
     private Map<String, Object> commonProperties() {
         Map<String, Object> properties = new HashMap<>();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokers);
+        properties.put(DEFAULT_PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG, KafkaProductionExceptionHandler.class);
 
         if (msk) {
             logger.info("configuring Kafka client with AWS MSK support");
