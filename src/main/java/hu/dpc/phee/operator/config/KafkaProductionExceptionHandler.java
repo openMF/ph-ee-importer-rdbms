@@ -19,6 +19,7 @@ public class KafkaProductionExceptionHandler extends DefaultProductionExceptionH
     @Override
     public ProductionExceptionHandlerResponse handle(ProducerRecord<byte[], byte[]> record, Exception exception) {
         logger.error("failed to produce record: {}", record, exception);
-        return super.handle(record, exception);
+        super.handle(record, exception);
+        return ProductionExceptionHandlerResponse.CONTINUE;
     }
 }
