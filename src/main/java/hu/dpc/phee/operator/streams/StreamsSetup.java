@@ -248,7 +248,7 @@ public class StreamsSetup {
             timestamps.setWorkflowInstanceKey(incomingRecord.read("$.value.processInstanceKey"));
             timestamps.setExportedTime(incomingRecord.read("$.exportedTime"));
             timestamps.setImportedTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").format(new Date()));
-            timestamps.setZeebeTime(incomingRecord.read("$.timestamp"));
+            timestamps.setZeebeTime(incomingRecord.read("$.timestamp").toString());
             timestampRepository.save(timestamps);
         }catch (Exception e) {
             logger.info(e.getMessage().toString() + " Error parsing record");
