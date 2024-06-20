@@ -34,9 +34,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -244,10 +246,9 @@ public class StreamsSetup {
         try{
             Timestamps timestamps = new Timestamps();
             timestamps.setWorkflowInstanceKey(incomingRecord.read("$.value.processInstanceKey"));
-            timestamps.setTransactionId(incomingRecord.read("$.value.transactionId"));
-            timestamps.setExportedTime(incomingRecord.read("$.value.exportedTime"));
-            timestamps.setImportedTime(incomingRecord.read("$.value.importedTime"));
-            timestamps.setZeebeTime(incomingRecord.read("$.value.timestamp"));
+            timestamps.setExportedTime(incomingRecord.read("$.exportedTime"));
+            timestamps.setImportedTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").format(new Date()));
+            timestamps.setZeebeTime(incomingRecord.read("$.timestamp"));
             timestampRepository.save(timestamps);
         }catch (Exception e) {
             logger.info("Error parsing record");
