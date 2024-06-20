@@ -251,7 +251,7 @@ public class StreamsSetup {
             timestamps.setZeebeTime(incomingRecord.read("$.timestamp"));
             timestampRepository.save(timestamps);
         }catch (Exception e) {
-            logger.info("Error parsing record");
+            logger.info(e.getMessage().toString() + " Error parsing record");
         }
     }
 }
