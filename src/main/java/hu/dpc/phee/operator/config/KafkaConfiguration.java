@@ -1,14 +1,17 @@
 package hu.dpc.phee.operator.config;
 
 import com.baasflow.commons.events.internal.KafkaHealthIndicator;
+import org.apache.commons.compress.archivers.dump.DumpArchiveConstants;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.state.StoreBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,6 +112,7 @@ public class KafkaConfiguration {
         properties.put(APPLICATION_ID_CONFIG, consumerGroup);
         properties.put(DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
         properties.put(COMMIT_INTERVAL_MS_CONFIG, commitIntervalMs);
+        properties.put(StreamsConfig.PRODUCER_PREFIX + ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
         return new KafkaStreamsConfiguration(properties);
     }
 
