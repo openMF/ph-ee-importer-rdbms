@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static hu.dpc.phee.operator.util.OperatorUtils.strip;
 
@@ -98,6 +100,11 @@ public class InflightBatchManager {
         if (filename == null) {
             return;
         }
+        String regex = ".*_sub-batch-([\\w-]+)\\.csv"; //payee DFSP Id for sub batch are extracted from the sub batch file name when party lookup is enabled and it is successful
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(filename);
+
+
         filename = strip(filename);
         String localFilePath = fileTransferService.downloadFile(filename, bucketName);
         if (localFilePath == null) {
@@ -112,7 +119,11 @@ public class InflightBatchManager {
             transfer.setCompletedAt(new Date(completeTimestamp));
             transfer.setTransactionId(transaction.getRequestId());
             transfer.setClientCorrelationId(UUID.randomUUID().toString());
-            transfer.setPayeeDfspId(batch.getPaymentMode());
+            if (matcher.matches()) {
+                String payeeDfspId = matcher.group(1);
+                transfer.setPayeeDfspId(payeeDfspId);
+            }
+
             transfer.setPayerDfspId(ThreadLocalContextUtil.getTenantName());
             String batchId = getBatchId(workflowInstanceKey);
             if(transaction.getBatchId() == null || transaction.getBatchId().isEmpty())
