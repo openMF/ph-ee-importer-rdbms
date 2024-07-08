@@ -445,7 +445,7 @@ transfer:
         - field: clientCorrelationId
           variableName: clientCorrelationId
         - field: payeeDfspId
-          variableName: payeeDFSPId
+          variableName: destinationFspId
     - name: PayeeQuoteTransfer
       direction: INCOMING
       type: TRANSFER

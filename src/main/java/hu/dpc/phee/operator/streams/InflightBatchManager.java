@@ -120,8 +120,8 @@ public class InflightBatchManager {
             transfer.setTransactionId(transaction.getRequestId());
             transfer.setClientCorrelationId(UUID.randomUUID().toString());
             if (matcher.matches()) {
-                String payeeDFSPId = matcher.group(1);
-                transfer.setPayeeDfspId(payeeDFSPId);
+                String payeeDfspId = matcher.group(1);
+                transfer.setPayeeDfspId(payeeDfspId);
             }
 
             transfer.setPayerDfspId(ThreadLocalContextUtil.getTenantName());
