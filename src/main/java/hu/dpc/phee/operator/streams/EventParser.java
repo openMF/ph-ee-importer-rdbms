@@ -5,7 +5,12 @@ import com.baasflow.commons.events.EventService;
 import com.baasflow.commons.events.EventStatus;
 import com.baasflow.commons.events.EventType;
 import com.jayway.jsonpath.DocumentContext;
+import hu.dpc.phee.operator.config.FileTransportTransformerConfig;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;
+import hu.dpc.phee.operator.config.transformer.Flow;
+import hu.dpc.phee.operator.config.transformer.Transformer;
+import hu.dpc.phee.operator.entity.filetransport.FileTransport;
+import hu.dpc.phee.operator.entity.filetransport.FileTransportRepository;
 import hu.dpc.phee.operator.entity.task.Task;
 import hu.dpc.phee.operator.entity.task.TaskRepository;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
@@ -50,7 +55,13 @@ public class EventParser {
     TransferRepository transferRepository;
 
     @Autowired
+    FileTransportRepository fileTransportRepository;
+
+    @Autowired
     TransferTransformerConfig transferTransformerConfig;
+
+    @Autowired
+    FileTransportTransformerConfig fileTransportTransformerConfig;
 
     @Autowired
     EventService eventService;
@@ -97,7 +108,7 @@ public class EventParser {
             transfer = new Transfer(processInstanceKey);
             transfer.setStatus(TransferStatus.IN_PROGRESS);
             transfer.setLastUpdated(timestamp);
-            Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
+            Optional<Flow> config = transferTransformerConfig.findFlow(bpmn);
             if (config.isPresent()) {
                 transfer.setDirection(config.get().getDirection());
             } else {
@@ -108,6 +119,19 @@ public class EventParser {
             logger.debug("found existing Transfer for processInstanceKey: {}", processInstanceKey);
         }
         return transfer;
+    }
+
+    public FileTransport retrieveOrCreateFileTransport(String bpmn, DocumentContext record) {
+        Long processInstanceKey = record.read("$.value.processInstanceKey", Long.class);
+        FileTransport fileTransport = fileTransportRepository.findByWorkflowInstanceKey(processInstanceKey);
+        if (fileTransport == null) {
+            logger.debug("creating new FileTransport for processInstanceKey: {}", processInstanceKey);
+            fileTransport = new FileTransport(processInstanceKey);
+            fileTransportRepository.save(fileTransport);
+        } else {
+            logger.debug("found existing Transfer for processInstanceKey: {}", processInstanceKey);
+        }
+        return fileTransport;
     }
 
     public void process(String bpmn, String tenantName, Transfer transfer, DocumentContext record) {
@@ -133,7 +157,7 @@ public class EventParser {
                     transfer.setStartedAt(new Date(timestamp));
                     transfer.setLastUpdated(timestamp);
 
-                    List<TransferTransformerConfig.Transformer> constantTransformers = transferTransformerConfig.getFlows().stream()
+                    List<Transformer> constantTransformers = transferTransformerConfig.getFlows().stream()
                             .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
                             .flatMap(it -> it.getTransformers().stream())
                             .filter(it -> Strings.isNotBlank(it.getConstant()))
@@ -216,7 +240,7 @@ public class EventParser {
                 String value = variableValue.startsWith("\"") && variableValue.endsWith("\"") ? StringEscapeUtils.unescapeJson(variableValue.substring(1, variableValue.length() - 1)) : variableValue;
 
                 logger.debug("finding transformers for bpmn: {} and variable: {}", bpmn, variableName);
-                List<TransferTransformerConfig.Transformer> matchingTransformers = transferTransformerConfig.getFlows().stream()
+                List<Transformer> matchingTransformers = transferTransformerConfig.getFlows().stream()
                         .filter(it -> bpmn.equalsIgnoreCase(it.getName()))
                         .flatMap(it -> it.getTransformers().stream())
                         .filter(it -> variableName.equalsIgnoreCase(it.getVariableName()))
@@ -300,7 +324,7 @@ public class EventParser {
         );
     }
 
-    private void applyTransformer(Long timestamp, Transfer transfer, String variableName, String variableValue, TransferTransformerConfig.Transformer transformer) {
+    private void applyTransformer(Long timestamp, Transfer transfer, String variableName, String variableValue, Transformer transformer) {
         logger.debug("applying transformer for field: {}", transformer.getField());
         try {
             String fieldName = transformer.getField();

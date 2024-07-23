@@ -1,10 +1,11 @@
 package hu.dpc.phee.operator.streams;
 
 import com.jayway.jsonpath.DocumentContext;
+import hu.dpc.phee.operator.config.FileTransportTransformerConfig;
 import hu.dpc.phee.operator.config.TransferTransformerConfig;
+import hu.dpc.phee.operator.entity.filetransport.FileTransport;
 import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
-import hu.dpc.phee.operator.entity.transfer.TransferRepository;
 import hu.dpc.phee.operator.importer.JsonPathReader;
 import hu.dpc.phee.operator.tenants.TenantsService;
 import jakarta.annotation.PostConstruct;
@@ -56,7 +57,7 @@ public class StreamsSetup {
     TransferTransformerConfig transferTransformerConfig;
 
     @Autowired
-    TransferRepository transferRepository;
+    FileTransportTransformerConfig fileTransportTransformerConfig;
 
     @Autowired
     TenantsService tenantsService;
@@ -111,7 +112,7 @@ public class StreamsSetup {
                 DataSource tenant = tenantsService.getTenantDataSource(tenantName);
                 ThreadLocalContextUtil.setTenant(tenant);
 
-                if (transferTransformerConfig.findFlow(bpmn).isEmpty()) {
+                if (transferTransformerConfig.findFlow(bpmn).isEmpty() && fileTransportTransformerConfig.findFlow(bpmn).isEmpty()) {
                     logger.warn("skipping record, no configured flow found for bpmn: {}", bpmn);
                     continue;
                 }
@@ -132,19 +133,11 @@ public class StreamsSetup {
     private void doProcess(String bpmn, DocumentContext sample, String key, Collection<DocumentContext> parsedRecords, String tenantName) {
         try {
             transactionTemplate.executeWithoutResult(status -> {
-                Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
-                try {
-                    MDC.put("transactionId", transfer.getTransactionId());
-                    for (DocumentContext record : parsedRecords) {
-                        try {
-                            eventParser.process(bpmn, tenantName, transfer, record);
-                        } catch (Exception e) {
-                            logger.error("failed to process record: {}", record, e);
-                        }
-                    }
-                    eventParser.transferRepository.save(transfer);
-                } finally {
-                    MDC.clear();
+                if(transferTransformerConfig.findFlow(bpmn).isPresent()) {
+                    processTranfer(bpmn, sample, parsedRecords, tenantName);
+                }
+                if(fileTransportTransformerConfig.findFlow(bpmn).isPresent()) {
+                    processTransport(bpmn, sample, parsedRecords, tenantName);
                 }
             });
 
@@ -153,6 +146,40 @@ public class StreamsSetup {
 
         } finally {
             ThreadLocalContextUtil.clear();
+        }
+    }
+
+    private void processTransport(String bpmn, DocumentContext sample, Collection<DocumentContext> parsedRecords, String tenantName) {
+        FileTransport fileTransport = eventParser.retrieveOrCreateFileTransport(bpmn, sample);
+        try {
+            MDC.put("transportId", fileTransport.getWorkflowInstanceKey());
+            for (DocumentContext record : parsedRecords) {
+                try {
+                    eventParser.process(bpmn, tenantName, fileTransport, record);
+                } catch (Exception e) {
+                    logger.error("failed to process record: {}", record, e);
+                }
+            }
+            eventParser.fileTransportRepository.save(fileTransport);
+        } finally {
+            MDC.clear();
+        }
+    }
+
+    private void processTranfer(String bpmn, DocumentContext sample, Collection<DocumentContext> parsedRecords, String tenantName) {
+        Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
+        try {
+            MDC.put("transactionId", transfer.getTransactionId());
+            for (DocumentContext record : parsedRecords) {
+                try {
+                    eventParser.process(bpmn, tenantName, transfer, record);
+                } catch (Exception e) {
+                    logger.error("failed to process record: {}", record, e);
+                }
+            }
+            eventParser.transferRepository.save(transfer);
+        } finally {
+            MDC.clear();
         }
     }
 
