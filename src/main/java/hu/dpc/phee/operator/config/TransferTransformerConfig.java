@@ -1,5 +1,6 @@
 package hu.dpc.phee.operator.config;
 
+import hu.dpc.phee.operator.config.transformer.Flow;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.slf4j.Logger;
@@ -27,24 +28,6 @@ public class TransferTransformerConfig {
     }
 
     private List<Flow> flows;
-
-    @Data
-    public static class Flow {
-        private String name;
-        private String direction;
-        private List<Transformer> transformers;
-
-    }
-
-    @Data
-    public static class Transformer {
-        private String field;
-        private String variableName;
-        private String jsonPath;
-        private String constant;
-        private String xpath;
-        private String dateFormat;
-    }
 
     public Optional<Flow> findFlow(String name) {
         return flows.stream().filter(flow -> name.equalsIgnoreCase(flow.getName())).findAny();
