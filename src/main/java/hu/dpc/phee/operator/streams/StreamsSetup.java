@@ -1,13 +1,7 @@
 package hu.dpc.phee.operator.streams;
 
 import com.jayway.jsonpath.DocumentContext;
-import hu.dpc.phee.operator.config.FileTransportTransformerConfig;
-import hu.dpc.phee.operator.config.TransferTransformerConfig;
-import hu.dpc.phee.operator.entity.filetransport.FileTransport;
-import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
-import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.importer.JsonPathReader;
-import hu.dpc.phee.operator.tenants.TenantsService;
 import jakarta.annotation.PostConstruct;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -15,14 +9,10 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.sql.DataSource;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,20 +38,7 @@ public class StreamsSetup {
     private StreamsBuilder streamsBuilder;
 
     @Autowired
-    private EventParser eventParser;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
-    @Autowired
-    TransferTransformerConfig transferTransformerConfig;
-
-    @Autowired
-    FileTransportTransformerConfig fileTransportTransformerConfig;
-
-    @Autowired
-    TenantsService tenantsService;
-
+    private List<EventParser> parsers;
 
     @PostConstruct
     public void setup() {
@@ -99,88 +76,11 @@ public class StreamsSetup {
 
         logger.info("received {} records for key: {}", parsedRecords.size(), key);
 
-        String bpmn = null;
-        String tenantName = null;
-        DocumentContext sample = null;
-        for (DocumentContext record : parsedRecords) {
-            sample = record;
-            try {
-                Pair<String, String> bpmnAndTenant = eventParser.retrieveTenant(record);
-                bpmn = bpmnAndTenant.getFirst();
-                tenantName = bpmnAndTenant.getSecond();
-                logger.trace("resolving tenant server connection for tenant: {}", tenantName);
-                DataSource tenant = tenantsService.getTenantDataSource(tenantName);
-                ThreadLocalContextUtil.setTenant(tenant);
+        EventParser parser = parsers.stream()
+                .filter(p -> p.isAbleToProcess(parsedRecords))
+                .findFirst().orElseThrow();
 
-                if (transferTransformerConfig.findFlow(bpmn).isEmpty() && fileTransportTransformerConfig.findFlow(bpmn).isEmpty()) {
-                    logger.warn("skipping record, no configured flow found for bpmn: {}", bpmn);
-                    continue;
-                }
-
-                break;
-            } catch (Exception e) {
-                logger.warn("could not resolve tenantName from record: {}", record);
-            }
-        }
-        if (bpmn == null) {
-            logger.error("could not resolve tenantName for key: {}, skipping whole batch", key);
-            return;
-        }
-
-        doProcess(bpmn, sample, key, parsedRecords, tenantName);
-    }
-
-    private void doProcess(String bpmn, DocumentContext sample, String key, Collection<DocumentContext> parsedRecords, String tenantName) {
-        try {
-            transactionTemplate.executeWithoutResult(status -> {
-                if(transferTransformerConfig.findFlow(bpmn).isPresent()) {
-                    processTranfer(bpmn, sample, parsedRecords, tenantName);
-                }
-                if(fileTransportTransformerConfig.findFlow(bpmn).isPresent()) {
-                    processTransport(bpmn, sample, parsedRecords, tenantName);
-                }
-            });
-
-        } catch (Exception e) {
-            logger.error("failed to process batch", e);
-
-        } finally {
-            ThreadLocalContextUtil.clear();
-        }
-    }
-
-    private void processTransport(String bpmn, DocumentContext sample, Collection<DocumentContext> parsedRecords, String tenantName) {
-        FileTransport fileTransport = eventParser.retrieveOrCreateFileTransport(bpmn, sample);
-        try {
-            MDC.put("transportId", fileTransport.getWorkflowInstanceKey());
-            for (DocumentContext record : parsedRecords) {
-                try {
-                    eventParser.process(bpmn, tenantName, fileTransport, record);
-                } catch (Exception e) {
-                    logger.error("failed to process record: {}", record, e);
-                }
-            }
-            eventParser.fileTransportRepository.save(fileTransport);
-        } finally {
-            MDC.clear();
-        }
-    }
-
-    private void processTranfer(String bpmn, DocumentContext sample, Collection<DocumentContext> parsedRecords, String tenantName) {
-        Transfer transfer = eventParser.retrieveOrCreateTransfer(bpmn, sample);
-        try {
-            MDC.put("transactionId", transfer.getTransactionId());
-            for (DocumentContext record : parsedRecords) {
-                try {
-                    eventParser.process(bpmn, tenantName, transfer, record);
-                } catch (Exception e) {
-                    logger.error("failed to process record: {}", record, e);
-                }
-            }
-            eventParser.transferRepository.save(transfer);
-        } finally {
-            MDC.clear();
-        }
+        parser.process(parsedRecords);
     }
 
     private Collection<DocumentContext> parseAndSortInterestingRecords(List<String> records) {
