@@ -3,7 +3,9 @@ package hu.dpc.phee.operator.entity.filetransport;
 import hu.dpc.phee.operator.entity.variable.Variable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
@@ -11,6 +13,8 @@ import java.util.List;
 @Entity
 @Cacheable(false)
 @Table(name = "file_transport")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class FileTransport {
@@ -57,4 +61,8 @@ public class FileTransport {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "fileTransport", fetch = FetchType.LAZY)
     private List<Variable> variables;
+
+    public FileTransport(Long workflowInstanceKey) {
+        this.workflowInstanceKey = workflowInstanceKey;
+    }
 }

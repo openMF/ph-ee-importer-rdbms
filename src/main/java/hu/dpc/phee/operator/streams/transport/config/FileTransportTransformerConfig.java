@@ -1,4 +1,4 @@
-package hu.dpc.phee.operator.config;
+package hu.dpc.phee.operator.streams.transport.config;
 
 import hu.dpc.phee.operator.config.transformer.Flow;
 import jakarta.annotation.PostConstruct;
