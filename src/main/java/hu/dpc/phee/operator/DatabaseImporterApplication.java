@@ -1,7 +1,7 @@
 package hu.dpc.phee.operator;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import hu.dpc.phee.operator.streams.transfer.config.TransferTransformerConfig;
+import hu.dpc.phee.operator.streams.impl.transfer.config.TransferTransformerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
