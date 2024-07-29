@@ -1,12 +1,13 @@
 package hu.dpc.phee.operator.streams;
 
-import com.jayway.jsonpath.DocumentContext;
+import hu.dpc.phee.operator.streams.impl.EventRecord;
+import org.springframework.beans.factory.NamedBean;
 
-import java.util.Collection;
+import java.util.List;
 
-public interface EventParser {
+public interface EventParser extends NamedBean {
 
-    boolean isAbleToProcess(Collection<DocumentContext> parsedRecords);
+    boolean isAbleToProcess(List<EventRecord> eventRecords);
 
-    void process(Collection<DocumentContext> parsedRecords);
+    void process(List<EventRecord> eventRecords);
 }

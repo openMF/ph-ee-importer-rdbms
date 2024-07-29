@@ -1,38 +1,34 @@
 package hu.dpc.phee.operator.streams;
 
-import com.jayway.jsonpath.DocumentContext;
-import hu.dpc.phee.operator.importer.JsonPathReader;
+import hu.dpc.phee.operator.streams.impl.EventRecord;
+import hu.dpc.phee.operator.streams.impl.config.ImporterConfig;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.apache.kafka.common.serialization.Serdes.ListSerde;
 
 @Service
+@Slf4j
 public class StreamsSetup {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private static final Serde<String> STRING_SERDE = Serdes.String();
 
-    @Value("${importer.kafka.topic}")
-    private String kafkaTopic;
-
-    @Value("${importer.kafka.aggregation-window-seconds}")
-    private int aggregationWindowSeconds;
-
-    @Value("${importer.kafka.aggregation-after-end-seconds}")
-    private int aggregationAfterEndSeconds;
+    @Autowired
+    private ImporterConfig config;
 
     @Autowired
     private StreamsBuilder streamsBuilder;
@@ -42,63 +38,56 @@ public class StreamsSetup {
 
     @PostConstruct
     public void setup() {
-        logger.info("## setting up kafka streams on topic `{}`, aggregating every {} seconds", kafkaTopic, aggregationWindowSeconds);
+        log.info("setting up kafka streams on topic {}, aggregating every {} seconds", config.kafka().topic(), config.kafka().aggregationWindowSeconds());
+
         Aggregator<String, String, List<String>> aggregator = (key, value, aggregate) -> {
             aggregate.add(value);
             return aggregate;
         };
+
         Merger<String, List<String>> merger = (key, first, second) -> Stream.of(first, second)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        streamsBuilder.stream(kafkaTopic, Consumed.with(STRING_SERDE, STRING_SERDE))
+        streamsBuilder.stream(config.kafka().topic(), Consumed.with(STRING_SERDE, STRING_SERDE))
                 .groupByKey()
-                .windowedBy(SessionWindows.ofInactivityGapAndGrace(Duration.ofSeconds(aggregationWindowSeconds), Duration.ofSeconds(aggregationAfterEndSeconds)))
+                .windowedBy(SessionWindows.ofInactivityGapAndGrace(
+                        Duration.ofSeconds(config.kafka().aggregationWindowSeconds()),
+                        Duration.ofSeconds(config.kafka().aggregationAfterEndSeconds())))
                 .aggregate(ArrayList::new, aggregator, merger, Materialized.with(STRING_SERDE, ListSerde(ArrayList.class, STRING_SERDE)))
                 .toStream()
                 .foreach(this::process);
     }
 
     public void process(Object _key, Object _value) {
+        @SuppressWarnings("unchecked")
         String key = ((Windowed<String>) _key).key();
-        List<String> records = (List<String>) _value;
+        @SuppressWarnings("unchecked")
+        List<String> events = (List<String>) _value;
 
-        if (records == null || records.isEmpty()) {
-            logger.warn("skipping processing, received no records for key: {}", key);
+        if (events == null || events.isEmpty()) {
+            log.warn("received no records for key {}", key);
             return;
         }
 
-        Collection<DocumentContext> parsedRecords = parseAndSortInterestingRecords(records);
-        if (parsedRecords.isEmpty()) {
-            logger.debug("skipping processing, all records are messages or expired for key: {}", key);
+        List<EventRecord> eventRecords = EventRecord.listBuilder().jsonEvents(events).build();
+        if (eventRecords.isEmpty()) {
+            log.debug("received no valid records for key {}", key);
             return;
         }
 
-        logger.info("received {} records for key: {}", parsedRecords.size(), key);
+        log.debug("received {} records for key {}", eventRecords.size(), key);
+        Optional<EventParser> validEventParser = parsers.stream()
+                .filter(p -> p.isAbleToProcess(eventRecords))
+                .findFirst();
 
-        EventParser parser = parsers.stream()
-                .filter(p -> p.isAbleToProcess(parsedRecords))
-                .findFirst().orElseThrow();
-
-        parser.process(parsedRecords);
-    }
-
-    private Collection<DocumentContext> parseAndSortInterestingRecords(List<String> records) {
-        Map<Long, DocumentContext> sortedRecords = new TreeMap<>(Comparator.naturalOrder());
-        for (String record : records) {
-            DocumentContext json = JsonPathReader.parse(record);
-            if (isNotMessageType(json) && isNotExpired(json)) {
-                sortedRecords.put(json.read("$.position", Long.class), json);
-            }
+        if (validEventParser.isEmpty()) {
+            log.warn("found no valid parser for records {}", key);
+            return;
         }
-        return sortedRecords.values();
-    }
 
-    private boolean isNotMessageType(DocumentContext json) {
-        return !"MESSAGE".equals(json.read("$.valueType"));
-    }
-
-    private boolean isNotExpired(DocumentContext json) {
-        return !"EXPIRED".equals(json.read("$.intent"));
+        EventParser parser = validEventParser.get();
+        log.info("parser {} processing {} records with key {}", parser.getBeanName(), eventRecords.size(), key);
+        parser.process(eventRecords);
     }
 }
