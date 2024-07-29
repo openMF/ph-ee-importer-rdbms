@@ -1,4 +1,4 @@
-package hu.dpc.phee.operator.streams.transfer;
+package hu.dpc.phee.operator.streams.impl.transfer;
 
 import com.baasflow.commons.events.EventLogLevel;
 import com.baasflow.commons.events.EventService;
@@ -9,7 +9,6 @@ import hu.dpc.phee.operator.config.transformer.Flow;
 import hu.dpc.phee.operator.config.transformer.Transformer;
 import hu.dpc.phee.operator.entity.task.Task;
 import hu.dpc.phee.operator.entity.task.TaskRepository;
-import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
 import hu.dpc.phee.operator.entity.transfer.Transfer;
 import hu.dpc.phee.operator.entity.transfer.TransferRepository;
 import hu.dpc.phee.operator.entity.transfer.TransferStatus;
@@ -17,26 +16,24 @@ import hu.dpc.phee.operator.entity.variable.Variable;
 import hu.dpc.phee.operator.entity.variable.VariableRepository;
 import hu.dpc.phee.operator.importer.JsonPathReader;
 import hu.dpc.phee.operator.streams.EventParser;
-import hu.dpc.phee.operator.streams.EventParserUtil;
-import hu.dpc.phee.operator.streams.transfer.config.TransferTransformerConfig;
+import hu.dpc.phee.operator.streams.impl.EventRecord;
+import hu.dpc.phee.operator.streams.impl.transfer.config.TransferTransformerConfig;
 import hu.dpc.phee.operator.tenants.TenantsService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.orm.jpa.JpaOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
@@ -64,8 +61,8 @@ public class TranferEventParser implements EventParser {
     @Autowired
     TransferTransformerConfig transferTransformerConfig;
 
-        @Autowired
-        private TransactionTemplate transactionTemplate;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Autowired
     EventService eventService;
@@ -355,31 +352,21 @@ public class TranferEventParser implements EventParser {
     }
 
     @Override
-    public boolean isAbleToProcess(Collection<DocumentContext> parsedRecords) {
-        for (DocumentContext record : parsedRecords) {
-            try {
-                Pair<String, String> bpmnAndTenant = EventParserUtil.retrieveTenant(record);
-                String bpmn = bpmnAndTenant.getFirst();
-                if (transferTransformerConfig.findFlow(bpmn).isPresent()) {
-                    return true;
-                }
-            } catch (Exception e) {
-                logger.trace("could not resolve bpmn name from record: {}", record);
-            }
-        }
-        return false;
+    public boolean isAbleToProcess(List<EventRecord> eventRecords) {
+        return eventRecords.stream()
+                .anyMatch(e -> transferTransformerConfig.findFlow(e.getBpmnProcessId()).isPresent());
     }
 
     @Override
-    public void process(Collection<DocumentContext> parsedRecords) {
-        try {
+    public void process(List<EventRecord> eventRecords) {
+        /*try {
             String bpmn = null;
             String tenantName = null;
             DocumentContext sample = null;
             for (DocumentContext record : parsedRecords) {
                 sample = record;
                 try {
-                    Pair<String, String> bpmnAndTenant = EventParserUtil.retrieveTenant(record);
+                    Pair<String, String> bpmnAndTenant = EventParserUtil.findTenantId(record);
                     bpmn = bpmnAndTenant.getFirst();
                     tenantName = bpmnAndTenant.getSecond();
                     DataSource tenant = tenantsService.getTenantDataSource(tenantName);
@@ -404,7 +391,7 @@ public class TranferEventParser implements EventParser {
             logger.error("failed to process batch", e);
         } finally {
             ThreadLocalContextUtil.clear();
-        }
+        }*/
     }
 
     private void doProcessRecords(Collection<DocumentContext> parsedRecords, String bpmn, DocumentContext sample, String tenantName) {
@@ -422,5 +409,10 @@ public class TranferEventParser implements EventParser {
         } finally {
             MDC.clear();
         }
+    }
+
+    @Override
+    public @NotNull String getBeanName() {
+        return this.getClass().getName();
     }
 }
