@@ -1,6 +1,8 @@
 package hu.dpc.phee.operator.entity.variable;
 
 
+import hu.dpc.phee.operator.entity.filetransport.FileTransport;
+import hu.dpc.phee.operator.entity.transfer.Transfer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -38,4 +40,13 @@ public class Variable {
     @Column(name = "VALUE")
     private String value;
 
+    @Id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "WORKFLOW_INSTANCE_KEY", referencedColumnName = "WORKFLOW_INSTANCE_KEY", insertable = false, updatable = false)
+    private Transfer transfer;
+
+    @Id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "WORKFLOW_INSTANCE_KEY", referencedColumnName = "WORKFLOW_INSTANCE_KEY", insertable = false, updatable = false)
+    private FileTransport fileTransport;
 }
