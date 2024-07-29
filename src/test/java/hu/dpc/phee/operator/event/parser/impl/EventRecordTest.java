@@ -1,4 +1,4 @@
-package hu.dpc.phee.operator.streams.impl;
+package hu.dpc.phee.operator.event.parser.impl;
 
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package hu.dpc.phee.operator.config.transformer;
+package hu.dpc.phee.operator.config.model;
 
 import lombok.Data;
 

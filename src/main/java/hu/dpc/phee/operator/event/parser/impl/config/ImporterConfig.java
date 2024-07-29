@@ -1,4 +1,4 @@
-package hu.dpc.phee.operator.streams.impl.config;
+package hu.dpc.phee.operator.event.parser.impl.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

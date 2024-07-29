@@ -1,6 +1,6 @@
-package hu.dpc.phee.operator.streams.impl.transfer.config;
+package hu.dpc.phee.operator.event.parser.impl.transfer.config;
 
-import hu.dpc.phee.operator.config.transformer.Flow;
+import hu.dpc.phee.operator.config.model.Flow;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.slf4j.Logger;

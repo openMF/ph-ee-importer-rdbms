@@ -1,47 +1,33 @@
-package hu.dpc.phee.operator.streams.impl.transport;
+package hu.dpc.phee.operator.event.parser.impl.transport;
 
 import com.baasflow.commons.events.EventLogLevel;
 import com.baasflow.commons.events.EventService;
 import com.baasflow.commons.events.EventStatus;
 import com.baasflow.commons.events.EventType;
-import com.jayway.jsonpath.DocumentContext;
-import hu.dpc.phee.operator.config.transformer.Transformer;
 import hu.dpc.phee.operator.entity.filetransport.FileTransport;
 import hu.dpc.phee.operator.entity.filetransport.FileTransportRepository;
 import hu.dpc.phee.operator.entity.task.Task;
 import hu.dpc.phee.operator.entity.task.TaskRepository;
 import hu.dpc.phee.operator.entity.tenant.ThreadLocalContextUtil;
-import hu.dpc.phee.operator.entity.transfer.Transfer;
-import hu.dpc.phee.operator.entity.transfer.TransferStatus;
 import hu.dpc.phee.operator.entity.variable.Variable;
 import hu.dpc.phee.operator.entity.variable.VariableRepository;
-import hu.dpc.phee.operator.importer.JsonPathReader;
-import hu.dpc.phee.operator.streams.EventParser;
-import hu.dpc.phee.operator.streams.impl.EventRecord;
-import hu.dpc.phee.operator.streams.impl.transport.config.FileTransportTransformerConfig;
+import hu.dpc.phee.operator.event.parser.EventParser;
+import hu.dpc.phee.operator.event.parser.impl.EventRecord;
+import hu.dpc.phee.operator.event.parser.impl.transport.config.FileTransportTransformerConfig;
 import hu.dpc.phee.operator.tenants.TenantsService;
+import hu.dpc.phee.operator.value.transformer.ValueTransformers;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.MDC;
-import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPathFactory;
-import java.io.StringReader;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -68,8 +54,8 @@ public class TransportEventParser implements EventParser {
     @Autowired
     private EventService eventService;
 
-    private final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-    private final XPathFactory xPathFactory = XPathFactory.newInstance();
+    @Autowired
+    private ValueTransformers valueTransformers;
 
     @Override
     public boolean isAbleToProcess(List<EventRecord> eventRecords) {
@@ -103,7 +89,7 @@ public class TransportEventParser implements EventParser {
             for (EventRecord eventRecord : eventRecords) {
                 log.trace("FileTransportEventParser processing record: {}", eventRecord.jsonString());
                 try {
-                    processRecord(fileTransport, eventRecord);
+                    processEventRecord(fileTransport, eventRecord);
                 } catch (Exception e) {
                     log.error("failed to process record with FileTransportEventParser: {}", eventRecord, e);
                 }
@@ -124,7 +110,7 @@ public class TransportEventParser implements EventParser {
         return newFileTransport;
     }
 
-    private void processRecord(FileTransport transport, EventRecord eventRecord) {
+    private void processEventRecord(FileTransport transport, EventRecord eventRecord) {
         if (log.isTraceEnabled()) {
             log.trace("{} event is: {}", eventRecord.getValueType(), eventRecord.jsonString());
         } else {
@@ -147,15 +133,7 @@ public class TransportEventParser implements EventParser {
         if ("EVENT".equals(recordType) && "START_EVENT".equals(eventRecord.getBpmnElementType()) && "ELEMENT_ACTIVATED".equals(intent)) {
             transport.setStartedAt(new Date(eventRecord.getTimestamp()));
             transport.setLastUpdated(eventRecord.getTimestamp());
-
-            List<Transformer> constantTransformers = fileTransportTransformerConfig.getFlows().stream()
-                    .filter(flow -> eventRecord.getBpmnProcessId().equalsIgnoreCase(flow.getName()))
-                    .flatMap(flow -> flow.getTransformers().stream())
-                    .filter(it -> Strings.isNotBlank(it.getConstant()))
-                    .toList();
-
-            log.debug("found {} constant transformers for flow start {}", constantTransformers.size(), eventRecord.getBpmnProcessId());
-            constantTransformers.forEach(it -> applyTransformer(eventRecord.getTimestamp(), transport, null, null, it));
+            valueTransformers.applyForConstants(eventRecord.getBpmnProcessId(), transport);
         }
 
         if ("EVENT".equals(recordType) && "END_EVENT".equals(eventRecord.getBpmnElementType()) && "ELEMENT_COMPLETED".equals(intent)) {
@@ -171,7 +149,7 @@ public class TransportEventParser implements EventParser {
 
         if ("EVENT".equals(recordType) && "EXCLUSIVE_GATEWAY".equals(eventRecord.getBpmnElementType()) && "ELEMENT_COMPLETED".equals(intent)) {
             log.info("exclusive gateway completed for processInstanceKey: {} at elementId: {}", eventRecord.getProcessInstanceKey(), eventRecord.getElementId());
-            Task task =new Task()
+            Task task = new Task()
                     .withWorkflowInstanceKey(eventRecord.getProcessInstanceKey())
                     .withWorkflowKey(eventRecord.getProcessDefinitionKey())
                     .withTimestamp(eventRecord.getTimestamp())
@@ -184,7 +162,7 @@ public class TransportEventParser implements EventParser {
 
         if ("EVENT".equals(recordType) && "TIMER".equals(eventRecord.getBpmnEventType()) && "ELEMENT_ACTIVATED".equals(intent)) {
             log.info("timer event for processInstanceKey: {} at elementId: {}", eventRecord.getProcessInstanceKey(), eventRecord.getElementId());
-            Task task =new Task()
+            Task task = new Task()
                     .withWorkflowInstanceKey(eventRecord.getProcessInstanceKey())
                     .withWorkflowKey(eventRecord.getProcessDefinitionKey())
                     .withTimestamp(eventRecord.getTimestamp())
@@ -211,21 +189,13 @@ public class TransportEventParser implements EventParser {
 
     private void processVariable(FileTransport transport, EventRecord eventRecord) {
         log.debug("processing variable in flow {}", eventRecord.getBpmnProcessId());
-
         String variableName = eventRecord.readProperty("$.value.name");
         String variableValue = eventRecord.readProperty("$.value.value");
         String value = variableValue.startsWith("\"") && variableValue.endsWith("\"") ? StringEscapeUtils.unescapeJson(variableValue.substring(1, variableValue.length() - 1)) : variableValue;
-
         log.trace("{} = {}", variableName, variableValue);
-
-        List<Transformer> matchingTransformers = fileTransportTransformerConfig.getFlows().stream()
-                .filter(flow -> eventRecord.getBpmnProcessId().equalsIgnoreCase(flow.getName()))
-                .flatMap(flow -> flow.getTransformers().stream())
-                .filter(transformer -> variableName.equalsIgnoreCase(transformer.getVariableName()))
-                .toList();
-
-        matchingTransformers.forEach(transformer -> applyTransformer(eventRecord.getTimestamp(), transport, variableName, value, transformer));
-
+        if (valueTransformers.applyForVariable(eventRecord.getBpmnProcessId(), variableName, transport, value)) {
+            transport.setLastUpdated(eventRecord.getTimestamp());
+        }
         Variable variable = new Variable()
                 .withWorkflowInstanceKey(eventRecord.getProcessInstanceKey())
                 .withName(variableName)
@@ -278,74 +248,6 @@ public class TransportEventParser implements EventParser {
                 .withType(eventRecord.readProperty("$.value.type"))
                 .withElementId(eventRecord.getElementId());
         taskRepository.save(task);
-    }
-
-    private void applyTransformer(Long timestamp, FileTransport transport, String variableName, String variableValue, Transformer transformer) {
-        log.debug("applying transformer for field: {}", transformer.getField());
-        try {
-            String fieldName = transformer.getField();
-            String dateFormat = transformer.getDateFormat();
-            if (Strings.isNotBlank(transformer.getConstant())) {
-                log.debug("setting constant value: {}", transformer.getConstant());
-                setPropertyValue(timestamp, transport, fieldName, transformer.getConstant(), dateFormat);
-                return;
-            }
-
-            if (Strings.isNotBlank(transformer.getJsonPath())) {
-                log.debug("applying jsonpath for variable {}", variableName);
-                DocumentContext json = JsonPathReader.parse(variableValue);
-                Object result = json.read(transformer.getJsonPath());
-                log.debug("jsonpath result: {} for variable {}", result, variableName);
-
-                String value = null;
-                if (result != null) {
-                    if (result instanceof List) {
-                        value = ((List<?>) result).stream().map(Object::toString).collect(Collectors.joining(" "));
-                    } else {
-                        value = result.toString();
-                    }
-                    setPropertyValue(timestamp, transport, fieldName, value, dateFormat);
-                }
-
-                if (StringUtils.isBlank(value)) {
-                    log.error("null result when setting field {} from variable {}. Jsonpath: {}, variable value: {}", fieldName, variableName, transformer.getJsonPath(), variableValue);
-                }
-                return;
-            }
-
-            if (Strings.isNotBlank(transformer.getXpath())) {
-                log.debug("applying xpath for variable {}", variableName);
-                Document document = documentBuilderFactory.newDocumentBuilder().parse(new InputSource(new StringReader(variableValue)));
-                String result = xPathFactory.newXPath().compile(transformer.getXpath()).evaluate(document);
-                log.debug("xpath result: {} for variable {}", result, variableName);
-                if (StringUtils.isNotBlank(result)) {
-                    setPropertyValue(timestamp, transport, fieldName, result, dateFormat);
-                } else {
-                    log.error("null result when setting field {} from variable {}. Xpath: {}, variable value: {}", fieldName, variableName, transformer.getXpath(), variableValue);
-                }
-                return;
-            }
-
-            log.debug("setting simple variable value: {} for variable {}", variableValue, variableName);
-            setPropertyValue(timestamp, transport, fieldName, variableValue, dateFormat);
-
-        } catch (Exception e) {
-            log.error("failed to apply transformer {} to variable {}", transformer, variableName, e);
-        }
-    }
-
-    private void setPropertyValue(Long timestamp, FileTransport transport, String fieldName, String variableValue, String dateFormat) {
-        if (Date.class.getName().equals(PropertyAccessorFactory.forBeanPropertyAccess(transport).getPropertyType(fieldName).getName())) {
-            try {
-                log.debug("Parsing date {} with format {}", variableValue, dateFormat);
-                PropertyAccessorFactory.forBeanPropertyAccess(transport).setPropertyValue(fieldName, new SimpleDateFormat(dateFormat).parse(variableValue));
-            } catch (ParseException pe) {
-                log.warn("failed to parse date {} with format {}", variableValue, dateFormat);
-            }
-        } else {
-            PropertyAccessorFactory.forBeanPropertyAccess(transport).setPropertyValue(fieldName, variableValue);
-        }
-        transport.setLastUpdated(timestamp);
     }
 
     @Override

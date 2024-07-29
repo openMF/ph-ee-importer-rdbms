@@ -1,6 +1,6 @@
-package hu.dpc.phee.operator.streams;
+package hu.dpc.phee.operator.event.parser;
 
-import hu.dpc.phee.operator.streams.impl.EventRecord;
+import hu.dpc.phee.operator.event.parser.impl.EventRecord;
 import org.springframework.beans.factory.NamedBean;
 
 import java.util.List;

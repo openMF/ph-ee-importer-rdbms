@@ -1,4 +1,4 @@
-package hu.dpc.phee.operator.streams.impl;
+package hu.dpc.phee.operator.event.parser.impl;
 
 import com.jayway.jsonpath.DocumentContext;
 import hu.dpc.phee.operator.importer.JsonPathReader;
