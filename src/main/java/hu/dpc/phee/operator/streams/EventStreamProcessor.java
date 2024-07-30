@@ -39,7 +39,7 @@ public class EventStreamProcessor {
 
     @PostConstruct
     public void setup() {
-        log.info("setting up kafka streams on topic {}, aggregating every {} seconds", config.kafka().topic(), config.kafka().aggregationWindowSeconds());
+        log.info("setting up kafka streams on topic {}, aggregating every {} seconds", config.getKafka().getTopic(), config.getKafka().getAggregationWindowSeconds());
 
         Aggregator<String, String, List<String>> aggregator = (key, value, aggregate) -> {
             aggregate.add(value);
@@ -50,11 +50,11 @@ public class EventStreamProcessor {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        streamsBuilder.stream(config.kafka().topic(), Consumed.with(STRING_SERDE, STRING_SERDE))
+        streamsBuilder.stream(config.getKafka().getTopic(), Consumed.with(STRING_SERDE, STRING_SERDE))
                 .groupByKey()
                 .windowedBy(SessionWindows.ofInactivityGapAndGrace(
-                        Duration.ofSeconds(config.kafka().aggregationWindowSeconds()),
-                        Duration.ofSeconds(config.kafka().aggregationAfterEndSeconds())))
+                        Duration.ofSeconds(config.getKafka().getAggregationWindowSeconds()),
+                        Duration.ofSeconds(config.getKafka().getAggregationAfterEndSeconds())))
                 .aggregate(ArrayList::new, aggregator, merger, Materialized.with(STRING_SERDE, ListSerde(ArrayList.class, STRING_SERDE)))
                 .toStream()
                 .foreach(this::process);
