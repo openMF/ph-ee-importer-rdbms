@@ -2,7 +2,7 @@ package hu.dpc.phee.operator.streams;
 
 import hu.dpc.phee.operator.event.parser.EventParser;
 import hu.dpc.phee.operator.event.parser.impl.EventRecord;
-import hu.dpc.phee.operator.event.parser.impl.config.ImporterConfig;
+import hu.dpc.phee.operator.streams.config.ImporterConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serde;
