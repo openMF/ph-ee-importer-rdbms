@@ -10,6 +10,7 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 
 import static org.apache.kafka.common.serialization.Serdes.ListSerde;
 
+@Configuration
 @Service
 @Slf4j
 public class EventStreamProcessor {
