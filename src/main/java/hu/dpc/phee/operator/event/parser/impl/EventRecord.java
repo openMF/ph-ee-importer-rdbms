@@ -95,12 +95,12 @@ public class EventRecord {
         if (StringUtils.isBlank(bpmnProcessId)) {
             return null;
         }
-        String[] bpmnAndTenant = bpmnProcessId.split("-");
-        if (bpmnAndTenant.length != 2) {
+        int lastIndex = bpmnProcessId.lastIndexOf("-");
+        if (lastIndex == -1) {
             return null;
         }
-        String bpmn = bpmnAndTenant[0];
-        String tenant = bpmnAndTenant[1];
+        String bpmn = bpmnProcessId.substring(0, lastIndex);
+        String tenant = bpmnProcessId.substring(lastIndex+1);
         if (StringUtils.isNotBlank(bpmn) && StringUtils.isNotBlank(tenant)) {
             return new BpmnAndTenant(bpmn, tenant);
         }

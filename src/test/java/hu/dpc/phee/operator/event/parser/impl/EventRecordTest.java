@@ -33,10 +33,28 @@ class EventRecordTest {
         assertEquals(8, records.size());
     }
 
+    @Test
+    void testSample() {
+        List<String> jsonEvents = loadFileLines("sample/1.json");
+
+        List<EventRecord> records = EventRecord.listBuilder().jsonEvents(jsonEvents).build();
+
+        assertEquals(9, records.size());
+    }
+
     private String loadFile(String filename) {
         try {
             URI path = Objects.requireNonNull(getClass().getClassLoader().getResource("event-samples/" + filename)).toURI();
             return Files.readString(Path.of(path));
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<String> loadFileLines(String filename) {
+        try {
+            URI path = Objects.requireNonNull(getClass().getClassLoader().getResource("event-samples/" + filename)).toURI();
+            return Files.readAllLines(Path.of(path));
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
