@@ -82,7 +82,7 @@ public class TransportEventParser implements EventParser {
             MDC.put("transactionId", String.valueOf(processInstanceKey));
             processEventRecords(eventRecords, bpmn, processInstanceKey, tenantName, direction);
         } catch (Exception e) {
-            log.error("failed to process records", e);
+            throw new RuntimeException("failed to process records", e);
         } finally {
             MDC.clear();
             ThreadLocalContextUtil.clear();
