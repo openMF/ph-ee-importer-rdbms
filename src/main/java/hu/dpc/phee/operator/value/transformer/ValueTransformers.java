@@ -35,7 +35,7 @@ public class ValueTransformers {
 
     public boolean applyForVariable(String bpmnProcessId, String variableName, Object entity, String value) {
         List<ValueTransformer> validTransformers = transformers.get(bpmnProcessId).stream()
-                .filter(transformer -> transformer.getTransformer().getVariableName().equals(variableName))
+                .filter(transformer -> variableName.equals(transformer.getTransformer().getVariableName()))
                 .toList();
         validTransformers.forEach(transformer -> transformer.apply(entity, value));
         return !validTransformers.isEmpty();
