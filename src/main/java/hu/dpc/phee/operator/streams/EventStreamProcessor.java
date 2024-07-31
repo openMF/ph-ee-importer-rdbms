@@ -73,24 +73,29 @@ public class EventStreamProcessor {
             return;
         }
 
-        List<EventRecord> eventRecords = EventRecord.listBuilder().jsonEvents(events).build();
-        if (eventRecords.isEmpty()) {
-            log.debug("received no valid records for key {}", key);
-            return;
+        try {
+            List<EventRecord> eventRecords = EventRecord.listBuilder().jsonEvents(events).build();
+            if (eventRecords.isEmpty()) {
+                log.debug("received no valid records for key {}", key);
+                return;
+            }
+
+            log.debug("received {} records for key {}", eventRecords.size(), key);
+            Optional<EventParser> validEventParser = parsers.stream()
+                    .filter(p -> p.isAbleToProcess(eventRecords))
+                    .findFirst();
+
+            if (validEventParser.isEmpty()) {
+                log.warn("found no valid parser for records {}", key);
+                return;
+            }
+
+            EventParser parser = validEventParser.get();
+            log.info("parser {} processing {} records with key {}", parser.getBeanName(), eventRecords.size(), key);
+            parser.process(eventRecords);
+        } catch (Exception e) {
+            log.error("{}:\n{}", e.getMessage(), String.join("\n", events));
+            throw new RuntimeException("could not process records for key " + key, e);
         }
-
-        log.debug("received {} records for key {}", eventRecords.size(), key);
-        Optional<EventParser> validEventParser = parsers.stream()
-                .filter(p -> p.isAbleToProcess(eventRecords))
-                .findFirst();
-
-        if (validEventParser.isEmpty()) {
-            log.warn("found no valid parser for records {}", key);
-            return;
-        }
-
-        EventParser parser = validEventParser.get();
-        log.info("parser {} processing {} records with key {}", parser.getBeanName(), eventRecords.size(), key);
-        parser.process(eventRecords);
     }
 }
