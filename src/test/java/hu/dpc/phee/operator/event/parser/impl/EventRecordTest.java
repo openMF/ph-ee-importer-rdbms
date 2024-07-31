@@ -26,6 +26,7 @@ class EventRecordTest {
         jsonEvents.add(loadFile("process_instance/process_activated.json"));
         jsonEvents.add(loadFile("process_instance/process_completed.json"));
         jsonEvents.add(loadFile("variable/1.json"));
+        jsonEvents.add(loadFile("ignore/1.json"));
 
         List<EventRecord> records = EventRecord.listBuilder().jsonEvents(jsonEvents).build();
 

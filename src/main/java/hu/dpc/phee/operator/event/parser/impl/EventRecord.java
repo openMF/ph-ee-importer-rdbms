@@ -53,6 +53,9 @@ public class EventRecord {
             }
             sortedRecords.put(readProperty(document, "$.position", Long.class), document);
         }
+        if (sortedRecords.isEmpty()) {
+            return Collections.emptyList();
+        }
         if (bpmnAndTenant == null) {
             log.error("could not find bpmn and tenant in records:\n{}", String.join("\n", jsonEvents));
             throw new RuntimeException("could not find bpmn and tenant in records");
