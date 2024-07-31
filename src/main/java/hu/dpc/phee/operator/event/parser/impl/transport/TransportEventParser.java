@@ -4,6 +4,7 @@ import com.baasflow.commons.events.EventLogLevel;
 import com.baasflow.commons.events.EventService;
 import com.baasflow.commons.events.EventStatus;
 import com.baasflow.commons.events.EventType;
+import hu.dpc.phee.operator.config.model.Flow;
 import hu.dpc.phee.operator.entity.filetransport.FileTransport;
 import hu.dpc.phee.operator.entity.filetransport.FileTransportRepository;
 import hu.dpc.phee.operator.entity.task.Task;
@@ -28,6 +29,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -71,9 +73,14 @@ public class TransportEventParser implements EventParser {
             String tenantName = first.getTenant();
             Long processInstanceKey = first.getProcessInstanceKey();
             String bpmn = first.getBpmnProcessId();
+            Optional<Flow> flow = fileTransportTransformerConfig.findFlow(bpmn);
+            if (flow.isEmpty()) {
+                throw new RuntimeException("no flow found for bpmn " + bpmn);
+            }
+            String direction = flow.get().getDirection();
             ThreadLocalContextUtil.setTenant(tenantsService.getTenantDataSource(tenantName));
             MDC.put("transactionId", String.valueOf(processInstanceKey));
-            processEventRecords(eventRecords, bpmn, processInstanceKey, tenantName);
+            processEventRecords(eventRecords, bpmn, processInstanceKey, tenantName, direction);
         } catch (Exception e) {
             log.error("failed to process records", e);
         } finally {
@@ -82,10 +89,10 @@ public class TransportEventParser implements EventParser {
         }
     }
 
-    private void processEventRecords(List<EventRecord> eventRecords, String bpmn, Long processInstanceKey, String tenantName) {
+    private void processEventRecords(List<EventRecord> eventRecords, String bpmn, Long processInstanceKey, String tenantName, String direction) {
         log.info("processing FileTransport event records for bpmn {} and processInstanceKey {} in tenant {}", bpmn, processInstanceKey, tenantName);
         transactionTemplate.executeWithoutResult(status -> {
-            FileTransport fileTransport = retrieveOrCreateFileTransport(processInstanceKey);
+            FileTransport fileTransport = retrieveOrCreateFileTransport(processInstanceKey, direction);
             for (EventRecord eventRecord : eventRecords) {
                 log.trace("FileTransportEventParser processing record: {}", eventRecord.jsonString());
                 try {
@@ -98,14 +105,15 @@ public class TransportEventParser implements EventParser {
         });
     }
 
-    private FileTransport retrieveOrCreateFileTransport(long processInstanceKey) {
+    private FileTransport retrieveOrCreateFileTransport(long processInstanceKey, String direction) {
         FileTransport fileTransport = fileTransportRepository.findByWorkflowInstanceKey(processInstanceKey);
         if (fileTransport != null) {
             log.debug("found existing FileTransport with id {}", processInstanceKey);
             return fileTransport;
         }
         log.debug("creating new FileTransport with id {}", processInstanceKey);
-        FileTransport newFileTransport = new FileTransport(processInstanceKey);
+        FileTransport.TransportDirection transportDirection = "OUTGOING".equals(direction) ? FileTransport.TransportDirection.OUT : FileTransport.TransportDirection.IN;
+        FileTransport newFileTransport = new FileTransport(processInstanceKey, transportDirection);
         fileTransportRepository.save(newFileTransport);
         return newFileTransport;
     }
@@ -131,8 +139,9 @@ public class TransportEventParser implements EventParser {
 
         if ("EVENT".equals(recordType) && "START_EVENT".equals(eventRecord.getBpmnElementType()) && "ELEMENT_ACTIVATED".equals(intent)) {
             transport.setStartedAt(new Date(eventRecord.getTimestamp()));
-            transport.setLastUpdated(eventRecord.getTimestamp());
+            transport.setLastUpdated(new Date(eventRecord.getTimestamp()));
             valueTransformers.applyForConstants(eventRecord.getBpmnProcessId(), transport);
+            return;
         }
 
         if ("EVENT".equals(recordType) && "END_EVENT".equals(eventRecord.getBpmnElementType()) && "ELEMENT_COMPLETED".equals(intent)) {
@@ -143,7 +152,8 @@ public class TransportEventParser implements EventParser {
             } else {
                 transport.setStatus(FileTransport.TransportStatus.COMPLETED);
             }
-            transport.setLastUpdated(eventRecord.getTimestamp());
+            transport.setLastUpdated(new Date(eventRecord.getTimestamp()));
+            return;
         }
 
         if ("EVENT".equals(recordType) && "EXCLUSIVE_GATEWAY".equals(eventRecord.getBpmnElementType()) && "ELEMENT_COMPLETED".equals(intent)) {
@@ -157,6 +167,7 @@ public class TransportEventParser implements EventParser {
                     .withType("EXCLUSIVE_GATEWAY")
                     .withElementId(eventRecord.getElementId());
             taskRepository.save(task);
+            return;
         }
 
         if ("EVENT".equals(recordType) && "TIMER".equals(eventRecord.getBpmnEventType()) && "ELEMENT_ACTIVATED".equals(intent)) {
@@ -170,6 +181,7 @@ public class TransportEventParser implements EventParser {
                     .withType("TIMER")
                     .withElementId(eventRecord.getElementId());
             taskRepository.save(task);
+            return;
         }
 
         if ("EVENT".equals(recordType) && "MESSAGE".equals(eventRecord.getBpmnEventType()) && "ELEMENT_ACTIVATED".equals(intent)) {
@@ -193,7 +205,7 @@ public class TransportEventParser implements EventParser {
         String value = variableValue.startsWith("\"") && variableValue.endsWith("\"") ? StringEscapeUtils.unescapeJson(variableValue.substring(1, variableValue.length() - 1)) : variableValue;
         log.trace("{} = {}", variableName, variableValue);
         if (valueTransformers.applyForVariable(eventRecord.getBpmnProcessId(), variableName, transport, value)) {
-            transport.setLastUpdated(eventRecord.getTimestamp());
+            transport.setLastUpdated(new Date(eventRecord.getTimestamp()));
         }
         Variable variable = new Variable()
                 .withWorkflowInstanceKey(eventRecord.getProcessInstanceKey())
@@ -210,7 +222,7 @@ public class TransportEventParser implements EventParser {
 
         transport.setStatus(FileTransport.TransportStatus.EXCEPTION);
         transport.setCompletedAt(new Date(eventRecord.getTimestamp()));
-        transport.setLastUpdated(eventRecord.getTimestamp());
+        transport.setLastUpdated(new Date(eventRecord.getTimestamp()));
 
         eventService.sendEvent(event -> event
                 .setSourceModule("importer")

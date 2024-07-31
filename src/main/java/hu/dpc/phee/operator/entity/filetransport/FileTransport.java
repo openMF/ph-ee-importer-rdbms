@@ -2,10 +2,7 @@ package hu.dpc.phee.operator.entity.filetransport;
 
 import hu.dpc.phee.operator.entity.variable.Variable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 import java.util.List;
@@ -13,8 +10,7 @@ import java.util.List;
 @Entity
 @Cacheable(false)
 @Table(name = "file_transport")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class FileTransport {
@@ -45,15 +41,19 @@ public class FileTransport {
     private Long sessionNumber;
 
     @Column(name = "STARTED_AT")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date startedAt;
 
     @Column(name = "COMPLETED_AT")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date completedAt;
 
     @Column(name = "LAST_UPDATED")
-    private Long lastUpdated;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdated;
 
     @Column(name = "TRANSACTION_DATE")
+    @Temporal(TemporalType.DATE)
     private Date transactionDate;
 
     @Enumerated(EnumType.STRING)
@@ -77,7 +77,8 @@ public class FileTransport {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "fileTransport", fetch = FetchType.LAZY)
     private List<Variable> variables;
 
-    public FileTransport(Long workflowInstanceKey) {
+    public FileTransport(Long workflowInstanceKey, TransportDirection direction) {
         this.workflowInstanceKey = workflowInstanceKey;
+        this.direction = direction;
     }
 }
