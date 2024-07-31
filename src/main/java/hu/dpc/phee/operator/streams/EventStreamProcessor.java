@@ -87,6 +87,7 @@ public class EventStreamProcessor {
 
             if (validEventParser.isEmpty()) {
                 log.warn("found no valid parser for records {}", key);
+                log.debug("records:\n{}", String.join("\n", events));
                 return;
             }
 
@@ -94,7 +95,7 @@ public class EventStreamProcessor {
             log.info("parser {} processing {} records with key {}", parser.getBeanName(), eventRecords.size(), key);
             parser.process(eventRecords);
         } catch (Exception e) {
-            log.error("{}:\n{}", e.getMessage(), String.join("\n", events));
+            log.debug("error {}\n{}", e.getMessage(), String.join("\n", events));
             throw new RuntimeException("could not process records for key " + key, e);
         }
     }
