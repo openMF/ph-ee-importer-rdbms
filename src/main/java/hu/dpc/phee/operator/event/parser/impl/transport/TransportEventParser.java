@@ -72,7 +72,15 @@ public class TransportEventParser implements EventParser {
             EventRecord first = eventRecords.get(0);
             String tenantName = first.getTenant();
             Long processInstanceKey = first.getProcessInstanceKey();
+            if (processInstanceKey == null) {
+                log.warn("no processInstanceKey found in record {}", first.jsonString());
+                return;
+            }
             String bpmn = first.getBpmnProcessId();
+            if (StringUtils.isBlank(bpmn)) {
+                log.warn("no bpmn found in record {}", first.jsonString());
+                return;
+            }
             Optional<Flow> flow = fileTransportTransformerConfig.findFlow(bpmn);
             if (flow.isEmpty()) {
                 throw new RuntimeException("no flow found for bpmn " + bpmn);
