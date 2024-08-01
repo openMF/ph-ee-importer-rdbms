@@ -45,7 +45,7 @@ public class EventRecord {
         Map<Long, DocumentContext> sortedRecords = new TreeMap<>(Comparator.naturalOrder());
         for (String jsonEvent : jsonEvents) {
             DocumentContext document = JsonPathReader.parse(jsonEvent);
-            if (isEventMessage(document) || isEventExpired(document)) {
+            if (isEventMessage(document) || isEventExpired(document) || isDepoyMessage(document)) {
                 continue;
             }
             if (bpmnAndTenant == null) {
@@ -120,6 +120,10 @@ public class EventRecord {
 
     private static boolean isEventMessage(DocumentContext document) {
         return "MESSAGE".equals(readProperty(document, "$.valueType"));
+    }
+
+    private static boolean isDepoyMessage(DocumentContext document) {
+        return "DEPLOYMENT".equals(readProperty(document, "$.valueType"));
     }
 
     private static boolean isEventExpired(DocumentContext document) {
