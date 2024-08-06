@@ -10,8 +10,14 @@ import hu.dpc.phee.operator.tenants.TenantsService;
 import jakarta.annotation.PostConstruct;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
+import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.SessionStore;
+import org.apache.kafka.streams.state.StoreSupplier;
+import org.apache.kafka.streams.state.Stores;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -28,6 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.apache.kafka.common.serialization.Serdes.ListSerde;
+import static org.apache.kafka.streams.kstream.Materialized.as;
 
 @Service
 public class StreamsSetup {
@@ -73,10 +80,13 @@ public class StreamsSetup {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
+//        Materialized<String, List<String>, SessionStore<Bytes, byte[]>> materialized = Materialized.with(STRING_SERDE, ListSerde(ArrayList.class, STRING_SERDE));
+        Materialized<String, List<String>, SessionStore<Bytes, byte[]>> materialized = as(Stores.inMemorySessionStore("session-store", Duration.ofSeconds(5)));
+
         streamsBuilder.stream(kafkaTopic, Consumed.with(STRING_SERDE, STRING_SERDE))
                 .groupByKey()
                 .windowedBy(SessionWindows.ofInactivityGapAndGrace(Duration.ofSeconds(aggregationWindowSeconds), Duration.ofSeconds(aggregationAfterEndSeconds)))
-                .aggregate(ArrayList::new, aggregator, merger, Materialized.with(STRING_SERDE, ListSerde(ArrayList.class, STRING_SERDE)))
+                .aggregate(ArrayList::new, aggregator, merger, materialized)
                 .toStream()
                 .foreach(this::process);
     }
