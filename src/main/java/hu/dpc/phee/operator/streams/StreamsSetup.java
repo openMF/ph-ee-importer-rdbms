@@ -8,6 +8,7 @@ import hu.dpc.phee.operator.entity.transfer.TransferRepository;
 import hu.dpc.phee.operator.importer.JsonPathReader;
 import hu.dpc.phee.operator.tenants.TenantsService;
 import jakarta.annotation.PostConstruct;
+import org.apache.kafka.common.protocol.types.Field;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
@@ -81,7 +82,10 @@ public class StreamsSetup {
                 .collect(Collectors.toList());
 
 //        Materialized<String, List<String>, SessionStore<Bytes, byte[]>> materialized = Materialized.with(STRING_SERDE, ListSerde(ArrayList.class, STRING_SERDE));
-        Materialized<String, List<String>, SessionStore<Bytes, byte[]>> materialized = Materialized.as(Stores.inMemorySessionStore("in-memory-store", Duration.ofSeconds(aggregationWindowSeconds + aggregationAfterEndSeconds + 1)));
+        Materialized<String, List<String>, SessionStore<Bytes, byte[]>> materialized = Materialized
+                .<String, List<String>>as(Stores.inMemorySessionStore("in-memory-store", Duration.ofSeconds(aggregationWindowSeconds + aggregationAfterEndSeconds + 1)))
+                .withKeySerde(STRING_SERDE)
+                .withValueSerde(ListSerde(ArrayList.class, STRING_SERDE));
 
         streamsBuilder.stream(kafkaTopic, Consumed.with(STRING_SERDE, STRING_SERDE))
                 .groupByKey()
