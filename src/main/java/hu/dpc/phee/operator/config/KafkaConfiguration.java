@@ -112,6 +112,7 @@ public class KafkaConfiguration {
         properties.put(APPLICATION_ID_CONFIG, consumerGroup);
         properties.put(DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
         properties.put(COMMIT_INTERVAL_MS_CONFIG, commitIntervalMs);
+        properties.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE_V2);
         properties.put(StreamsConfig.PRODUCER_PREFIX + ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
         return new KafkaStreamsConfiguration(properties);
     }
