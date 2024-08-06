@@ -38,7 +38,7 @@ import static org.apache.kafka.streams.kstream.Materialized.as;
 
 @Service
 public class StreamsSetup {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final Serde<String> STRING_SERDE = Serdes.String();
 
     @Value("${importer.kafka.topic}")
@@ -81,7 +81,7 @@ public class StreamsSetup {
                 .collect(Collectors.toList());
 
 //        Materialized<String, List<String>, SessionStore<Bytes, byte[]>> materialized = Materialized.with(STRING_SERDE, ListSerde(ArrayList.class, STRING_SERDE));
-        Materialized<String, List<String>, SessionStore<Bytes, byte[]>> materialized = as(Stores.inMemorySessionStore("session-store", Duration.ofSeconds(5)));
+        Materialized<String, List<String>, SessionStore<Bytes, byte[]>> materialized = Materialized.as(Stores.inMemorySessionStore("in-memory-store", Duration.ofSeconds(aggregationWindowSeconds + aggregationAfterEndSeconds + 1)));
 
         streamsBuilder.stream(kafkaTopic, Consumed.with(STRING_SERDE, STRING_SERDE))
                 .groupByKey()
