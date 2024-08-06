@@ -83,7 +83,8 @@ public class StreamsSetup {
 
 //        Materialized<String, List<String>, SessionStore<Bytes, byte[]>> materialized = Materialized.with(STRING_SERDE, ListSerde(ArrayList.class, STRING_SERDE));
         Materialized<String, List<String>, SessionStore<Bytes, byte[]>> materialized = Materialized
-                .<String, List<String>>as(Stores.inMemorySessionStore("in-memory-store", Duration.ofSeconds(aggregationWindowSeconds + aggregationAfterEndSeconds + 1)))
+                .<String, List<String>>as(Stores.inMemorySessionStore("in-memory-only-store", Duration.ofSeconds(aggregationWindowSeconds + aggregationAfterEndSeconds + 1)))
+                .withLoggingDisabled()
                 .withKeySerde(STRING_SERDE)
                 .withValueSerde(ListSerde(ArrayList.class, STRING_SERDE));
 
