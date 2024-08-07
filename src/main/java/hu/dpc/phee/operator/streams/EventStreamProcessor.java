@@ -10,7 +10,6 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -23,7 +22,6 @@ import java.util.stream.Stream;
 
 import static org.apache.kafka.common.serialization.Serdes.ListSerde;
 
-@Configuration
 @Service
 @Slf4j
 public class EventStreamProcessor {
@@ -95,8 +93,8 @@ public class EventStreamProcessor {
             log.info("parser {} processing {} records with key {}", parser.getBeanName(), eventRecords.size(), key);
             parser.process(eventRecords);
         } catch (Exception e) {
-            log.debug("error {}\n{}", e.getMessage(), String.join("\n", events));
-            throw new RuntimeException("could not process records for key " + key, e);
+            log.trace("error {}\n{}", e.getMessage(), String.join("\n", events));
+            log.error("could not process records for key {}", key, e);
         }
     }
 }
