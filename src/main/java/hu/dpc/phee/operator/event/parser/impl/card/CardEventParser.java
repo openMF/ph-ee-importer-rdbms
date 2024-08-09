@@ -5,6 +5,7 @@ import com.baasflow.commons.events.EventService;
 import com.baasflow.commons.events.EventStatus;
 import com.baasflow.commons.events.EventType;
 import hu.dpc.phee.operator.config.model.Flow;
+import hu.dpc.phee.operator.entity.card.BusinessProcessStatus;
 import hu.dpc.phee.operator.entity.card.CardTransaction;
 import hu.dpc.phee.operator.entity.card.CardTransactionRepository;
 import hu.dpc.phee.operator.entity.task.Task;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -145,21 +147,21 @@ public class CardEventParser implements EventParser {
         String intent = eventRecord.readProperty("$.intent");
 
         if ("EVENT".equals(recordType) && "START_EVENT".equals(eventRecord.getBpmnElementType()) && "ELEMENT_ACTIVATED".equals(intent)) {
-            /*transport.setStartedAt(new Date(eventRecord.getTimestamp()));
-            transport.setLastUpdated(new Date(eventRecord.getTimestamp()));*/
+            cardTransaction.setStartedAt(new Date(eventRecord.getTimestamp()));
+            cardTransaction.setLastUpdated(new Date(eventRecord.getTimestamp()));
             valueTransformers.applyForConstants(eventRecord.getBpmnProcessId(), cardTransaction);
             return;
         }
 
         if ("EVENT".equals(recordType) && "END_EVENT".equals(eventRecord.getBpmnElementType()) && "ELEMENT_COMPLETED".equals(intent)) {
             log.info("finishing transfer for processInstanceKey: {} at elementId: {}", eventRecord.getProcessInstanceKey(), eventRecord.getElementId());
-            /*transport.setCompletedAt(new Date(eventRecord.getTimestamp()));
+            cardTransaction.setCompletedAt(new Date(eventRecord.getTimestamp()));
             if (StringUtils.isNotEmpty(eventRecord.getElementId()) && eventRecord.getElementId().contains("Failed")) {
-                transport.setStatus(FileTransport.TransportStatus.FAILED);
+                cardTransaction.setBusinessProcessStatus(BusinessProcessStatus.FAILED);
             } else {
-                transport.setStatus(FileTransport.TransportStatus.COMPLETED);
+                cardTransaction.setBusinessProcessStatus(BusinessProcessStatus.COMPLETED);
             }
-            transport.setLastUpdated(new Date(eventRecord.getTimestamp()));*/
+            cardTransaction.setLastUpdated(new Date(eventRecord.getTimestamp()));
             return;
         }
 
@@ -212,7 +214,7 @@ public class CardEventParser implements EventParser {
         String value = variableValue.startsWith("\"") && variableValue.endsWith("\"") ? StringEscapeUtils.unescapeJson(variableValue.substring(1, variableValue.length() - 1)) : variableValue;
         log.trace("{} = {}", variableName, variableValue);
         if (valueTransformers.applyForVariable(eventRecord.getBpmnProcessId(), variableName, cardTransaction, value)) {
-            //cardTransaction.setLastUpdated(new Date(eventRecord.getTimestamp()));
+            cardTransaction.setLastUpdated(new Date(eventRecord.getTimestamp()));
         }
         Variable variable = new Variable()
                 .withWorkflowInstanceKey(eventRecord.getProcessInstanceKey())
@@ -227,9 +229,9 @@ public class CardEventParser implements EventParser {
     private void processIncident(CardTransaction cardTransaction, EventRecord eventRecord) {
         log.warn("processing incident in flow {}", eventRecord.getBpmnProcessId());
 
-        /*transport.setStatus(FileTransport.TransportStatus.EXCEPTION);
-        transport.setCompletedAt(new Date(eventRecord.getTimestamp()));
-        transport.setLastUpdated(new Date(eventRecord.getTimestamp()));*/
+        cardTransaction.setBusinessProcessStatus(BusinessProcessStatus.EXCEPTION);
+        cardTransaction.setCompletedAt(new Date(eventRecord.getTimestamp()));
+        cardTransaction.setLastUpdated(new Date(eventRecord.getTimestamp()));
 
         eventService.sendEvent(event -> event
                 .setSourceModule("importer")
