@@ -1,4 +1,4 @@
-package hu.dpc.phee.operator.event.parser.impl.card;
+package hu.dpc.phee.operator.event.parser.impl.card.clearing;
 
 import com.baasflow.commons.events.EventLogLevel;
 import com.baasflow.commons.events.EventService;
@@ -15,7 +15,7 @@ import hu.dpc.phee.operator.entity.variable.Variable;
 import hu.dpc.phee.operator.entity.variable.VariableRepository;
 import hu.dpc.phee.operator.event.parser.EventParser;
 import hu.dpc.phee.operator.event.parser.impl.EventRecord;
-import hu.dpc.phee.operator.event.parser.impl.card.config.CardTransactionTransformerConfig;
+import hu.dpc.phee.operator.event.parser.impl.card.clearing.config.CardTransactionTransformerConfig;
 import hu.dpc.phee.operator.tenants.TenantsService;
 import hu.dpc.phee.operator.value.transformer.ValueTransformers;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class CardEventParser implements EventParser {
+public class CardClearingEventParser implements EventParser {
 
     @Autowired
     private VariableRepository variableRepository;

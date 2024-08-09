@@ -1,4 +1,4 @@
-package hu.dpc.phee.operator.event.parser.impl.card.config;
+package hu.dpc.phee.operator.event.parser.impl.card.clearing.config;
 
 import hu.dpc.phee.operator.config.model.Flow;
 import lombok.Data;
