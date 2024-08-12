@@ -1,6 +1,6 @@
 package hu.dpc.phee.operator.entity.card;
 
-public enum BusinessProcessStatus {
+public enum CardStatus {
     COMPLETED,
     FAILED,
     IN_PROGRESS,

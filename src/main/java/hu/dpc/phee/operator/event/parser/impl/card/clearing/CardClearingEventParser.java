@@ -5,7 +5,7 @@ import com.baasflow.commons.events.EventService;
 import com.baasflow.commons.events.EventStatus;
 import com.baasflow.commons.events.EventType;
 import hu.dpc.phee.operator.config.model.Flow;
-import hu.dpc.phee.operator.entity.card.BusinessProcessStatus;
+import hu.dpc.phee.operator.entity.card.CardStatus;
 import hu.dpc.phee.operator.entity.card.CardTransaction;
 import hu.dpc.phee.operator.entity.card.CardTransactionRepository;
 import hu.dpc.phee.operator.entity.task.Task;
@@ -157,9 +157,9 @@ public class CardClearingEventParser implements EventParser {
             log.info("finishing transfer for processInstanceKey: {} at elementId: {}", eventRecord.getProcessInstanceKey(), eventRecord.getElementId());
             cardTransaction.setCompletedAt(new Date(eventRecord.getTimestamp()));
             if (StringUtils.isNotEmpty(eventRecord.getElementId()) && eventRecord.getElementId().contains("Failed")) {
-                cardTransaction.setBusinessProcessStatus(BusinessProcessStatus.FAILED);
+                cardTransaction.setStatus(CardStatus.FAILED);
             } else {
-                cardTransaction.setBusinessProcessStatus(BusinessProcessStatus.COMPLETED);
+                cardTransaction.setStatus(CardStatus.COMPLETED);
             }
             cardTransaction.setLastUpdated(new Date(eventRecord.getTimestamp()));
             return;
@@ -229,7 +229,7 @@ public class CardClearingEventParser implements EventParser {
     private void processIncident(CardTransaction cardTransaction, EventRecord eventRecord) {
         log.warn("processing incident in flow {}", eventRecord.getBpmnProcessId());
 
-        cardTransaction.setBusinessProcessStatus(BusinessProcessStatus.EXCEPTION);
+        cardTransaction.setStatus(CardStatus.EXCEPTION);
         cardTransaction.setCompletedAt(new Date(eventRecord.getTimestamp()));
         cardTransaction.setLastUpdated(new Date(eventRecord.getTimestamp()));
 
