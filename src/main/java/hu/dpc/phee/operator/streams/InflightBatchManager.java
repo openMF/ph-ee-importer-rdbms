@@ -12,6 +12,7 @@ import hu.dpc.phee.operator.entity.transfer.TransferStatus;
 import hu.dpc.phee.operator.file.CsvFileService;
 import hu.dpc.phee.operator.file.FileTransferService;
 import hu.dpc.phee.operator.util.BatchFormatToTransferMapper;
+import hu.dpc.phee.operator.util.PaymentModeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static hu.dpc.phee.operator.util.OperatorUtils.strip;
 
@@ -59,12 +62,21 @@ public class InflightBatchManager {
         Optional<TransferTransformerConfig.Flow> config = transferTransformerConfig.findFlow(bpmn);
 
         Optional<Batch> batchOptional = batchRepository.findByWorkflowInstanceKey(processInstanceKey);
-
         if (batchOptional.isEmpty()) {
             logger.debug("Creating new Batch for processInstanceKey: {}", processInstanceKey);
             String batchId = getBatchId(processInstanceKey);
 
             if (batchId != null && batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId).isEmpty()) {
+                Batch batch = new Batch(processInstanceKey);
+                batchRepository.save(batch);
+                return batch;
+            }
+            else if (batchId != null) {
+                Batch batch = batchRepository.findByBatchIdAndSubBatchIdIsNull(batchId).orElse(null);
+                assert batch != null;
+                return batch;
+            }
+            else{
                 Batch batch = new Batch(processInstanceKey);
                 batchRepository.save(batch);
                 return batch;
@@ -82,12 +94,17 @@ public class InflightBatchManager {
 
     }
 
-    private void    updateTransferTableForBatch(Batch batch, Long workflowInstanceKey, Long completeTimestamp) {
+    private void  updateTransferTableForBatch(Batch batch, Long workflowInstanceKey, Long completeTimestamp) {
         String filename = getBatchFileName(workflowInstanceKey);
         logger.info("Filename {}", filename);
         if (filename == null) {
             return;
         }
+        String regex = ".*_sub-batch-([\\w-]+)\\.csv"; //payee DFSP Id for sub batch are extracted from the sub batch file name when party lookup is enabled and it is successful
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(filename);
+
+
         filename = strip(filename);
         String localFilePath = fileTransferService.downloadFile(filename, bucketName);
         if (localFilePath == null) {
@@ -96,15 +113,18 @@ public class InflightBatchManager {
             return;
         }
         List<Transaction> transactionList = csvFileService.getTransactionList(filename);
-
         for (Transaction transaction : transactionList) {
             Transfer transfer = BatchFormatToTransferMapper.mapToTransferEntity(transaction);
             transfer.setWorkflowInstanceKey(workflowInstanceKey);
             transfer.setCompletedAt(new Date(completeTimestamp));
             transfer.setTransactionId(transaction.getRequestId());
             transfer.setClientCorrelationId(UUID.randomUUID().toString());
-            transfer.setPayeeDfspId(batch.getPaymentMode());
-            transfer.setPayerDfspId(ThreadLocalContextUtil.getTenant().toString());
+            if (matcher.matches()) {
+                String payeeDfspId = matcher.group(1);
+                transfer.setPayeeDfspId(payeeDfspId);
+            }
+
+            transfer.setPayerDfspId(ThreadLocalContextUtil.getTenantName());
             String batchId = getBatchId(workflowInstanceKey);
             if(transaction.getBatchId() == null || transaction.getBatchId().isEmpty())
             {
@@ -116,10 +136,12 @@ public class InflightBatchManager {
             transfer.setPayeeFee(BigDecimal.ZERO);
             transfer.setPayerFeeCurrency(transaction.getCurrency());
             transfer.setPayerFee(BigDecimal.ZERO);
+            if(transaction.getPaymentMode().equals(PaymentModeEnum.CLOSED_LOOP.getValue())) {
 
-            BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
-            transfer = updatedExistingRecord(transfer, batchId);
-            transferRepository.save(transfer);
+                BatchFormatToTransferMapper.updateTransferUsingBatchDetails(transfer, batch);
+                transfer = updatedExistingRecord(transfer, batchId);
+                transferRepository.save(transfer);
+            }
             logger.debug("Saved transfer with batchId: {}", transfer.getBatchId());
         }
 
@@ -194,7 +216,7 @@ public class InflightBatchManager {
                 transfer.setCompletedAt(new Date());
                 transfer.setErrorInformation(transaction.getNote());
                 transfer.setClientCorrelationId(UUID.randomUUID().toString());
-                transfer.setTransactionId(UUID.randomUUID().toString());
+                transfer.setTransactionId(transaction.getRequestId());
                 logger.debug("Inserting failed txn: {}", transfer);
                 logger.info("Inserting failed txn with note: {}", transaction.getNote());
                 transfer = updatedExistingRecord(transfer, batchId);

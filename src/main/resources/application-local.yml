@@ -100,29 +100,29 @@ transfer:
         - field: paymentMode
           variableName: transactionList
           jsonPath: $.payment_mode
-    - name: bulk_connector_closedloop
-      direction: UNKNOWN
-      type: BATCH
-      transformers:
-        - field: batchId
-          variableName: batchId
-        - field: payerFsp
-          variableName: tenantId
-        - field: requestFile
-          variableName: filename
-        - field: registeringInstitutionId
-          variableName: registeringInstituteId
-        - field: correlationId
-          variableName: clientCorrelationId
-        - field: requestId
-          variableName: transactionList
-          jsonPath: $.request_id
-        - field: note
-          variableName: transactionList
-          jsonPath: $.note
-        - field: paymentMode
-          variableName: transactionList
-          jsonPath: $.payment_mode
+#    - name: bulk_connector_closedloop
+#      direction: UNKNOWN
+#      type: BATCH
+#      transformers:
+#        - field: batchId
+#          variableName: batchId
+#        - field: payerFsp
+#          variableName: tenantId
+#        - field: requestFile
+#          variableName: filename
+#        - field: registeringInstitutionId
+#          variableName: registeringInstituteId
+#        - field: correlationId
+#          variableName: clientCorrelationId
+#        - field: requestId
+#          variableName: transactionList
+#          jsonPath: $.request_id
+#        - field: note
+#          variableName: transactionList
+#          jsonPath: $.note
+#        - field: paymentMode
+#          variableName: transactionList
+#          jsonPath: $.payment_mode
     - name: inbound_transfer_mifos
       direction: INCOMING
       type: TRANSACTION-REQUEST
@@ -431,7 +431,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -444,6 +444,8 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
+        - field: payeeDfspId
+          variableName: destinationFspId
     - name: PayeeQuoteTransfer
       direction: INCOMING
       type: TRANSFER
@@ -465,7 +467,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -499,7 +501,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -533,7 +535,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -567,7 +569,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -601,7 +603,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -635,7 +637,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -669,7 +671,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -703,7 +705,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -737,7 +739,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -771,7 +773,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -805,7 +807,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -839,7 +841,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -873,7 +875,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -907,7 +909,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -941,7 +943,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -975,7 +977,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -1009,7 +1011,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -1043,7 +1045,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -1077,7 +1079,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -1111,7 +1113,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -1145,7 +1147,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -1179,7 +1181,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -1213,7 +1215,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -1247,7 +1249,7 @@ transfer:
           jsonPath: $.payer.partyIdInfo.partyIdType
         - field: payerPartyId
           variableName: channelRequest
-          jsonPath: $.payee.partyIdInfo.partyIdentifier
+          jsonPath: $.payer.partyIdInfo.partyIdentifier
         - field: transactionId
           variableName: transactionId
         - field: currency
@@ -1260,5 +1262,57 @@ transfer:
           variableName: errorInformation
         - field: clientCorrelationId
           variableName: clientCorrelationId
+        - field: payeeDfspId
+          variableName: partyLookupFspId
+    - name: payment_notification
+      direction: OUTGOING
+      type: TRANSFER
+      transformers:
+        - field: amount
+          variableName: amount
+        - field: payeePartyIdType
+          variableName: payeePartyIdType
+        - field: payeePartyId
+          variableName: payeePartyId
+        - field: payerPartyIdType
+          variableName: payerPartyIdType
+        - field: payerPartyId
+          variableName: payerPartyId
+        - field: transactionId
+          variableName: transactionId
+        - field: currency
+          variableName: currency
+        - field: batchId
+          variableName: batchId
+        - field: tenantId
+          variableName: tenantId
+        - field: errorInformation
+          variableName: errorInformation
+        - field: clientCorrelationId
+          variableName: clientCorrelationId
+    - name: bill_request
+      direction: INCOMING
+      type: TRANSACTION-REQUEST
+      transformers:
+        - field: transactionId
+          variableName: transactionId
+        - field: amount
+          variableName: billAmount
+        - field: payerDfspId
+          variableName: tenantId
+        - field: payeeDfspId
+          variableName: payeeDfspId
+        - field: clientCorrelationId
+          variableName: X-CorrelationID
+        - field: payeePartyIdType
+          variableName: payeePartyIdType
+        - field: payeePartyId
+          variableName: payeePartyId
+        - field: payerPartyIdType
+          variableName: payerPartyIdType
+        - field: payerPartyId
+          variableName: payerPartyId
+        - field: errorInformation
+          variableName: errorInformation
 
 

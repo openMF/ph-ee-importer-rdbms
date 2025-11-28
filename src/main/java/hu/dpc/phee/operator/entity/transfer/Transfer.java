@@ -86,6 +86,8 @@ public class Transfer {
 
     @Column(name = "CLIENTCORRELATIONID")
     private String clientCorrelationId;
+    @Transient
+    private String tenantId;
 
 
     public Transfer(Long workflowInstanceKey) {

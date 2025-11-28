@@ -129,6 +129,7 @@ public class StreamsSetup {
             logger.trace("resolving tenant server connection for tenant: {}", tenantName);
             DataSource tenant = tenantsService.getTenantDataSource(tenantName);
             ThreadLocalContextUtil.setTenant(tenant);
+            ThreadLocalContextUtil.setTenantName(tenantName);
         } catch (Exception e) {
             logger.error("failed to process first record: {}, skipping whole batch", first, e);
             return;
