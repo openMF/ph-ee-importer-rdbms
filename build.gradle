@@ -14,16 +14,8 @@ plugins {
 
 repositories {
     mavenLocal()
-    maven {
-        url = uri('https://repo.spring.io/milestone')
-    }
-
-    maven {
-        url = uri('https://repo.maven.apache.org/maven2/')
-    }
-    maven {
-        url = uri('https://jfrog.sandbox.fynarfin.io/artifactory/fyn-libs-snapshot')
-    }
+    maven { url = uri('https://repo.spring.io/milestone') }
+    maven { url = uri('https://repo.maven.apache.org/maven2/') }
 }
 
 dependencies {
@@ -50,7 +42,7 @@ dependencies {
 }
 
 group = 'hu.dpc.phee'
-version = '1.0.0-SNAPSHOT'
+version = '2.0.0-SNAPSHOT'
 description = 'importer-rdbms'
 java.sourceCompatibility = JavaVersion.VERSION_17
 
