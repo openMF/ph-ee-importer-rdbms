@@ -100,29 +100,45 @@ transfer:
         - field: paymentMode
           variableName: transactionList
           jsonPath: $.payment_mode
-#    - name: bulk_connector_closedloop
-#      direction: UNKNOWN
-#      type: BATCH
-#      transformers:
-#        - field: batchId
-#          variableName: batchId
-#        - field: payerFsp
-#          variableName: tenantId
-#        - field: requestFile
-#          variableName: filename
-#        - field: registeringInstitutionId
-#          variableName: registeringInstituteId
-#        - field: correlationId
-#          variableName: clientCorrelationId
-#        - field: requestId
-#          variableName: transactionList
-#          jsonPath: $.request_id
-#        - field: note
-#          variableName: transactionList
-#          jsonPath: $.note
-#        - field: paymentMode
-#          variableName: transactionList
-#          jsonPath: $.payment_mode
+    - name: bulk_connector_closedloop
+      direction: UNKNOWN
+      type: BATCH
+      transformers:
+        - field: batchId
+          variableName: batchId
+        - field: payerFsp
+          variableName: tenantId
+        - field: requestFile
+          variableName: filename
+        - field: registeringInstitutionId
+          variableName: registeringInstituteId
+        - field: correlationId
+          variableName: clientCorrelationId
+        - field: requestId
+          variableName: transactionList
+          jsonPath: $.request_id
+        - field: note
+          variableName: transactionList
+          jsonPath: $.note
+        - field: paymentMode
+          variableName: transactionList
+          jsonPath: $.payment_mode
+        - field: totalTransactions
+          variableName: totalTransactions
+        - field: completed
+          variableName: completedTransaction
+        - field: failed
+          variableName: failedTransactions
+        - field: ongoing
+          variableName: ongoingTransactions
+        - field: totalAmount
+          variableName: totalAmount
+        - field: completedAmount
+          variableName: completedAmount
+        - field: failedAmount
+          variableName: failedAmount
+        - field: ongoingAmount
+          variableName: ongoingAmount
     - name: inbound_transfer_mifos
       direction: INCOMING
       type: TRANSACTION-REQUEST
