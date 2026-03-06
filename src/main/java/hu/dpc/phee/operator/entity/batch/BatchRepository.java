@@ -3,6 +3,7 @@ package hu.dpc.phee.operator.entity.batch;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BatchRepository extends JpaRepository<Batch, Long>, JpaSpecificationExecutor {
@@ -11,4 +12,5 @@ public interface BatchRepository extends JpaRepository<Batch, Long>, JpaSpecific
     Optional<Batch> findByBatchId(String batchId);
     Optional<Batch> findBySubBatchId(String subBatchId);
     Optional<Batch> findByBatchIdAndSubBatchIdIsNull(String batchId);
+    List<Batch> findAllByBatchIdAndSubBatchIdIsNull(String batchId);
 }

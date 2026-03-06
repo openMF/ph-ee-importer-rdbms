@@ -232,6 +232,20 @@ public class RecordParser {
             transactionRequestRepository.save(transactionRequest);
         } else if ("BATCH".equalsIgnoreCase(flowType)) {
             Batch batch = inflightBatchManager.retrieveOrCreateBatch(bpmn, sample);
+            // Duplicate parent check BEFORE applying transformer to avoid JPA auto-flush writing
+            // the in-memory batchId to DB before the duplicate lookup query runs (which would
+            // cause NonUniqueResultException since both rows would then match the WHERE clause).
+            if (variableName.equals("batchId") && batch.getSubBatchId() == null && batch.getBatchId() == null) {
+                List<Batch> existingParents = batchRepository.findAllByBatchIdAndSubBatchIdIsNull(value);
+                if (!existingParents.isEmpty() && !existingParents.get(0).getId().equals(batch.getId())) {
+                    logger.info("Duplicate parent batch row detected for batchId={}, deleting orphan row id={}, using parent id={}",
+                            value, batch.getId(), existingParents.get(0).getId());
+                    batchRepository.delete(batch);
+                    // storeBatchId so future lookups for this workflowInstanceKey find the existing parent
+                    inflightBatchManager.storeBatchId(workflowInstanceKey, value);
+                    return;
+                }
+            }
             matchingTransformers.forEach(transformer -> applyTransformer(batch, variableName, value, transformer));
             batchRepository.save(batch);
             //if (!config.get().getName().equalsIgnoreCase("bulk_processor")) {
